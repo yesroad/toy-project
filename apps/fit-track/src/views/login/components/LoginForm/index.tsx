@@ -29,9 +29,15 @@ const DATA: LoginFormItem = [
 const LoginForm = () => {
   const { control } = useFormContext<LoginFieldValues>();
 
-  return DATA.map(({ label, name, type, placeholder }) => (
-    <FormInput key={name} control={control} label={label} type={type} name={name} placeholder={placeholder} />)
-  );
+  return (
+    <div className="w-full mt-[40px]">
+      {
+        DATA.map(({ label, name, type, placeholder }) => (
+          <FormInput key={name} control={control} label={label} type={type} name={name} placeholder={placeholder} />)
+        )
+      }
+    </div>
+  )
 }
 
 export default LoginForm;
