@@ -1,9 +1,15 @@
-
 import { HookFormProvider } from "@/provider"
-import { LoginForm } from "./components"
+import { LoginForm, LogoBlock } from "./components"
 import { LoginFieldValues } from "./types"
-import Logo from '@/assets/logo.svg';
 import { Button } from "@workspace/ui/components/button";
+
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from "@workspace/ui/components/card"
 
 const defaultValues: LoginFieldValues = {
   email: '',
@@ -12,15 +18,27 @@ const defaultValues: LoginFieldValues = {
 
 const Login = () => {
   return (
-    <HookFormProvider<LoginFieldValues> options={{ defaultValues }}>
-      <div className="h-full flex justify-center items-center">
-        <div className="w-full max-w-[420px] flex justify-center flex-wrap">
-          <Logo />
-          <LoginForm />
-          <Button size="lg" className="w-full mt-[20px]">로그인</Button>
-        </div>
-      </div>
-    </HookFormProvider>
+    <div className="flex justify-center flex-wrap mt-10">
+      <LogoBlock />
+      <HookFormProvider<LoginFieldValues> options={{ defaultValues }}>
+        <Card className="w-full max-w-sm">
+          <CardContent>
+            <LoginForm />
+          </CardContent>
+          <CardFooter className="flex-col gap-2">
+            <Button type="submit" className="w-full">
+              로그인
+            </Button>
+          </CardFooter>
+          <CardAction className="flex justify-center items-center w-full">
+            <CardDescription>
+              계정이 없으신가요?
+            </CardDescription>
+            <Button variant="link">회원가입</Button>
+          </CardAction>
+        </Card >
+      </HookFormProvider >
+    </div>
   )
 }
 

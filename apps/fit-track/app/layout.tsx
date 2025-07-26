@@ -13,8 +13,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="h-screen flex bg-(--foreground) justify-center align-center">
-        <div className="w-full max-w-[640px] border border-solid border-(--color-border) rounded-2xl p-[24px] mt-[24px] mb-[24px] bg-(--background)">
+      <body className="h-screen flex justify-center align-center">
+        <div className="w-full max-w-[640px] p-[24px] bg-(--background)">
           {children}
         </div>
       </body>

@@ -13,13 +13,13 @@ type LoginFormItem = {
 
 const DATA: LoginFormItem = [
   {
-    label: 'Email',
+    label: '이메일',
     name: 'email',
     type: 'email',
     placeholder: '이메일을 입력하세요.'
   },
   {
-    label: 'Password',
+    label: '비밀번호',
     name: 'password',
     type: 'password',
     placeholder: '비밀번호를 입력하세요.'
