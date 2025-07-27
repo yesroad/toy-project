@@ -1,10 +1,7 @@
-
-import { Button } from "@workspace/ui/components/button"
+import Dashboard from "@/views/dashboard";
 
 export default function Home() {
   return (
-    <div>
-      <Button size="sm">Button</Button>
-    </div>
+    <Dashboard />
   );
 }

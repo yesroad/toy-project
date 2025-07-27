@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@workspace/ui": "*",
+    "classnames": "^2.5.1",
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hook-form": "^7.57.0"
+    "react-hook-form": "^7.57.0",
+    "react-icons": "^5.5.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",

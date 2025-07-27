@@ -22,7 +22,7 @@ const FormInput = <T extends FieldValues>({ control, label, name, type, placehol
         <FormItem className="mb-[15px]">
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input type={type} placeholder={placeholder} {...field} />
+            <Input type={type} placeholder={placeholder} {...field} className="bg-(--input-background)" />
           </FormControl>
           <FormMessage />
         </FormItem>

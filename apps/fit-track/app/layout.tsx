@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@workspace/ui/globals.css"
+import "@/styles/base.css"
 
 export const metadata: Metadata = {
   title: "Create Next App",
