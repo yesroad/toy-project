@@ -45,22 +45,22 @@ toy-project/
 
 ### 설치
 ```bash
-pnpm install
+yarn install
 ```
 
 ### 개발 서버 실행
 ```bash
 # 전체 프로젝트
-pnpm dev
+yarn dev
 
 # 특정 앱만
-pnpm --filter fit-track dev
+yarn workspace fit-track dev
 ```
 
 ### shadcn/ui 컴포넌트 추가
 
 ```bash
-pnpm dlx shadcn@latest add button -c apps/fit-track
+yarn dlx shadcn@latest add button -c apps/fit-track
 ```
 
 컴포넌트는 `packages/ui/src/components`에 저장되어 모든 앱에서 공유됩니다.
@@ -69,7 +69,7 @@ pnpm dlx shadcn@latest add button -c apps/fit-track
 
 **Core**
 - Turborepo - 모노레포 빌드 시스템
-- pnpm - 패키지 매니저
+- Yarn Berry (v4) - 패키지 매니저
 - TypeScript - 타입 안전성
 
 **UI**
@@ -119,3 +119,4 @@ export default function Page() {
 - [Turborepo Documentation](https://turbo.build/repo/docs)
 - [shadcn/ui Documentation](https://ui.shadcn.com)
 - [Next.js Documentation](https://nextjs.org/docs)
+- [Yarn Berry Documentation](https://yarnpkg.com)
