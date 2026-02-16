@@ -6,7 +6,7 @@
 
 ## 📦 프로젝트
 
-- `fit-track`: `apps/fit-track/README.md`
+- `fit-track`: [`apps/fit-track`](apps/fit-track/)
 
 ## 🏗️ 모노레포 구조
 
