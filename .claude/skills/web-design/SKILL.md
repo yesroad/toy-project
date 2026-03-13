@@ -13,12 +13,12 @@ description: 2025-2026 트렌드를 반영한 웹/앱 UI를 Next.js + TailwindCS
 
 작업 디렉토리의 `package.json`을 읽어 다음을 확인하세요:
 
-| 항목 | 확인 내용 | 영향 |
-|------|----------|------|
-| `next` 버전 | v14 vs v15 | v15는 `params`, `searchParams`, `cookies()`, `headers()` 모두 async |
-| `tailwindcss` 버전 | v3 vs v4 | v4는 `tailwind.config.ts` 대신 `globals.css @theme` CSS-first 방식 |
-| `framer-motion` | 설치 여부 | 고급 인터랙션(패럴랙스, 키네틱 타이포) 사용 가능 여부 |
-| `shadcn/ui` | 설치 여부 (`@/components/ui`) | 베이스 컴포넌트 사용 가능 여부 |
+| 항목               | 확인 내용                     | 영향                                                                |
+| ------------------ | ----------------------------- | ------------------------------------------------------------------- |
+| `next` 버전        | v14 vs v15                    | v15는 `params`, `searchParams`, `cookies()`, `headers()` 모두 async |
+| `tailwindcss` 버전 | v3 vs v4                      | v4는 `tailwind.config.ts` 대신 `globals.css @theme` CSS-first 방식  |
+| `framer-motion`    | 설치 여부                     | 고급 인터랙션(패럴랙스, 키네틱 타이포) 사용 가능 여부               |
+| `shadcn/ui`        | 설치 여부 (`@/components/ui`) | 베이스 컴포넌트 사용 가능 여부                                      |
 
 **이 스킬의 기본값은 Tailwind v4 + Next.js v15입니다.** package.json에서 다른 버전이 확인되면 해당 버전에 맞는 문법으로 전환하세요.
 
@@ -39,6 +39,7 @@ description: 2025-2026 트렌드를 반영한 웹/앱 UI를 Next.js + TailwindCS
 ## Step 2: 디자인 스타일 선택 제안
 
 **다음 중 하나라도 해당하면 Step 3으로 바로 진행하세요:**
+
 - 스타일/분위기 키워드가 명시된 경우 (예: "어두운", "미니멀", "파스텔", "어스톤", "레트로")
 - 단일 컴포넌트 요청
 - 기존 프로젝트에 컴포넌트를 추가하는 경우
@@ -96,14 +97,14 @@ C. 소프트 파스텔
 
 Mobile-First로 설계하세요. Tailwind 브레이크포인트 기준:
 
-| 접두사 | min-width | 대상 |
-|--------|-----------|------|
-| (기본) | 0px | 모바일 |
-| `sm` | 640px | 대형 폰 / 소형 태블릿 |
-| `md` | 768px | 태블릿 |
-| `lg` | 1024px | 소형 데스크톱 |
-| `xl` | 1280px | 대형 데스크톱 |
-| `2xl` | 1536px | 울트라와이드 |
+| 접두사 | min-width | 대상                  |
+| ------ | --------- | --------------------- |
+| (기본) | 0px       | 모바일                |
+| `sm`   | 640px     | 대형 폰 / 소형 태블릿 |
+| `md`   | 768px     | 태블릿                |
+| `lg`   | 1024px    | 소형 데스크톱         |
+| `xl`   | 1280px    | 대형 데스크톱         |
+| `2xl`  | 1536px    | 울트라와이드          |
 
 Tailwind v4에서는 `@container` 쿼리가 기본 내장됩니다. 컴포넌트가 부모 크기에 따라 레이아웃을 바꿔야 할 때 `@container` + `@sm:` / `@md:` 활용을 적극 검토하세요.
 
@@ -124,13 +125,13 @@ Tailwind v4에서는 `@container` 쿼리가 기본 내장됩니다. 컴포넌트
 
 @theme {
   /* 어스톤 스타일 예시 — 선택된 스타일에 맞게 교체 */
-  --color-mocha: #9E7B5A;
-  --color-mocha-light: #C4A882;
-  --color-mocha-dark: #7D5F42;
-  --color-mocha-deep: #5C3D2E;
-  --color-cream: #FAF7F2;
-  --color-sage: #8FAF7E;
-  --color-terracotta: #C4724A;
+  --color-mocha: #9e7b5a;
+  --color-mocha-light: #c4a882;
+  --color-mocha-dark: #7d5f42;
+  --color-mocha-deep: #5c3d2e;
+  --color-cream: #faf7f2;
+  --color-sage: #8faf7e;
+  --color-terracotta: #c4724a;
 
   /* 폰트 (next/font 변수와 연결) */
   --font-sans: var(--font-pretendard), sans-serif;
@@ -140,33 +141,40 @@ Tailwind v4에서는 `@container` 쿼리가 기본 내장됩니다. 컴포넌트
   --animate-shake: shake 0.3s ease-in-out;
 
   @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25%  { transform: translateX(-4px); }
-    75%  { transform: translateX(4px); }
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
   }
 }
 
 /* 다크모드 CSS 변수 전환 */
 :root {
-  --background: #FAF7F2;
+  --background: #faf7f2;
   --foreground: #1c140e;
   --card: #ffffff;
   --border: #dcd2c8;
   --muted: #f5efe0;
   --muted-foreground: #78644f;
-  --primary: #9E7B5A;
+  --primary: #9e7b5a;
   --primary-foreground: #ffffff;
 }
 
 .dark {
-  --background: #0A0E1A;
-  --foreground: #E2E8F0;
-  --card: #1A2235;
-  --border: #2D3A52;
+  --background: #0a0e1a;
+  --foreground: #e2e8f0;
+  --card: #1a2235;
+  --border: #2d3a52;
   --muted: #111827;
-  --muted-foreground: #94A3B8;
-  --primary: #00FF87;
-  --primary-foreground: #0A0E1A;
+  --muted-foreground: #94a3b8;
+  --primary: #00ff87;
+  --primary-foreground: #0a0e1a;
 }
 ```
 
@@ -244,18 +252,21 @@ className="break-keep"
 코드 생성 직후, Step 5 출력 전에 반드시 점검하세요. `references/spacing.md` 참고.
 
 **스페이싱 체크:**
+
 - 모든 여백/패딩/간격이 4 또는 8의 배수인가? (4, 8, 16, 24, 32, 40, 48, 64, 96px)
 - 컴포넌트 내부 패딩 ≤ 컴포넌트 간 여백인가?
 - 헤드라인 주변 여백이 충분한가? (기존 대비 20% 이상)
 - 모바일/태블릿/데스크톱 여백이 단계별로 올바른가?
 
 **타이포그래피 체크:**
+
 - 버튼 padding이 텍스트에 비례하는가? (최소 44×44px 터치 타겟)
 - 본문 줄 간격이 1.5 이상인가?
 - 폰트 크기가 `clamp()`로 유체 대응하는가?
 - 나란히 배치된 요소들의 `gap`이 일관적인가?
 
 **레이아웃 체크:**
+
 - 가격·버튼 등 밀도 높은 영역에서 요소가 잘리거나 넘치지 않는가?
 - 한국어 텍스트에 `break-keep`이 적용되었는가?
 - `text-center` 단락 마지막 줄에 단어 한두 개만 남지 않는가?
@@ -294,23 +305,27 @@ className="break-keep"
 # Design Summary
 
 ## 스타일
+
 [선택된 스타일과 선택 이유]
 
 ## 레이아웃
+
 [사용한 레이아웃 패턴과 이유]
 
 ## 컬러 팔레트
+
 [주요 컬러와 선택 이유]
 
 ## 인터랙션
+
 [적용한 인터랙션과 이유]
 ```
 
 ### 5. 추가 설치 패키지 (있을 경우)
 
 ```bash
-npm install framer-motion        # 고급 인터랙션 시
-npm install next-themes          # 다크모드 시
+yarn add framer-motion        # 고급 인터랙션 시
+yarn add next-themes          # 다크모드 시
 npx shadcn@latest add [컴포넌트]
 ```
 

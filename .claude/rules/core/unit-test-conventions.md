@@ -2,6 +2,13 @@
 
 순수 함수(utils, helpers, lib, adapters)에 대한 유닛 테스트 작성 규칙입니다.
 
+> **현재 프로젝트 상태**: 테스트 환경 미설정. 테스트 작성 전 반드시 Jest 또는 Vitest를 설치해야 한다.
+>
+> **Jest 설치 예시** (Vitest 권장 — Next.js App Router와 호환성 좋음):
+> ```bash
+> yarn workspace @apps/fit-track add -D vitest @vitejs/plugin-react jsdom @testing-library/react
+> ```
+
 ---
 
 ## 적용 대상
