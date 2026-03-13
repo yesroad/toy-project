@@ -1,6 +1,6 @@
 'use client';
 
-import { Form } from "@workspace/ui/components/Form";
+import { Form } from "@workspace/ui/components/form";
 import { ReactNode } from "react";
 import { useForm, FieldValues, UseFormProps } from "react-hook-form";
 
