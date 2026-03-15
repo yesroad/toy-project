@@ -39,20 +39,34 @@ COUPANG_SECRET_KEY=
 
 ---
 
+## 쿠팡 연동 전략 (2단계)
+
+| 단계            | 방식                                                         | 조건           |
+| --------------- | ------------------------------------------------------------ | -------------- |
+| **MVP (1단계)** | DB `recipe_cache.coupang_links` 컬럼에 사전 저장된 링크 조회 | 현재           |
+| **2단계**       | 쿠팡 파트너스 API 실시간 호출                                | API 키 발급 후 |
+
+> 1단계에서 `/api/coupang`은 DB에서 `keyword → url` 매핑을 찾아 반환.
+> 없으면 `https://www.coupang.com/np/search?q={keyword}` 폴백.
+> 2단계 전환 시 `services/coupang/index.ts`만 교체하면 됨.
+
+---
+
 ## Supabase 테이블 스키마
 
 ```sql
 CREATE TABLE recipe_cache (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  video_id     TEXT NOT NULL UNIQUE,
-  title        TEXT NOT NULL,
-  thumbnail    TEXT NOT NULL,
-  channel_name TEXT NOT NULL,
-  ingredients  JSONB NOT NULL,  -- [{ name: string, amount: string }]
-  steps        JSONB NOT NULL,  -- string[]
-  raw_caption  TEXT,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  video_id       TEXT NOT NULL UNIQUE,
+  title          TEXT NOT NULL,
+  thumbnail      TEXT NOT NULL,
+  channel_name   TEXT NOT NULL,
+  ingredients    JSONB NOT NULL,  -- [{ name: string, amount: string }]
+  steps          JSONB NOT NULL,  -- string[]
+  coupang_links  JSONB,           -- { [ingredientName: string]: string (url) }
+  raw_caption    TEXT,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_recipe_cache_video_id ON recipe_cache(video_id);
 ```
@@ -61,11 +75,11 @@ CREATE INDEX idx_recipe_cache_video_id ON recipe_cache(video_id);
 
 ## API Route 설계
 
-| Method | 경로                              | 설명                           |
-| ------ | --------------------------------- | ------------------------------ |
-| `GET`  | `/api/search?q=&pageToken=`       | YouTube 검색 + 채널 필터링     |
-| `POST` | `/api/recipe` body: `{ videoId }` | 자막 분석 (Supabase 캐시 우선) |
-| `GET`  | `/api/coupang?keyword=`           | 쿠팡 파트너스 링크 생성        |
+| Method | 경로                              | 설명                                               |
+| ------ | --------------------------------- | -------------------------------------------------- |
+| `GET`  | `/api/search?q=&pageToken=`       | YouTube 검색 + 채널 필터링                         |
+| `POST` | `/api/recipe` body: `{ videoId }` | 자막 분석 (Supabase 캐시 우선)                     |
+| `GET`  | `/api/coupang?keyword=&videoId=`  | 쿠팡 링크 조회 (1단계: DB 조회, 2단계: API 실시간) |
 
 ---
 

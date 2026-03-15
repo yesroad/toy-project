@@ -1,59 +1,30 @@
-import { generateCoupangAuthHeader, buildCoupangApiUrl } from '@/lib/coupang-sign';
 import type { CoupangLinkResponse } from '@/types/coupang.types';
 
+const COUPANG_SEARCH_BASE = 'https://www.coupang.com/np/search?q=';
+
 /**
- * 쿠팡 파트너스 검색 링크 생성
- * 실제 API 호출 또는 딥링크 방식으로 링크 반환
+ * [MVP 1단계] DB에 사전 저장된 coupang_links에서 재료명으로 링크 조회
+ * 매핑이 없으면 쿠팡 일반 검색 URL 반환
+ *
+ * [2단계] 쿠팡 파트너스 API 발급 후 실시간 호출로 교체 예정
+ */
+export function getCoupangLinkFromCache(
+  keyword: string,
+  coupangLinks: Record<string, string> | null | undefined,
+): CoupangLinkResponse {
+  const url = coupangLinks?.[keyword] ?? `${COUPANG_SEARCH_BASE}${encodeURIComponent(keyword)}`;
+  return { keyword, url };
+}
+
+/**
+ * [2단계 스텁] 쿠팡 파트너스 API 실시간 호출
+ * API 키 발급 후 coupang-sign.ts 활용하여 구현
  */
 export async function generateCoupangLink(keyword: string): Promise<CoupangLinkResponse> {
-  const accessKey = process.env.COUPANG_ACCESS_KEY;
-  const secretKey = process.env.COUPANG_SECRET_KEY;
-
-  // 쿠팡 파트너스 키가 없으면 일반 검색 URL로 폴백
-  if (!accessKey || !secretKey) {
-    return {
-      keyword,
-      url: `https://www.coupang.com/np/search?q=${encodeURIComponent(keyword)}`,
-    };
-  }
-
-  const apiUrl = buildCoupangApiUrl(keyword);
-
-  const authHeader = generateCoupangAuthHeader({
-    method: 'GET',
-    url: apiUrl,
-    accessKey,
-    secretKey,
-  });
-
-  const res = await fetch(apiUrl, {
-    headers: {
-      Authorization: authHeader,
-      'Content-Type': 'application/json;charset=UTF-8',
-    },
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
-    // API 실패 시 일반 검색 URL 폴백
-    return {
-      keyword,
-      url: `https://www.coupang.com/np/search?q=${encodeURIComponent(keyword)}`,
-    };
-  }
-
-  const data = await res.json();
-  const product = data?.data?.[0];
-
-  if (!product?.productUrl) {
-    return {
-      keyword,
-      url: `https://www.coupang.com/np/search?q=${encodeURIComponent(keyword)}`,
-    };
-  }
-
+  // TODO: 쿠팡 파트너스 API 발급 후 구현
+  // import { generateCoupangAuthHeader, buildCoupangApiUrl } from '@/lib/coupang-sign'
   return {
     keyword,
-    url: product.productUrl,
+    url: `${COUPANG_SEARCH_BASE}${encodeURIComponent(keyword)}`,
   };
 }

@@ -9,10 +9,10 @@ description: main 최신화 → 작업 브랜치 생성 → 커밋/푸시 → ma
 
 **옵션**: $ARGUMENTS
 
-| 옵션                | 설명                                            |
-| ------------------- | ----------------------------------------------- |
-| `--branch <name>`   | 기준 브랜치 (기본값: `main`)                    |
-| `--no-gate`         | 출시 게이트 점검 스킵                           |
+| 옵션              | 설명                         |
+| ----------------- | ---------------------------- |
+| `--branch <name>` | 기준 브랜치 (기본값: `main`) |
+| `--no-gate`       | 출시 게이트 점검 스킵        |
 
 ---
 
@@ -43,6 +43,7 @@ staged 변경사항을 분석해 브랜치명을 자동 생성한다.
 **형식**: `{type}/{kebab-case-brief-description}` (최대 4단어)
 
 예시:
+
 - `feat/login-form-validation`
 - `fix/date-format-bug`
 - `chore/update-dependencies`
@@ -57,6 +58,7 @@ git checkout -b <생성된-브랜치명>
 ## Step 3. 커밋 메시지 생성 및 커밋
 
 commit-helper 스킬 규칙으로 staged 변경사항 분석 후 커밋 메시지 생성:
+
 - 타입 프리픽스: **영어** (`feat`, `fix`, `chore` 등)
 - 제목 / Body: **한글**
 
@@ -88,6 +90,7 @@ git push origin <기준브랜치>
 ```
 
 머지 충돌 발생 시:
+
 - 충돌 파일 목록 표시
 - 사용자에게 충돌 해결 요청 후 플로우 재개
 
