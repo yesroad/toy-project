@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
+import { serverEnv } from '@/env/server';
 import type { RecipeAnalysis } from '@/types/api/openai/response';
 
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: serverEnv.openAiApiKey,
 });
 
 const RecipeAnalysisSchema = z.object({

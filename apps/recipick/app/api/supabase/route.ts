@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions, type CookieMethodsServer } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { serverEnv } from '@/env/server';
 import type { Recipe } from '@/types/api/routeApi/response';
 import type { RecipeCacheRow } from '@/types/api/supabase/response';
 
@@ -21,8 +22,8 @@ async function createSupabaseClient() {
   };
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    serverEnv.supabaseUrl,
+    serverEnv.supabaseAnonKey,
     { cookies: cookieMethods },
   );
 }

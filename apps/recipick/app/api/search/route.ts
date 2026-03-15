@@ -16,10 +16,16 @@ export async function GET(request: Request) {
 
   try {
     const res = await fetch(`${baseUrl}/api/youtube?${params}`);
+    const payload = await res.json().catch(() => null);
+
     if (!res.ok) {
-      return NextResponse.json({ error: 'YouTube 검색에 실패했습니다' }, { status: 503 });
+      return NextResponse.json(
+        payload ?? { error: 'YouTube 검색에 실패했습니다' },
+        { status: res.status },
+      );
     }
-    const result: SearchResult = await res.json();
+
+    const result = payload as SearchResult;
     return NextResponse.json(result);
   } catch {
     return NextResponse.json({ error: 'YouTube 검색에 실패했습니다' }, { status: 503 });

@@ -6,11 +6,52 @@ import {
   CHANNEL_WHITELIST,
   MIN_VIEW_COUNT,
 } from '@/lib/youtube';
+import { serverEnv } from '@/env/server';
 import type { SearchResult, VideoItem } from '@/types/api/routeApi/response';
 import type {
   YouTubeSearchResponse,
   YouTubeVideoStatisticsResponse,
 } from '@/types/api/youtube/response';
+
+class ApiRouteError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly details?: unknown,
+  ) {
+    super(message);
+  }
+}
+
+async function parseErrorPayload(res: Response): Promise<unknown> {
+  const contentType = res.headers.get('content-type') ?? '';
+  if (contentType.includes('application/json')) {
+    return res.json().catch(() => null);
+  }
+
+  const text = await res.text().catch(() => '');
+  return text.trim() === '' ? null : text;
+}
+
+function extractUpstreamMessage(payload: unknown, fallback: string): string {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'error' in payload &&
+    payload.error &&
+    typeof payload.error === 'object' &&
+    'message' in payload.error &&
+    typeof payload.error.message === 'string'
+  ) {
+    return payload.error.message;
+  }
+
+  if (typeof payload === 'string') {
+    return payload;
+  }
+
+  return fallback;
+}
 
 /**
  * videos.list API로 조회수를 배치 조회
@@ -40,8 +81,7 @@ async function getVideoViewCounts(
 }
 
 async function searchVideos(q: string, pageToken?: string): Promise<SearchResult> {
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  if (!apiKey) throw new Error('YOUTUBE_API_KEY is not set');
+  const apiKey = serverEnv.youtubeDataApiKey;
 
   const params = new URLSearchParams({
     part: 'snippet',
@@ -55,7 +95,14 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
   });
 
   const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`);
-  if (!res.ok) throw new Error(`YouTube API 오류: ${res.status}`);
+  if (!res.ok) {
+    const payload = await parseErrorPayload(res);
+    throw new ApiRouteError(
+      extractUpstreamMessage(payload, `YouTube API 오류: ${res.status}`),
+      res.status,
+      payload,
+    );
+  }
 
   const data: YouTubeSearchResponse = await res.json();
 
@@ -117,8 +164,20 @@ export async function GET(request: Request) {
     try {
       const result = await searchVideos(q.trim(), pageToken);
       return NextResponse.json(result);
-    } catch {
-      return NextResponse.json({ error: 'YouTube 검색에 실패했습니다' }, { status: 503 });
+    } catch (error) {
+      const status = error instanceof ApiRouteError ? error.status : 503;
+      const message =
+        error instanceof ApiRouteError ? error.message : 'YouTube 검색에 실패했습니다';
+
+      return NextResponse.json(
+        {
+          error: message,
+          ...(error instanceof ApiRouteError && error.details
+            ? { details: error.details }
+            : {}),
+        },
+        { status },
+      );
     }
   }
 
