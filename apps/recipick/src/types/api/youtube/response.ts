@@ -45,6 +45,24 @@ export interface YouTubeSearchResponse {
   items: YouTubeSearchItem[];
 }
 
+// YouTube Videos API (statistics)
+export interface YouTubeVideoStatisticsItem {
+  kind: string;
+  etag: string;
+  id: string;
+  statistics: {
+    viewCount?: string;
+    likeCount?: string;
+    commentCount?: string;
+  };
+}
+
+export interface YouTubeVideoStatisticsResponse {
+  kind: string;
+  etag: string;
+  items: YouTubeVideoStatisticsItem[];
+}
+
 // YouTube Captions API
 export interface CaptionTrack {
   kind: string;

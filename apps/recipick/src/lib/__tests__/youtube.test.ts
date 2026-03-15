@@ -1,38 +1,62 @@
 import { describe, it, expect } from 'vitest';
-import { isCookingChannel, normalizeThumbnailUrl } from '../youtube';
+import { filterVideoByTitle, normalizeThumbnailUrl } from '../youtube';
 
-describe('isCookingChannel', () => {
-  describe('정상 케이스', () => {
-    it('채널명에 요리 키워드가 있으면 true 반환', () => {
-      expect(isCookingChannel('백종원 요리', '간단 레시피')).toBe(true);
+describe('filterVideoByTitle', () => {
+  describe('정상 케이스 — 포함 키워드', () => {
+    it('제목에 "레시피"가 있으면 true 반환', () => {
+      expect(filterVideoByTitle('떡볶이 레시피')).toBe(true);
     });
 
-    it('영상 제목에 recipe 키워드가 있으면 true 반환', () => {
-      expect(isCookingChannel("John's Channel", 'Simple Recipe for Beginners')).toBe(true);
+    it('제목에 "만들기"가 있으면 true 반환', () => {
+      expect(filterVideoByTitle('떡볶이 만들기')).toBe(true);
     });
 
-    it('대소문자 무시하고 일치하면 true 반환', () => {
-      expect(isCookingChannel('HomeChef', 'How to COOK pasta')).toBe(true);
+    it('제목에 "recipe"가 있으면 true 반환 (영문)', () => {
+      expect(filterVideoByTitle('Simple Recipe for Beginners')).toBe(true);
     });
 
-    it('먹방 키워드가 있으면 true 반환', () => {
-      expect(isCookingChannel('먹방채널', '오늘의 먹방')).toBe(true);
+    it('제목에 "cook"이 있으면 true 반환 (대소문자 무시)', () => {
+      expect(filterVideoByTitle('How to COOK pasta')).toBe(true);
+    });
+
+    it('제목에 "요리법"이 있으면 true 반환', () => {
+      expect(filterVideoByTitle('간단 요리법 5가지')).toBe(true);
+    });
+  });
+
+  describe('정상 케이스 — 제외 키워드 우선 적용', () => {
+    it('포함+제외 키워드가 동시에 있으면 false (제외 우선)', () => {
+      expect(filterVideoByTitle('레시피 vlog')).toBe(false);
+    });
+
+    it('제목에 "먹방"이 있으면 false', () => {
+      expect(filterVideoByTitle('오늘의 먹방 떡볶이')).toBe(false);
+    });
+
+    it('제목에 "asmr"이 있으면 false (대소문자 무시)', () => {
+      expect(filterVideoByTitle('ASMR 먹기')).toBe(false);
+    });
+
+    it('제목에 "리뷰"가 있으면 false', () => {
+      expect(filterVideoByTitle('맛집 리뷰 서울')).toBe(false);
+    });
+
+    it('제목에 "mukbang"이 있으면 false', () => {
+      expect(filterVideoByTitle('Korean mukbang with friends')).toBe(false);
     });
   });
 
   describe('경계값', () => {
     it('빈 문자열이면 false 반환', () => {
-      expect(isCookingChannel('', '')).toBe(false);
+      expect(filterVideoByTitle('')).toBe(false);
     });
 
-    it('채널명과 제목 모두 관련 없으면 false 반환', () => {
-      expect(isCookingChannel('게임채널', '롤 공략 영상')).toBe(false);
+    it('포함/제외 키워드 모두 없으면 false 반환', () => {
+      expect(filterVideoByTitle('롤 공략 영상')).toBe(false);
     });
-  });
 
-  describe('에러 케이스', () => {
-    it('관련 없는 영어 채널은 false 반환', () => {
-      expect(isCookingChannel('Tech Reviews', 'Best Laptop 2024')).toBe(false);
+    it('포함/제외 키워드 모두 없는 영문 제목도 false 반환', () => {
+      expect(filterVideoByTitle('Best Laptop 2024')).toBe(false);
     });
   });
 });

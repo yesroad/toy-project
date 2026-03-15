@@ -1,8 +1,43 @@
 import { NextResponse } from 'next/server';
 import { parseTimedTextXml } from '@/lib/caption';
-import { isCookingChannel, normalizeThumbnailUrl } from '@/lib/youtube';
+import {
+  filterVideoByTitle,
+  normalizeThumbnailUrl,
+  CHANNEL_WHITELIST,
+  MIN_VIEW_COUNT,
+} from '@/lib/youtube';
 import type { SearchResult, VideoItem } from '@/types/api/routeApi/response';
-import type { YouTubeSearchResponse } from '@/types/api/youtube/response';
+import type {
+  YouTubeSearchResponse,
+  YouTubeVideoStatisticsResponse,
+} from '@/types/api/youtube/response';
+
+/**
+ * videos.list API로 조회수를 배치 조회
+ * @returns videoId → viewCount 맵
+ */
+async function getVideoViewCounts(
+  videoIds: string[],
+  apiKey: string,
+): Promise<Map<string, number>> {
+  if (videoIds.length === 0) return new Map();
+
+  const params = new URLSearchParams({
+    part: 'statistics',
+    id: videoIds.join(','),
+    key: apiKey,
+  });
+
+  const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?${params}`);
+  if (!res.ok) return new Map();
+
+  const data: YouTubeVideoStatisticsResponse = await res.json();
+  const viewCountMap = new Map<string, number>();
+  for (const item of data.items) {
+    viewCountMap.set(item.id, parseInt(item.statistics.viewCount ?? '0', 10));
+  }
+  return viewCountMap;
+}
 
 async function searchVideos(q: string, pageToken?: string): Promise<SearchResult> {
   const apiKey = process.env.YOUTUBE_API_KEY;
@@ -24,8 +59,19 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
 
   const data: YouTubeSearchResponse = await res.json();
 
-  const videos: VideoItem[] = data.items
-    .filter((item) => isCookingChannel(item.snippet.channelTitle, item.snippet.title))
+  // 1차 필터: 제목 키워드 (포함/제외)
+  const titleFiltered = data.items.filter((item) => filterVideoByTitle(item.snippet.title));
+
+  // 2차 필터: 조회수 (화이트리스트 채널은 통과)
+  const videoIds = titleFiltered.map((item) => item.id.videoId);
+  const viewCountMap = await getVideoViewCounts(videoIds, apiKey);
+
+  const videos: VideoItem[] = titleFiltered
+    .filter((item) => {
+      if (CHANNEL_WHITELIST.includes(item.snippet.channelId)) return true;
+      const viewCount = viewCountMap.get(item.id.videoId) ?? 0;
+      return viewCount >= MIN_VIEW_COUNT;
+    })
     .map((item) => ({
       videoId: item.id.videoId,
       title: item.snippet.title,
