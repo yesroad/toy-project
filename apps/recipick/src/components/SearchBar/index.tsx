@@ -1,7 +1,7 @@
 'use client';
 
-import { FormEvent, useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
+import { useSearchBar } from './useSearchBar';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -14,17 +14,7 @@ export default function SearchBar({
   defaultValue = '',
   isLoading = false,
 }: SearchBarProps) {
-  const [value, setValue] = useState(defaultValue);
-
-  useEffect(() => {
-    setValue(defaultValue);
-  }, [defaultValue]);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    const trimmed = value.trim();
-    if (trimmed) onSearch(trimmed);
-  };
+  const { value, setValue, handleSubmit } = useSearchBar({ defaultValue, isLoading, onSearch });
 
   return (
     <form
@@ -50,7 +40,14 @@ export default function SearchBar({
                    disabled:opacity-60 disabled:cursor-not-allowed
                    min-h-[40px] min-w-[80px] shrink-0 cursor-pointer"
       >
-        {isLoading ? '검색 중…' : '검색'}
+        {isLoading ? (
+          <span className="flex items-center gap-1.5">
+            <Loader2 size={14} className="animate-spin" />
+            검색 중
+          </span>
+        ) : (
+          '검색'
+        )}
       </button>
     </form>
   );

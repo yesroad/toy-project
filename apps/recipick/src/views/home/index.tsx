@@ -1,32 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchHistory } from '@/hooks/useSearchHistory';
-import { useInfiniteSearchQuery } from '@/queries/search';
 import SearchBar from '@/components/SearchBar';
 import SearchHistoryTabs from '@/components/SearchHistoryTabs';
 import RecipeModal from '@/components/RecipeModal';
 import VideoList from './components/VideoList';
 import EmptyState from './components/EmptyState';
+import { useHomeView } from './useHomeView';
 
 export default function HomeView() {
-  const [query, setQuery] = useState('');
-  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
-  const { tabs, add, remove } = useSearchHistory();
-
-  const { data, isLoading } = useInfiniteSearchQuery(query);
-  const videos = data?.pages.flatMap((page) => page.videos) ?? [];
-
-  // 검색 완료 후 결과가 있을 때만 기록 저장
-  useEffect(() => {
-    if (query && !isLoading && videos.length > 0) {
-      add(query);
-    }
-  }, [query, isLoading, videos.length, add]);
-
-  const handleSearch = (newQuery: string) => {
-    setQuery(newQuery);
-  };
+  const {
+    query,
+    selectedVideoId,
+    setSelectedVideoId,
+    tabs,
+    isLoading,
+    handleSearch,
+    handleTabRemove,
+    setQuery,
+  } = useHomeView();
 
   return (
     <div className="min-h-screen bg-[#faf7f2]">
@@ -58,7 +49,7 @@ export default function HomeView() {
               tabs={tabs}
               activeQuery={query}
               onTabClick={setQuery}
-              onTabRemove={remove}
+              onTabRemove={handleTabRemove}
             />
           </div>
         </div>

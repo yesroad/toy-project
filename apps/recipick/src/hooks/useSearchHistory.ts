@@ -11,12 +11,13 @@ const STORAGE_KEY = 'recipick:search-tabs';
  * localStorage 지연 초기화로 SSR hydration 오류 방지
  */
 export function useSearchHistory() {
-  const [tabs, setTabs] = useState<SearchTab[]>(() => {
-    if (typeof window === 'undefined') return [];
-    return parseTabs(localStorage.getItem(STORAGE_KEY));
-  });
+  const [tabs, setTabs] = useState<SearchTab[]>([]);
 
-  // tabs 변경 시 localStorage 동기화
+  // 마운트 시 localStorage 로드 + 이후 변경 시 동기화
+  useEffect(() => {
+    setTabs(parseTabs(localStorage.getItem(STORAGE_KEY)));
+  }, []);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tabs));
   }, [tabs]);

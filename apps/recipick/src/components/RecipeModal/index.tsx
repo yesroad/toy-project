@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { useRecipeQuery } from '@/queries/recipe';
+import { Loader2 } from 'lucide-react';
+import { useRecipeModal } from './useRecipeModal';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Dialog, DialogContent, DialogTitle } from '@workspace/ui/components/dialog';
 import IngredientList from './IngredientList';
@@ -13,7 +14,7 @@ interface RecipeModalProps {
 }
 
 export default function RecipeModal({ videoId, onClose }: RecipeModalProps) {
-  const { data: recipe, isLoading, isError } = useRecipeQuery(videoId);
+  const { recipe, isLoading, isError } = useRecipeModal(videoId);
 
   return (
     <Dialog
@@ -150,7 +151,9 @@ function RecipeModalContent({ recipe, onClose }: RecipeModalContentProps) {
 function ModalSkeleton() {
   return (
     <>
-      <Skeleton className="aspect-[16/7] w-full rounded-none" />
+      <div className="relative aspect-[16/7] w-full bg-[#f5ede0] flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-[#c4724a]/60" />
+      </div>
       <div className="p-6 space-y-3">
         <Skeleton className="h-5 w-3/5" />
         <Skeleton className="h-4 w-4/5" />

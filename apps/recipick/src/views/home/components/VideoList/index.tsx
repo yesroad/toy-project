@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { useInfiniteSearchQuery } from '@/queries/search';
+import { Loader2 } from 'lucide-react';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import VideoCard from '@/components/VideoCard';
+import { useVideoList } from './useVideoList';
 
 interface VideoListProps {
   query: string;
@@ -11,29 +11,7 @@ interface VideoListProps {
 }
 
 export default function VideoList({ query, onVideoClick }: VideoListProps) {
-  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useInfiniteSearchQuery(query);
-
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || !hasNextPage) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: '200px' },
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const videos = data?.pages.flatMap((page) => page.videos) ?? [];
+  const { videos, isLoading, isFetchingNextPage, sentinelRef } = useVideoList(query);
 
   if (isLoading) {
     return (
@@ -64,18 +42,15 @@ export default function VideoList({ query, onVideoClick }: VideoListProps) {
         ))}
       </div>
 
-      {/* Intersection Observer sentinel */}
-      <div ref={sentinelRef} className="h-1" />
-
       {isFetchingNextPage && (
-        <div className="flex justify-center mt-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5 w-full">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <VideoCardSkeleton key={i} />
-            ))}
-          </div>
+        <div className="flex justify-center items-center gap-2 mt-8 py-4 text-[#9e7b5a]">
+          <Loader2 size={20} className="animate-spin" />
+          <span className="text-[13px] text-[#7d6550]">더 불러오는 중…</span>
         </div>
       )}
+
+      {/* Intersection Observer sentinel */}
+      <div ref={sentinelRef} className="h-1" />
     </div>
   );
 }
