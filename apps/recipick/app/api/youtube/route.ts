@@ -6,6 +6,7 @@ import {
   CHANNEL_WHITELIST,
   MIN_VIEW_COUNT,
 } from '@/lib/youtube';
+import { getCachedSearch, setCachedSearch } from '@/lib/youtubeCache';
 import { serverEnv } from '@/env/server';
 import type { SearchResult, VideoItem } from '@/types/api/routeApi/response';
 import type {
@@ -81,6 +82,11 @@ async function getVideoViewCounts(
 }
 
 async function searchVideos(q: string, pageToken?: string): Promise<SearchResult> {
+  const cacheKey = pageToken ?? '';
+
+  const cached = await getCachedSearch(q, cacheKey).catch(() => null);
+  if (cached) return cached;
+
   const apiKey = serverEnv.youtubeDataApiKey;
 
   const params = new URLSearchParams({
@@ -127,10 +133,16 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
       publishedAt: item.snippet.publishedAt,
     }));
 
-  return {
+  const result: SearchResult = {
     videos,
     nextPageToken: data.nextPageToken,
   };
+
+  void setCachedSearch(q, cacheKey, result).catch(() => {
+    // 캐시 저장 실패는 응답에 영향 없음
+  });
+
+  return result;
 }
 
 async function getCaption(videoId: string): Promise<string> {
@@ -172,9 +184,7 @@ export async function GET(request: Request) {
       return NextResponse.json(
         {
           error: message,
-          ...(error instanceof ApiRouteError && error.details
-            ? { details: error.details }
-            : {}),
+          ...(error instanceof ApiRouteError && error.details ? { details: error.details } : {}),
         },
         { status },
       );

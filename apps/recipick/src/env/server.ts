@@ -3,7 +3,7 @@ import 'server-only';
 const LEGACY_ENV_KEYS = {
   youtubeDataApiKey: ['YOUTUBE_API_KEY'],
   supabaseUrl: ['NEXT_PUBLIC_SUPABASE_URL'],
-  supabaseAnonKey: ['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
+  supabaseAnonKey: ['NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY='],
 } as const;
 
 function readEnv(keys: readonly string[]): string | undefined {
@@ -17,10 +17,7 @@ function readEnv(keys: readonly string[]): string | undefined {
   return undefined;
 }
 
-function requireEnv(options: {
-  key: string;
-  aliases?: readonly string[];
-}): string {
+function requireEnv(options: { key: string; aliases?: readonly string[] }): string {
   const value = readEnv([options.key, ...(options.aliases ?? [])]);
   if (!value) {
     throw new Error(`${options.key} is not set`);
@@ -47,8 +44,11 @@ export const serverEnv = {
   },
   get supabaseAnonKey(): string {
     return requireEnv({
-      key: 'SUPABASE_ANON_KEY',
+      key: 'SUPABASE_SERVICE_ROLE_KEY=',
       aliases: LEGACY_ENV_KEYS.supabaseAnonKey,
     });
+  },
+  get supabaseServiceRoleKey(): string {
+    return requireEnv({ key: 'SUPABASE_SERVICE_ROLE_KEY' });
   },
 };

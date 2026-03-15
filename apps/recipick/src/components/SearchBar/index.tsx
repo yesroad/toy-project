@@ -38,7 +38,7 @@ export default function SearchBar({
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="요리 채널을 검색해보세요 (예: 백종원, 1분요리)"
+        placeholder="요리 및 채널을 검색해보세요 (예: 1분요리, 김치찌개)"
         className="flex-1 bg-transparent outline-none text-[15px] text-[#3d2b1f] placeholder:text-[#a89880] break-keep"
         disabled={isLoading}
       />

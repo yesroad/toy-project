@@ -19,10 +19,9 @@ export async function GET(request: Request) {
     const payload = await res.json().catch(() => null);
 
     if (!res.ok) {
-      return NextResponse.json(
-        payload ?? { error: 'YouTube 검색에 실패했습니다' },
-        { status: res.status },
-      );
+      return NextResponse.json(payload ?? { error: 'YouTube 검색에 실패했습니다' }, {
+        status: res.status,
+      });
     }
 
     const result = payload as SearchResult;

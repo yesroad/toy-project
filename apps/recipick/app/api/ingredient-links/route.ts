@@ -21,11 +21,9 @@ async function createSupabaseClient() {
     },
   };
 
-  return createServerClient(
-    serverEnv.supabaseUrl,
-    serverEnv.supabaseAnonKey,
-    { cookies: cookieMethods },
-  );
+  return createServerClient(serverEnv.supabaseUrl, serverEnv.supabaseAnonKey, {
+    cookies: cookieMethods,
+  });
 }
 
 /**
