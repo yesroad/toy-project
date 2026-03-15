@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     const cacheRes = await fetch(`${baseUrl}/api/supabase?videoId=${encodeURIComponent(videoId)}`);
     if (cacheRes.ok) {
       const { recipe } = await cacheRes.json();
-      if (recipe) return NextResponse.json({ recipe });
+      if (recipe) return NextResponse.json({ recipe: { ...recipe, cached: true } });
     }
   } catch {
     // 캐시 조회 실패해도 계속 진행

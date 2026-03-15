@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
+import { useInfiniteSearchQuery } from '@/queries/search';
 import SearchBar from '@/components/SearchBar';
 import SearchHistoryTabs from '@/components/SearchHistoryTabs';
 import RecipeModal from '@/components/RecipeModal';
@@ -13,9 +14,18 @@ export default function HomeView() {
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const { tabs, add, remove } = useSearchHistory();
 
+  const { data, isLoading } = useInfiniteSearchQuery(query);
+  const videos = data?.pages.flatMap((page) => page.videos) ?? [];
+
+  // 검색 완료 후 결과가 있을 때만 기록 저장
+  useEffect(() => {
+    if (query && !isLoading && videos.length > 0) {
+      add(query);
+    }
+  }, [query, isLoading, videos.length, add]);
+
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
-    add(newQuery);
   };
 
   return (
@@ -36,7 +46,7 @@ export default function HomeView() {
           레시피와 재료를 한 번에 확인하세요
         </p>
         <div className="max-w-[600px] mx-auto">
-          <SearchBar onSearch={handleSearch} defaultValue={query} />
+          <SearchBar onSearch={handleSearch} defaultValue={query} isLoading={isLoading} />
         </div>
       </header>
 

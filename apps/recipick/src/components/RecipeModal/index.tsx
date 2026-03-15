@@ -56,7 +56,14 @@ export default function RecipeModal({ videoId, onClose }: RecipeModalProps) {
                 <h2 className="text-[18px] font-bold text-white leading-snug break-keep">
                   {recipe.title}
                 </h2>
-                <p className="text-[13px] text-white/75 mt-1">📺 {recipe.channelName}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-[13px] text-white/75">📺 {recipe.channelName}</p>
+                  {recipe.cached && (
+                    <span className="text-[11px] font-semibold bg-[#c4724a]/80 text-white px-2 py-0.5 rounded-full">
+                      ⚡ 즉시 로드
+                    </span>
+                  )}
+                </div>
               </div>
               <button
                 onClick={onClose}

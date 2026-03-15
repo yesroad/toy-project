@@ -115,6 +115,7 @@ Tailwind v4에서는 `@container` 쿼리가 기본 내장됩니다. 컴포넌트
 > **왜 필수인가?** HTML 목업은 "디자인 계약서"입니다. React 구현 전에 색상·레이아웃·상태(state)·인터랙션을 사용자와 합의해두면, 컴포넌트 구현 중 방향 수정이 없어집니다. 작은 수정(텍스트 정렬, 색상 변경, 요소 제거)을 HTML에서 하는 것이 React 코드를 고치는 것보다 훨씬 빠릅니다.
 
 **다음 경우에만 생략 가능:**
+
 - 단일 버튼/뱃지처럼 명백히 단순한 컴포넌트 1개 추가
 - 사용자가 "목업 없이 바로 구현해줘"라고 명시한 경우
 
@@ -126,10 +127,16 @@ Tailwind v4에서는 `@container` 쿼리가 기본 내장됩니다. 컴포넌트
 ### 목업에 반드시 포함할 내용
 
 **1. 상단 목업 네비게이션 바**
+
 ```html
 <!-- 목업임을 명확히 표시 -->
-<nav style="position:fixed; top:0; background:#1a1a1a; color:#fff; padding:8px 16px; font-size:13px; z-index:9999; display:flex; gap:8px; align-items:center;">
-  <span style="background:#c4724a; color:#fff; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:700;">MOCKUP</span>
+<nav
+  style="position:fixed; top:0; background:#1a1a1a; color:#fff; padding:8px 16px; font-size:13px; z-index:9999; display:flex; gap:8px; align-items:center;"
+>
+  <span
+    style="background:#c4724a; color:#fff; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:700;"
+    >MOCKUP</span
+  >
   <span>{프로젝트명} — UI 목업</span>
 </nav>
 ```
@@ -139,22 +146,28 @@ Tailwind v4에서는 `@container` 쿼리가 기본 내장됩니다. 컴포넌트
 
 **3. 모든 컴포넌트를 개별 섹션으로**
 각 섹션마다 점선 테두리 + 라벨로 구분:
+
 ```html
-<div style="border: 2px dashed #ddd; border-radius:12px; padding:24px; margin-bottom:32px; position:relative;">
-  <span style="position:absolute; top:-12px; left:16px; background:#333; color:#fff; font-size:11px; padding:3px 10px; border-radius:99px; text-transform:uppercase;">ComponentName</span>
+<div
+  style="border: 2px dashed #ddd; border-radius:12px; padding:24px; margin-bottom:32px; position:relative;"
+>
+  <span
+    style="position:absolute; top:-12px; left:16px; background:#333; color:#fff; font-size:11px; padding:3px 10px; border-radius:99px; text-transform:uppercase;"
+    >ComponentName</span
+  >
   <!-- 컴포넌트 내용 -->
 </div>
 ```
 
 **4. 각 컴포넌트의 주요 상태 표시**
 
-| 상태 | 설명 |
-|------|------|
-| 기본 | 기본 렌더링 상태 |
-| hover | CSS `:hover`로 마우스 오버 효과 |
+| 상태          | 설명                                |
+| ------------- | ----------------------------------- |
+| 기본          | 기본 렌더링 상태                    |
+| hover         | CSS `:hover`로 마우스 오버 효과     |
 | 로딩/스켈레톤 | shimmer 애니메이션 (데이터 패칭 UI) |
-| 비어있음 | 결과 없음 / 초기 상태 |
-| 에러 | 실패/경고 상태 (해당하는 경우) |
+| 비어있음      | 결과 없음 / 초기 상태               |
+| 에러          | 실패/경고 상태 (해당하는 경우)      |
 
 **5. 전체 레이아웃 미리보기 섹션**
 실제 페이지처럼 조합된 최종 레이아웃을 마지막에 표시
@@ -180,6 +193,7 @@ docs/{파일명}.html 에 목업을 생성했습니다.
 ```
 
 **사용자가 수정을 요청하면:**
+
 - HTML 파일만 수정 (React 코드 작성 금지)
 - 수정 완료 후 다시 확인 요청
 

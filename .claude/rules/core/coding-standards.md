@@ -254,15 +254,16 @@ import RecipeModal from '@/components/RecipeModal';
 
 **적용 대상 폴더:**
 
-| 폴더 | 예시 |
-|------|------|
-| `components/` | UI 컴포넌트 모음 |
-| `queries/` | TanStack Query 훅 모음 |
-| `services/` | API 서비스 함수 모음 |
-| `types/` | 타입 정의 모음 |
-| `lib/` | 유틸리티 함수 모음 |
+| 폴더          | 예시                   |
+| ------------- | ---------------------- |
+| `components/` | UI 컴포넌트 모음       |
+| `queries/`    | TanStack Query 훅 모음 |
+| `services/`   | API 서비스 함수 모음   |
+| `types/`      | 타입 정의 모음         |
+| `lib/`        | 유틸리티 함수 모음     |
 
 **규칙:**
+
 - 폴더 내 export가 2개 이상이면 `index.ts` 생성
 - 새 파일 추가 시 해당 폴더의 `index.ts`에도 즉시 추가
 - `index.ts` 내부에서는 로직 작성 금지 — re-export만 허용
@@ -361,12 +362,12 @@ export function useInfiniteSearchQuery(query: string) {
 
 **규칙 요약:**
 
-| 규칙 | 내용 |
-|------|------|
+| 규칙        | 내용                                               |
+| ----------- | -------------------------------------------------- |
 | 도메인 분리 | 1도메인 = 1폴더 (`search/`, `recipe/`, `coupang/`) |
-| 파일 분리 | 훅(`index.ts`) + 쿼리 키(`queryKeys.ts`) 항상 분리 |
-| 서비스 연결 | 훅 내부에서 `services/api/{domain}` 직접 호출 |
-| Client 선언 | 훅 파일 최상단에 `'use client'` 필수 |
+| 파일 분리   | 훅(`index.ts`) + 쿼리 키(`queryKeys.ts`) 항상 분리 |
+| 서비스 연결 | 훅 내부에서 `services/api/{domain}` 직접 호출      |
+| Client 선언 | 훅 파일 최상단에 `'use client'` 필수               |
 
 ---
 
