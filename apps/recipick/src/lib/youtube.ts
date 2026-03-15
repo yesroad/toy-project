@@ -24,6 +24,8 @@ export const TITLE_EXCLUDE_KEYWORDS = [
   'review',
   '브랜드',
   'haul',
+  '#shorts',
+  '#short',
 ] as const;
 
 /** 화이트리스트 채널 ID (조회수 기준 무관하게 통과) */
@@ -41,6 +43,17 @@ export function filterVideoByTitle(title: string): boolean {
   const lower = title.toLowerCase();
   if (TITLE_EXCLUDE_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()))) return false;
   return TITLE_INCLUDE_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
+}
+
+/**
+ * description 또는 tags 기반 Shorts 판별
+ * - description에 #shorts / #short 포함 시 true
+ * - tags 배열에 'shorts' / 'short' 항목 포함 시 true
+ */
+export function isVideoShorts(description: string, tags?: string[]): boolean {
+  const descLower = description.toLowerCase();
+  if (descLower.includes('#shorts') || descLower.includes('#short')) return true;
+  return tags?.some((t) => t.toLowerCase() === 'shorts' || t.toLowerCase() === 'short') ?? false;
 }
 
 /**

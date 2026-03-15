@@ -18,6 +18,7 @@ export interface YouTubeVideoSnippet {
   };
   channelTitle: string;
   liveBroadcastContent: string;
+  tags?: string[];
 }
 
 export interface YouTubeVideoId {
@@ -43,6 +44,23 @@ export interface YouTubeSearchResponse {
     resultsPerPage: number;
   };
   items: YouTubeSearchItem[];
+}
+
+// YouTube Videos API (statistics + snippet 통합)
+export interface YouTubeVideoDetailsItem {
+  id: string;
+  statistics: {
+    viewCount?: string;
+    likeCount?: string;
+    commentCount?: string;
+  };
+  snippet: YouTubeVideoSnippet;
+}
+
+export interface YouTubeVideoDetailsResponse {
+  kind: string;
+  etag: string;
+  items: YouTubeVideoDetailsItem[];
 }
 
 // YouTube Videos API (statistics)

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { filterVideoByTitle, normalizeThumbnailUrl } from '../youtube';
+import { filterVideoByTitle, isVideoShorts, normalizeThumbnailUrl } from '../youtube';
 
 describe('filterVideoByTitle', () => {
   describe('정상 케이스 — 포함 키워드', () => {
@@ -57,6 +57,54 @@ describe('filterVideoByTitle', () => {
 
     it('포함/제외 키워드 모두 없는 영문 제목도 false 반환', () => {
       expect(filterVideoByTitle('Best Laptop 2024')).toBe(false);
+    });
+  });
+});
+
+describe('isVideoShorts', () => {
+  describe('정상 케이스 — description 해시태그', () => {
+    it('description에 #shorts 포함 시 true 반환', () => {
+      expect(isVideoShorts('맛있는 레시피 #shorts')).toBe(true);
+    });
+
+    it('description에 #Shorts 포함 시 true 반환 (대소문자 무시)', () => {
+      expect(isVideoShorts('맛있는 레시피 #Shorts')).toBe(true);
+    });
+
+    it('description에 #short 포함 시 true 반환', () => {
+      expect(isVideoShorts('quick recipe #short')).toBe(true);
+    });
+  });
+
+  describe('정상 케이스 — tags 배열', () => {
+    it("tags에 'shorts' 항목 포함 시 true 반환", () => {
+      expect(isVideoShorts('', ['요리', 'shorts'])).toBe(true);
+    });
+
+    it("tags에 'Shorts' 항목 포함 시 true 반환 (대소문자 무시)", () => {
+      expect(isVideoShorts('', ['요리', 'Shorts'])).toBe(true);
+    });
+
+    it("tags에 'short' 항목 포함 시 true 반환", () => {
+      expect(isVideoShorts('', ['요리', 'short'])).toBe(true);
+    });
+  });
+
+  describe('경계값 / false 케이스', () => {
+    it('description과 tags 모두 없으면 false 반환', () => {
+      expect(isVideoShorts('일반 레시피 영상입니다')).toBe(false);
+    });
+
+    it('빈 description, undefined tags이면 false 반환', () => {
+      expect(isVideoShorts('', undefined)).toBe(false);
+    });
+
+    it('빈 tags 배열이면 false 반환', () => {
+      expect(isVideoShorts('', [])).toBe(false);
+    });
+
+    it("tags에 'shortcut' 같은 부분 일치 단어는 false 반환", () => {
+      expect(isVideoShorts('', ['shortcut', 'recipe'])).toBe(false);
     });
   });
 });
