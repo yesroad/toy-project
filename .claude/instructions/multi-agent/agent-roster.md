@@ -8,14 +8,14 @@
 
 ## 에이전트 목록
 
-| 에이전트                    | 기본 모델 | 병렬 | 용도                          |
-| --------------------------- | --------- | ---- | ----------------------------- |
-| **explore**                 | haiku     | ✅   | 코드베이스 탐색, 패턴 분석    |
-| **code-reviewer**           | sonnet    | ✅   | 코드 리뷰, 품질 검증          |
-| **lint-fixer**              | haiku     | ✅   | 린트/포맷 오류 수정           |
-| **Plan** (빌트인)           | opus      | ❌   | 아키텍처 설계, 구현 계획      |
-| **implementation-executor** | sonnet    | ⚠️   | 코드 구현, 수정               |
-| **git-operator**            | sonnet    | ❌   | Git 커밋/브랜치/PR 관리       |
+| 에이전트                    | 기본 모델 | 병렬 | 용도                       |
+| --------------------------- | --------- | ---- | -------------------------- |
+| **explore**                 | haiku     | ✅   | 코드베이스 탐색, 패턴 분석 |
+| **code-reviewer**           | sonnet    | ✅   | 코드 리뷰, 품질 검증       |
+| **lint-fixer**              | haiku     | ✅   | 린트/포맷 오류 수정        |
+| **Plan** (빌트인)           | opus      | ❌   | 아키텍처 설계, 구현 계획   |
+| **implementation-executor** | sonnet    | ⚠️   | 코드 구현, 수정            |
+| **git-operator**            | sonnet    | ❌   | Git 커밋/브랜치/PR 관리    |
 
 > 비즈니스 로직(날짜 계산, 상태 조건, 수치 계산 등) 포함 시 모델 상향 - `coordination-guide.md` 참조
 
@@ -207,18 +207,18 @@ Task(
 
 ## 스킬 카탈로그
 
-| 스킬 | 트리거 | 에이전트 조합 |
-|------|--------|--------------|
-| **commit-helper** | "커밋 메시지" | git-operator |
-| **code-quality** | "린트", "포맷", "타입체크" | lint-fixer |
-| **bug-fix** | "버그", "오류", "에러" | explore → implementation-executor |
-| **refactor** | "리팩토링", "구조 개선" | explore → Plan → implementation-executor |
-| **docs-creator** | "문서 작성", "CLAUDE.md" | explore |
-| **agents-generator** | "루트 지시문 생성" | explore |
-| **component-creator** | "컴포넌트 만들어", "페이지 추가" | explore → implementation-executor |
-| **test-generator** | "테스트 작성", "커버리지" | explore |
-| **pr-review-responder** | "리뷰 반영", PR 번호 | explore → implementation-executor |
-| **migration-helper** | "업그레이드", "마이그레이션" | explore → Plan → implementation-executor |
+| 스킬                    | 트리거                           | 에이전트 조합                            |
+| ----------------------- | -------------------------------- | ---------------------------------------- |
+| **commit-helper**       | "커밋 메시지"                    | git-operator                             |
+| **code-quality**        | "린트", "포맷", "타입체크"       | lint-fixer                               |
+| **bug-fix**             | "버그", "오류", "에러"           | explore → implementation-executor        |
+| **refactor**            | "리팩토링", "구조 개선"          | explore → Plan → implementation-executor |
+| **docs-creator**        | "문서 작성", "CLAUDE.md"         | explore                                  |
+| **agents-generator**    | "루트 지시문 생성"               | explore                                  |
+| **component-creator**   | "컴포넌트 만들어", "페이지 추가" | explore → implementation-executor        |
+| **test-generator**      | "테스트 작성", "커버리지"        | explore                                  |
+| **pr-review-responder** | "리뷰 반영", PR 번호             | explore → implementation-executor        |
+| **migration-helper**    | "업그레이드", "마이그레이션"     | explore → Plan → implementation-executor |
 
 ### 스킬 연결 흐름
 

@@ -1,6 +1,6 @@
-import { HookFormProvider } from "@/provider"
-import { LoginForm, LogoBlock } from "./components"
-import { LoginFieldValues } from "./types"
+import { HookFormProvider } from "@/provider";
+import { LoginForm, LogoBlock } from "./components";
+import { LoginFieldValues } from "./types";
 import { Button } from "@workspace/ui/components/button";
 
 import {
@@ -9,12 +9,12 @@ import {
   CardContent,
   CardDescription,
   CardFooter,
-} from "@workspace/ui/components/card"
+} from "@workspace/ui/components/card";
 
 const defaultValues: LoginFieldValues = {
-  email: '',
-  password: '',
-}
+  email: "",
+  password: "",
+};
 
 const Login = () => {
   return (
@@ -31,15 +31,13 @@ const Login = () => {
             </Button>
           </CardFooter>
           <CardAction className="flex justify-center items-center w-full">
-            <CardDescription>
-              계정이 없으신가요?
-            </CardDescription>
+            <CardDescription>계정이 없으신가요?</CardDescription>
             <Button variant="link">회원가입</Button>
           </CardAction>
-        </Card >
-      </HookFormProvider >
+        </Card>
+      </HookFormProvider>
     </div>
-  )
-}
+  );
+};
 
 export default Login;

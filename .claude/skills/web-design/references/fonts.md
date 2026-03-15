@@ -247,11 +247,13 @@ export default function RootLayout({ children }) {
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
         />
       </head>
-      <body style={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif" }}>
+      <body
+        style={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif" }}
+      >
         {children}
       </body>
     </html>
-  )
+  );
 }
 ```
 

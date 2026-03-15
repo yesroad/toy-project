@@ -91,25 +91,29 @@
 ## Release Readiness Gate
 
 ### Gate 1. 계획 품질
+
 - 결과: PASS | FAIL
 - 근거: ...
 
 ### Gate 2. 구현 적합성
+
 - 결과: PASS | FAIL
 - 근거: ...
 
 ### Gate 3. 안정성/보안/사이드 이펙트
+
 - 결과: PASS | FAIL
 - 근거: ...
 
 ### Gate 4. 사용자 흐름/운영 품질
+
 - 결과: PASS | FAIL
 - 근거: ...
 
 ### Gate 5. 커밋/PR 준비
+
 - 결과: PASS | FAIL
 - 근거: ...
 
 최종 판정: READY | NOT READY
 ```
-

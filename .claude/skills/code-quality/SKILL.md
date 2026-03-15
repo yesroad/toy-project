@@ -37,11 +37,11 @@ git diff --name-only HEAD
 # 루트에 package.json이 없거나 scripts가 없으면 서브패키지 탐색
 ```
 
-| 상황 | 실행 위치 |
-|------|-----------|
-| 루트에 lint/format 스크립트 있음 | 루트 |
-| 변경 파일이 서브패키지에만 있음 | 해당 서브패키지 경로 |
-| 모노레포 전체 검증 요청 | 루트 turbo/nx 명령 우선 |
+| 상황                             | 실행 위치               |
+| -------------------------------- | ----------------------- |
+| 루트에 lint/format 스크립트 있음 | 루트                    |
+| 변경 파일이 서브패키지에만 있음  | 해당 서브패키지 경로    |
+| 모노레포 전체 검증 요청          | 루트 turbo/nx 명령 우선 |
 
 ### 1. 패키지 매니저 감지
 
@@ -52,12 +52,12 @@ ls pnpm-lock.yaml 2>/dev/null && echo "pnpm"
 ls package-lock.json 2>/dev/null && echo "npm"
 ```
 
-| lock 파일        | 패키지 매니저 |
-| ---------------- | ------------- |
-| `yarn.lock`      | yarn          |
-| `pnpm-lock.yaml` | pnpm          |
-| `package-lock.json` | npm        |
-| 없음             | npm (기본)    |
+| lock 파일           | 패키지 매니저 |
+| ------------------- | ------------- |
+| `yarn.lock`         | yarn          |
+| `pnpm-lock.yaml`    | pnpm          |
+| `package-lock.json` | npm           |
+| 없음                | npm (기본)    |
 
 ### 2. 사용 가능한 스크립트 확인
 
@@ -67,11 +67,11 @@ cat package.json | grep -E '"(format|prettier|lint|type-check|typecheck|tsc|buil
 
 스크립트 존재 여부에 따라 실행 여부 결정:
 
-| 확인 대상         | 스크립트 키 예시                        |
-| ----------------- | --------------------------------------- |
-| Prettier          | `format`, `prettier`, `fmt`             |
-| Lint              | `lint`, `eslint`                        |
-| 타입 체크         | `type-check`, `typecheck`, `tsc`, `build` |
+| 확인 대상 | 스크립트 키 예시                          |
+| --------- | ----------------------------------------- |
+| Prettier  | `format`, `prettier`, `fmt`               |
+| Lint      | `lint`, `eslint`                          |
+| 타입 체크 | `type-check`, `typecheck`, `tsc`, `build` |
 
 ### 3. 포맷 (Prettier)
 

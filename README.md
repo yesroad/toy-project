@@ -26,11 +26,13 @@ toy-project/
 ## 🚀 시작하기
 
 ### 설치
+
 ```bash
 yarn install
 ```
 
 ### 개발 서버 실행
+
 ```bash
 yarn dev
 

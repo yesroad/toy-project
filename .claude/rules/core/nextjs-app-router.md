@@ -170,13 +170,13 @@ async function UserPosts({ userId }: { userId: string }) {
 로깅, 분석, 알림 등 응답에 영향을 주지 않는 작업은 `after()`로 응답 후에 실행한다.
 
 ```typescript
-import { after } from 'next/server';
+import { after } from "next/server";
 
 // ❌ 안티패턴: 사이드 이펙트가 응답을 차단
 export async function POST(req: Request) {
   const data = await req.json();
   await db.event.create({ data }); // 핵심 처리
-  await sendAnalyticsEvent(data);  // 로깅 때문에 응답 지연
+  await sendAnalyticsEvent(data); // 로깅 때문에 응답 지연
   return Response.json({ success: true });
 }
 
@@ -210,7 +210,7 @@ App Router 코드 작성 시:
 
 ## 참조 문서
 
-| 문서 | 용도 |
-|------|------|
+| 문서                          | 용도                      |
+| ----------------------------- | ------------------------- |
 | `react-nextjs-conventions.md` | 공통 React/Next.js 컨벤션 |
-| `state-and-server-state.md` | 상태 관리 경계 |
+| `state-and-server-state.md`   | 상태 관리 경계            |

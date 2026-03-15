@@ -10,12 +10,15 @@
 
 ```typescript
 // ❌ 금지: 단순 계산에 useMemo 낭비
-const isActive = useMemo(() => status === 'active', [status]);
-const fullName = useMemo(() => `${firstName} ${lastName}`, [firstName, lastName]);
+const isActive = useMemo(() => status === "active", [status]);
+const fullName = useMemo(
+  () => `${firstName} ${lastName}`,
+  [firstName, lastName],
+);
 const count = useMemo(() => items.length, [items]);
 
 // ✅ 허용: 렌더링 중 직접 계산
-const isActive = status === 'active';
+const isActive = status === "active";
 const fullName = `${firstName} ${lastName}`;
 const count = items.length;
 ```
@@ -48,7 +51,7 @@ const [data, setData] = useState(expensiveFn());
 const [data, setData] = useState(() => expensiveFn());
 
 // ✅ localStorage 읽기도 동일하게 적용
-const [token, setToken] = useState(() => localStorage.getItem('token') ?? '');
+const [token, setToken] = useState(() => localStorage.getItem("token") ?? "");
 ```
 
 ---
@@ -60,7 +63,9 @@ const [token, setToken] = useState(() => localStorage.getItem('token') ?? '');
 
 ```typescript
 // ❌ 안티패턴: 렌더링에 사용되지 않는 값을 useState로 관리
-const [timerId, setTimerId] = useState<ReturnType<typeof setTimeout> | null>(null);
+const [timerId, setTimerId] = useState<ReturnType<typeof setTimeout> | null>(
+  null,
+);
 const [prevValue, setPrevValue] = useState(initialValue);
 
 // ✅ 렌더링 불필요한 값은 useRef
@@ -70,12 +75,12 @@ const prevValueRef = useRef(initialValue);
 
 **useRef가 적합한 사례:**
 
-| 사례 | 설명 |
-|------|------|
-| 타이머 ID | setTimeout/setInterval 반환값 |
-| 이전 값 추적 | 이전 렌더의 props/state 저장 |
-| DOM 측정값 | scrollTop, clientHeight 등 |
-| 이벤트 핸들러 ref | effect 내부에서 재구독 방지 |
+| 사례              | 설명                          |
+| ----------------- | ----------------------------- |
+| 타이머 ID         | setTimeout/setInterval 반환값 |
+| 이전 값 추적      | 이전 렌더의 props/state 저장  |
+| DOM 측정값        | scrollTop, clientHeight 등    |
+| 이벤트 핸들러 ref | effect 내부에서 재구독 방지   |
 
 ```typescript
 // ✅ 이벤트 핸들러를 ref에 저장 (effect 재구독 방지)
@@ -86,8 +91,8 @@ useEffect(() => {
 
 useEffect(() => {
   const handler = () => onScrollRef.current();
-  window.addEventListener('scroll', handler);
-  return () => window.removeEventListener('scroll', handler);
+  window.addEventListener("scroll", handler);
+  return () => window.removeEventListener("scroll", handler);
 }, []); // onScroll 변경 시 재구독 없음
 ```
 
@@ -95,7 +100,7 @@ useEffect(() => {
 
 ## 참조 문서
 
-| 문서 | 용도 |
-|------|------|
-| `coding-standards.md` | 기본 TypeScript/React 표준 |
-| `state-and-server-state.md` | 상태 관리 경계 |
+| 문서                        | 용도                       |
+| --------------------------- | -------------------------- |
+| `coding-standards.md`       | 기본 TypeScript/React 표준 |
+| `state-and-server-state.md` | 상태 관리 경계             |

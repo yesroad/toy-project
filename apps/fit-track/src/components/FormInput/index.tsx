@@ -1,7 +1,19 @@
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Control, FieldValues, Path, RegisterOptions, UseFormProps } from "react-hook-form";
-
+import {
+  Control,
+  FieldValues,
+  Path,
+  RegisterOptions,
+  UseFormProps,
+} from "react-hook-form";
 
 interface InputProps<T extends FieldValues> {
   control: Control<T>;
@@ -12,7 +24,14 @@ interface InputProps<T extends FieldValues> {
   rules?: RegisterOptions<T, Path<T>>;
 }
 
-const FormInput = <T extends FieldValues>({ control, label, name, type, placeholder, rules }: InputProps<T>) => {
+const FormInput = <T extends FieldValues>({
+  control,
+  label,
+  name,
+  type,
+  placeholder,
+  rules,
+}: InputProps<T>) => {
   return (
     <FormField
       control={control}
@@ -28,7 +47,7 @@ const FormInput = <T extends FieldValues>({ control, label, name, type, placehol
         </FormItem>
       )}
     />
-  )
-}
+  );
+};
 
 export default FormInput;

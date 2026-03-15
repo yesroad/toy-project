@@ -9,12 +9,12 @@
 
 ## 상태 유형별 도구 (현재 스택)
 
-| 상태 유형 | 도구 | 상태 |
-|-----------|------|------|
-| 폼 상태 | React Hook Form | 설치됨 |
-| 로컬 UI 상태 | useState/useReducer | 기본 |
-| 서버 상태 (API 데이터) | TanStack Query v5 | 미설치 |
-| 전역 UI/세션 상태 | Jotai | 미설치 |
+| 상태 유형              | 도구                | 상태   |
+| ---------------------- | ------------------- | ------ |
+| 폼 상태                | React Hook Form     | 설치됨 |
+| 로컬 UI 상태           | useState/useReducer | 기본   |
+| 서버 상태 (API 데이터) | TanStack Query v5   | 미설치 |
+| 전역 UI/세션 상태      | Jotai               | 미설치 |
 
 ### 판단 기준
 
@@ -114,7 +114,10 @@ useEffect(() => {
 }, [items]);
 
 // ✅ 대안: useMemo로 파생 계산
-const filteredItems = useMemo(() => items.filter((item) => item.active), [items]);
+const filteredItems = useMemo(
+  () => items.filter((item) => item.active),
+  [items],
+);
 ```
 
 ---
@@ -146,9 +149,9 @@ src/
 ```typescript
 // queries/user/queryKeys.ts
 export const userKeys = {
-  all: ['user'] as const,
-  lists: () => [...userKeys.all, 'list'] as const,
-  detail: (id: string) => [...userKeys.all, 'detail', id] as const,
+  all: ["user"] as const,
+  lists: () => [...userKeys.all, "list"] as const,
+  detail: (id: string) => [...userKeys.all, "detail", id] as const,
 };
 ```
 
@@ -166,10 +169,10 @@ yarn workspace @apps/fit-track add jotai
 
 ```typescript
 // src/atoms/uiAtoms.ts
-import { atom } from 'jotai';
+import { atom } from "jotai";
 
 export const sidebarOpenAtom = atom(false);
-export const selectedTabAtom = atom<'all' | 'active'>('all');
+export const selectedTabAtom = atom<"all" | "active">("all");
 ```
 
 ### 금지 사항

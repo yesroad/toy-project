@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Form } from "@workspace/ui/components/form";
 import { ReactNode } from "react";
@@ -9,14 +9,13 @@ interface IProps<T extends FieldValues> {
   options?: UseFormProps<T>;
 }
 
-const HookFormProvider = <T extends FieldValues>({ children, options }: IProps<T>) => {
+const HookFormProvider = <T extends FieldValues>({
+  children,
+  options,
+}: IProps<T>) => {
   const methods = useForm<T>(options);
 
-  return (
-    <Form {...methods}>
-      {children}
-    </Form>
-  )
+  return <Form {...methods}>{children}</Form>;
 };
 
 export default HookFormProvider;

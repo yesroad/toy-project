@@ -6,16 +6,16 @@
 
 ## 타입별 권장 패턴
 
-| 타입 | 주 패턴 | 보조 패턴 |
-|------|---------|-----------|
-| 랜딩페이지 | Above-the-fold CTA | 스토리텔링 스크롤 + Kinetic Typography |
-| SaaS 랜딩 | Above-the-fold CTA | 벤토 박스 (피처 소개) |
-| 대시보드 | 벤토 박스 | 사이드바 + 그리드 |
-| 앱 화면 | 카드 그리드 | 탭 내비게이션 |
-| 포트폴리오 | 탈구축 히어로 | Bold Kinetic Typography |
-| 에이전시 사이트 | 탈구축 히어로 | 풀스크린 스크롤 |
-| e-커머스 | 카드 그리드 | 필터 사이드바 |
-| 블로그/미디어 | 에디토리얼 그리드 | 카드 리스트 |
+| 타입            | 주 패턴            | 보조 패턴                              |
+| --------------- | ------------------ | -------------------------------------- |
+| 랜딩페이지      | Above-the-fold CTA | 스토리텔링 스크롤 + Kinetic Typography |
+| SaaS 랜딩       | Above-the-fold CTA | 벤토 박스 (피처 소개)                  |
+| 대시보드        | 벤토 박스          | 사이드바 + 그리드                      |
+| 앱 화면         | 카드 그리드        | 탭 내비게이션                          |
+| 포트폴리오      | 탈구축 히어로      | Bold Kinetic Typography                |
+| 에이전시 사이트 | 탈구축 히어로      | 풀스크린 스크롤                        |
+| e-커머스        | 카드 그리드        | 필터 사이드바                          |
+| 블로그/미디어   | 에디토리얼 그리드  | 카드 리스트                            |
 
 ---
 
@@ -58,7 +58,9 @@
   </p>
   <div className="mt-8 flex gap-4">
     <Button size="lg">지금 시작하기</Button>
-    <Button size="lg" variant="outline">더 알아보기</Button>
+    <Button size="lg" variant="outline">
+      더 알아보기
+    </Button>
   </div>
 </section>
 ```
@@ -83,9 +85,15 @@
   </div>
   {/* 오버레이 텍스트 */}
   <div className="relative z-10 mt-40 ml-12 max-w-sm">
-    <p className="text-sm uppercase tracking-widest text-muted-foreground">브랜드 레이블</p>
+    <p className="text-sm uppercase tracking-widest text-muted-foreground">
+      브랜드 레이블
+    </p>
     <h2 className="text-5xl font-bold mt-2 leading-tight break-keep">
-      당신의<br />이야기를<br />만듭니다
+      당신의
+      <br />
+      이야기를
+      <br />
+      만듭니다
     </h2>
     <Button className="mt-6">작업 보기</Button>
   </div>
@@ -107,8 +115,10 @@
     <h1 className="text-[clamp(5rem,15vw,12rem)] font-black uppercase leading-none whitespace-nowrap">
       MAKE IT
     </h1>
-    <h1 className="text-[clamp(5rem,15vw,12rem)] font-black uppercase leading-none whitespace-nowrap
-      -mt-4 ml-[10vw] text-transparent [-webkit-text-stroke:2px_white]">
+    <h1
+      className="text-[clamp(5rem,15vw,12rem)] font-black uppercase leading-none whitespace-nowrap
+      -mt-4 ml-[10vw] text-transparent [-webkit-text-stroke:2px_white]"
+    >
       HAPPEN
     </h1>
   </div>
@@ -146,13 +156,20 @@
   {/* 피처 아티클 - 넓게 */}
   <article className="md:col-span-2 group cursor-pointer">
     <div className="aspect-[16/9] rounded-xl overflow-hidden">
-      <Image src="..." fill className="object-cover group-hover:scale-105 transition-transform duration-500" alt="" />
+      <Image
+        src="..."
+        fill
+        className="object-cover group-hover:scale-105 transition-transform duration-500"
+        alt=""
+      />
     </div>
     <h2 className="text-2xl font-bold mt-4 break-keep">피처 아티클 제목</h2>
   </article>
   {/* 서브 아티클 목록 */}
   <div className="flex flex-col gap-4">
-    {articles.map(a => <ArticleCard key={a.id} {...a} />)}
+    {articles.map((a) => (
+      <ArticleCard key={a.id} {...a} />
+    ))}
   </div>
 </div>
 ```

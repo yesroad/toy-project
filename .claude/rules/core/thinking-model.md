@@ -271,9 +271,9 @@ rg "Typography" src/ --type tsx | head -10
 
 ## 참조 문서
 
-| 문서                                                           | 용도           |
-| -------------------------------------------------------------- | -------------- |
-| `@../../instructions/multi-agent/coordination-guide.md`        | 병렬 실행 원칙 |
+| 문서                                                           | 용도               |
+| -------------------------------------------------------------- | ------------------ |
+| `@../../instructions/multi-agent/coordination-guide.md`        | 병렬 실행 원칙     |
 | `@../../instructions/multi-agent/model-routing.md`             | 에이전트 모델 선택 |
-| `@../../instructions/workflow-patterns/sequential-thinking.md` | 복잡도별 단계  |
-| `@../../instructions/validation/forbidden-patterns.md`         | 금지 패턴      |
+| `@../../instructions/workflow-patterns/sequential-thinking.md` | 복잡도별 단계      |
+| `@../../instructions/validation/forbidden-patterns.md`         | 금지 패턴          |

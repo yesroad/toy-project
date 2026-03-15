@@ -5,6 +5,9 @@ export interface Ingredient {
   amount: string;
 }
 
+// ingredientName → coupang URL 매핑 (MVP: DB 사전 저장, 2단계: API 실시간 조회)
+export type CoupangLinks = Record<string, string>;
+
 export interface Recipe {
   videoId: string;
   title: string;
@@ -12,6 +15,7 @@ export interface Recipe {
   channelName: string;
   ingredients: Ingredient[];
   steps: string[];
+  coupangLinks?: CoupangLinks;
   rawCaption?: string;
   cached: boolean;
   createdAt?: string;
@@ -26,6 +30,7 @@ export interface RecipeCacheRow {
   channel_name: string;
   ingredients: Ingredient[];
   steps: string[];
+  coupang_links: CoupangLinks | null;
   raw_caption: string | null;
   created_at: string;
   updated_at: string;

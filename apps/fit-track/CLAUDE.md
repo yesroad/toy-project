@@ -5,6 +5,7 @@
 운동/식단 기록 Next.js 16 App Router 앱. 패키지명 `fit-track`.
 
 **기술 스택:**
+
 - Next.js 16 (App Router) + React 19
 - Tailwind CSS v4 (PostCSS 방식, `tailwind.config.js` 없음)
 - shadcn/ui (New York 스타일, `@workspace/ui/components/*`)
@@ -98,23 +99,29 @@ const { control } = useFormContext<LoginFieldValues>();
 ### shadcn/ui 컴포넌트 import 경로
 
 ```typescript
-import { Button } from '@workspace/ui/components/button';
-import { Card, CardContent, CardFooter } from '@workspace/ui/components/card';
-import { Form, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/form';
-import { Input } from '@workspace/ui/components/input';
+import { Button } from "@workspace/ui/components/button";
+import { Card, CardContent, CardFooter } from "@workspace/ui/components/card";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
 ```
 
 ### SVG import (SVGR)
 
 ```typescript
-import LogoIcon from '@/assets/logo.svg'; // React 컴포넌트로 사용
+import LogoIcon from "@/assets/logo.svg"; // React 컴포넌트로 사용
 ```
 
 ## Path Alias
 
-| 앨리어스 | 실제 경로 |
-|---------|----------|
-| `@/*` | `src/*` |
+| 앨리어스          | 실제 경로           |
+| ----------------- | ------------------- |
+| `@/*`             | `src/*`             |
 | `@workspace/ui/*` | `packages/ui/src/*` |
 
 ## 주의사항

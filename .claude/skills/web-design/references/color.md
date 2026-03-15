@@ -103,65 +103,67 @@
 ```ts
 // tailwind.config.ts
 export default {
-  darkMode: 'class',  // HTML에 .dark 클래스 토글 방식
+  darkMode: "class", // HTML에 .dark 클래스 토글 방식
   theme: {
     extend: {
       colors: {
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        card: 'hsl(var(--card))',
-        border: 'hsl(var(--border))',
-        muted: 'hsl(var(--muted))',
-        'muted-foreground': 'hsl(var(--muted-foreground))',
-        primary: 'hsl(var(--primary))',
-        'primary-foreground': 'hsl(var(--primary-foreground))',
-      }
-    }
-  }
-}
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: "hsl(var(--card))",
+        border: "hsl(var(--border))",
+        muted: "hsl(var(--muted))",
+        "muted-foreground": "hsl(var(--muted-foreground))",
+        primary: "hsl(var(--primary))",
+        "primary-foreground": "hsl(var(--primary-foreground))",
+      },
+    },
+  },
+};
 ```
 
 ```css
 /* app/globals.css */
 :root {
-  --background: 250 247 242;      /* 크림 오프화이트 */
-  --foreground: 28 20 14;         /* 다크 브라운 */
+  --background: 250 247 242; /* 크림 오프화이트 */
+  --foreground: 28 20 14; /* 다크 브라운 */
   --card: 255 255 255;
   --border: 220 210 200;
   --muted: 245 239 224;
   --muted-foreground: 120 100 80;
-  --primary: 158 123 90;          /* 모카 무스 */
+  --primary: 158 123 90; /* 모카 무스 */
   --primary-foreground: 255 255 255;
 }
 
 .dark {
-  --background: 10 14 26;         /* 딥 네이비 */
+  --background: 10 14 26; /* 딥 네이비 */
   --foreground: 226 232 240;
   --card: 26 34 53;
   --border: 45 58 82;
   --muted: 17 24 39;
   --muted-foreground: 148 163 184;
-  --primary: 0 255 135;           /* 네온 그린 포인트 */
+  --primary: 0 255 135; /* 네온 그린 포인트 */
   --primary-foreground: 10 14 26;
 }
 ```
 
 ```tsx
 // 다크모드 토글 버튼
-'use client'
-import { useEffect, useState } from 'react'
+"use client";
+import { useEffect, useState } from "react";
 
 export function DarkModeToggle() {
-  const [dark, setDark] = useState(false)
+  const [dark, setDark] = useState(false);
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark)
-  }, [dark])
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
   return (
-    <button onClick={() => setDark(!dark)}
-      className="p-2 rounded-full transition-colors hover:bg-muted">
-      {dark ? '☀️' : '🌙'}
+    <button
+      onClick={() => setDark(!dark)}
+      className="p-2 rounded-full transition-colors hover:bg-muted"
+    >
+      {dark ? "☀️" : "🌙"}
     </button>
-  )
+  );
 }
 ```
 
@@ -173,39 +175,43 @@ npm install next-themes
 
 ```tsx
 // app/providers.tsx
-'use client'
-import { ThemeProvider } from 'next-themes'
+"use client";
+import { ThemeProvider } from "next-themes";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       {children}
     </ThemeProvider>
-  )
+  );
 }
 
 // app/layout.tsx
-import { Providers } from './providers'
+import { Providers } from "./providers";
 export default function RootLayout({ children }) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body><Providers>{children}</Providers></body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
-  )
+  );
 }
 ```
 
 ```tsx
 // 다크모드 토글 컴포넌트
-'use client'
-import { useTheme } from 'next-themes'
+"use client";
+import { useTheme } from "next-themes";
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
   return (
-    <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="p-2 rounded-full hover:bg-muted transition-colors">
-      {theme === 'dark' ? '☀️' : '🌙'}
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="p-2 rounded-full hover:bg-muted transition-colors"
+    >
+      {theme === "dark" ? "☀️" : "🌙"}
     </button>
-  )
+  );
 }
 ```
 
@@ -217,8 +223,10 @@ export function ThemeToggle() {
   <div className="bg-card border border-border rounded-xl p-6">
     <h2 className="text-foreground font-bold">제목</h2>
     <p className="text-muted-foreground text-sm">설명 텍스트</p>
-    <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg
-      hover:opacity-90 transition-opacity">
+    <button
+      className="bg-primary text-primary-foreground px-4 py-2 rounded-lg
+      hover:opacity-90 transition-opacity"
+    >
       버튼
     </button>
   </div>

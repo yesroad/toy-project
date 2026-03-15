@@ -15,24 +15,24 @@ metadata:
 
 ## 트리거 조건
 
-| 상황            | 작성 필요   |
-| --------------- | ----------- |
-| **새 프로젝트 (Claude)** | CLAUDE.md   |
-| **새 프로젝트 (Codex/OpenCode)** | AGENTS.md |
-| **새 스킬**     | SKILL.md    |
-| **새 커맨드**   | COMMAND.md  |
-| **규칙 추가**   | rules/\*.md |
+| 상황                             | 작성 필요   |
+| -------------------------------- | ----------- |
+| **새 프로젝트 (Claude)**         | CLAUDE.md   |
+| **새 프로젝트 (Codex/OpenCode)** | AGENTS.md   |
+| **새 스킬**                      | SKILL.md    |
+| **새 커맨드**                    | COMMAND.md  |
+| **규칙 추가**                    | rules/\*.md |
 
 ---
 
 ## 도구별 루트 지시문
 
-| 도구 | 루트 파일 |
-| --- | --- |
-| Claude Code | `CLAUDE.md` |
+| 도구         | 루트 파일   |
+| ------------ | ----------- |
+| Claude Code  | `CLAUDE.md` |
 | OpenAI Codex | `AGENTS.md` |
-| OpenCode | `AGENTS.md` |
-| Gemini CLI | `GEMINI.md` |
+| OpenCode     | `AGENTS.md` |
+| Gemini CLI   | `GEMINI.md` |
 
 ---
 
@@ -127,8 +127,8 @@ Task(subagent_type="explore", model="haiku", prompt="기존 규칙 분석")
 // 복사 가능 패턴
 const fn = (): ReturnType => { ... }
 ```
-</quick_patterns>
 
+</quick_patterns>
 ````
 
 ---
@@ -139,14 +139,17 @@ const fn = (): ReturnType => { ... }
 # AGENTS.md - [프로젝트명]
 
 ## Overview
+
 [프로젝트 목적 1-2문장]
 
 ## Working Rules
+
 - Keep functions small and testable.
 - Validate external API payloads.
 - Follow project lint/type rules before commit.
 
 ## Context Routing
+
 - **Frontend changes**: read `./apps/web/AGENTS.md`
 - **Backend changes**: read `./services/api/AGENTS.md`
 ```
@@ -155,7 +158,7 @@ const fn = (): ReturnType => { ... }
 
 ### SKILL.md
 
-````markdown
+```markdown
 ---
 name: skill-name
 description: 트리거 키워드를 포함한 한 줄 설명. "X", "Y" 입력 시 이 스킬 활성화.
@@ -171,16 +174,16 @@ metadata:
 
 ## 트리거 조건
 
-| 트리거 | 반응 |
-|--------|------|
+| 트리거   | 반응        |
+| -------- | ----------- |
 | "키워드" | 스킬 활성화 |
 
 ## 복잡도 판단
 
-| 복잡도 | 기준 | 접근 |
-|--------|------|------|
-| LOW | 단순 | 바로 실행 |
-| HIGH | 복잡 | 분석 후 실행 |
+| 복잡도 | 기준 | 접근         |
+| ------ | ---- | ------------ |
+| LOW    | 단순 | 바로 실행    |
+| HIGH   | 복잡 | 분석 후 실행 |
 
 ## 워크플로우
 
@@ -190,10 +193,10 @@ metadata:
 
 ## 금지 패턴
 
-| 금지 | 이유 |
-|------|------|
+| 금지        | 이유   |
+| ----------- | ------ |
 | {금지 사항} | {이유} |
-````
+```
 
 ---
 
@@ -226,12 +229,12 @@ argument-hint: <인자>
 
 ## 워크플로우
 
-| Step  | 작업                                        | 도구       |
-| ----- | ------------------------------------------- | ---------- |
+| Step  | 작업                                                   | 도구       |
+| ----- | ------------------------------------------------------ | ---------- |
 | **1** | 문서 유형 결정(CLAUDE/AGENTS/SKILL/COMMAND), 구조 파악 | Glob, Read |
-| **2** | 규칙 추출 (forbidden → required → patterns) | Grep       |
-| **3** | 작성 (XML 태그, 표, 코드, @imports)         | Write      |
-| **4** | 검증 (체크리스트)                           | -          |
+| **2** | 규칙 추출 (forbidden → required → patterns)            | Grep       |
+| **3** | 작성 (XML 태그, 표, 코드, @imports)                    | Write      |
+| **4** | 검증 (체크리스트)                                      | -          |
 
 ---
 

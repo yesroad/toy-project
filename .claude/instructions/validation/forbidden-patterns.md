@@ -29,7 +29,8 @@
 const getData = (id) => api.get(`/orders/${id}`);
 
 // ✅ 허용
-const getData = (id: string): Promise<OrderResponse> => api.get(`/orders/${id}`);
+const getData = (id: string): Promise<OrderResponse> =>
+  api.get(`/orders/${id}`);
 ```
 
 ---
@@ -59,17 +60,17 @@ const { data: orders } = useItemListQuery(params);
 
 아이콘/컴포넌트 라이브러리 barrel 파일은 수만 개의 re-export를 포함할 수 있어 개발 환경에서 **200-800ms** 추가 비용이 발생한다.
 
-| 금지                           | 대안                           |
-| ------------------------------ | ------------------------------ |
-| barrel 파일을 통한 대량 import | 소스 파일 직접 경로로 import   |
+| 금지                           | 대안                         |
+| ------------------------------ | ---------------------------- |
+| barrel 파일을 통한 대량 import | 소스 파일 직접 경로로 import |
 
 ```typescript
 // ❌ 금지: barrel 파일 경유 (라이브러리에 따라 수천 개 re-export)
-import { IconHome, IconSearch, IconUser } from 'some-icon-library';
+import { IconHome, IconSearch, IconUser } from "some-icon-library";
 
 // ✅ 허용: 직접 경로로 import
-import { IconHome } from 'some-icon-library/icons/IconHome';
-import { IconSearch } from 'some-icon-library/icons/IconSearch';
+import { IconHome } from "some-icon-library/icons/IconHome";
+import { IconSearch } from "some-icon-library/icons/IconSearch";
 ```
 
 > **예외**: 프로젝트 디자인 시스템 패키지의 공식 barrel은 허용 (관리된 export)
@@ -111,9 +112,9 @@ git commit -m "feat: add feature"
 
 ## 보안
 
-| 금지                       | 대안                         |
-| -------------------------- | ---------------------------- |
-| 토큰/비밀번호 하드코딩     | 환경변수 또는 로컬 env 파일  |
+| 금지                          | 대안                           |
+| ----------------------------- | ------------------------------ |
+| 토큰/비밀번호 하드코딩        | 환경변수 또는 로컬 env 파일    |
 | 스크립트에 자격증명 직접 작성 | `.env.*.example` + 런타임 주입 |
 
 ```bash
@@ -128,12 +129,12 @@ API_KEY="${MY_API_KEY:-}"
 
 ## 워크플로우
 
-| 금지                | 대안                |
-| ------------------- | ------------------- |
-| 읽지 않은 파일 수정 | Read → Edit         |
-| 정책 변경 시 테스트 누락 | 단위 테스트 작성 |
-| 린트 오류 무시      | lint-fixer 실행     |
-| 기존 정책 임의 변경 | 사용자 확인 후 변경 |
+| 금지                     | 대안                |
+| ------------------------ | ------------------- |
+| 읽지 않은 파일 수정      | Read → Edit         |
+| 정책 변경 시 테스트 누락 | 단위 테스트 작성    |
+| 린트 오류 무시           | lint-fixer 실행     |
+| 기존 정책 임의 변경      | 사용자 확인 후 변경 |
 
 ---
 
@@ -163,40 +164,40 @@ const Content = ({ onClose }: { onClose: () => void }) => {
 
 ## API/서비스
 
-| 금지             | 대안                          |
-| ---------------- | ----------------------------- |
-| 수동 axios 호출  | 프로젝트 api 래퍼 사용        |
-| 직접 에러 핸들링 | Query의 onError               |
-| 하드코딩된 URL   | 환경 변수                     |
+| 금지             | 대안                   |
+| ---------------- | ---------------------- |
+| 수동 axios 호출  | 프로젝트 api 래퍼 사용 |
+| 직접 에러 핸들링 | Query의 onError        |
+| 하드코딩된 URL   | 환경 변수              |
 
 ```typescript
 // ❌ 금지
-const res = await axios.get('https://api.example.com/orders');
+const res = await axios.get("https://api.example.com/orders");
 
 // ✅ 허용
-const res = await api.get('/api/orders');
+const res = await api.get("/api/orders");
 ```
 
 ---
 
 ## 테스트
 
-| 금지                       | 대안                           | 참조                                         |
-| -------------------------- | ------------------------------ | -------------------------------------------- |
-| 테스트 삭제                | 테스트 수정                    | -                                            |
-| 하드코딩된 날짜            | `jest.useFakeTimers()`         | `@../../rules/core/unit-test-conventions.md` |
-| 구현 상세 테스트           | 동작 중심 테스트               | -                                            |
+| 금지             | 대안                   | 참조                                         |
+| ---------------- | ---------------------- | -------------------------------------------- |
+| 테스트 삭제      | 테스트 수정            | -                                            |
+| 하드코딩된 날짜  | `jest.useFakeTimers()` | `@../../rules/core/unit-test-conventions.md` |
+| 구현 상세 테스트 | 동작 중심 테스트       | -                                            |
 
 ---
 
 ## 스타일링
 
-| 금지              | 대안                       |
-| ----------------- | -------------------------- |
-| inline style 객체 | Emotion styled/css         |
-| !important        | `&&` specificity           |
-| px 하드코딩       | 디자인 토큰/변수 사용      |
-| 하드코딩 색상값   | 디자인 토큰/변수 사용      |
+| 금지              | 대안                  |
+| ----------------- | --------------------- |
+| inline style 객체 | Emotion styled/css    |
+| !important        | `&&` specificity      |
+| px 하드코딩       | 디자인 토큰/변수 사용 |
+| 하드코딩 색상값   | 디자인 토큰/변수 사용 |
 
 ```typescript
 // ❌ 금지

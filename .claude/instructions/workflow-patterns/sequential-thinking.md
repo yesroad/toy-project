@@ -29,7 +29,7 @@
 
 ```typescript
 // 바로 수정
-Edit('Button.tsx', '확인', '저장');
+Edit("Button.tsx", "확인", "저장");
 ```
 
 ---
@@ -88,7 +88,11 @@ Bash("yarn lint")
 
 ```typescript
 // Plan 에이전트 활용
-Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '인증 모듈 리팩토링 계획'));
+Task(
+  (subagent_type = "Plan"),
+  (model = "opus"),
+  (prompt = "인증 모듈 리팩토링 계획"),
+);
 ```
 
 ---
@@ -110,11 +114,11 @@ Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '인증 모듈 리팩
 
 ## 에이전트 연계
 
-| 복잡도 | 에이전트            | 모델          |
-| ------ | ------------------- | ------------- |
-| LOW    | - (직접 처리)       | -             |
-| MEDIUM | explore, code-reviewer     | haiku, sonnet |
-| HIGH   | Plan, code-reviewer | opus, sonnet  |
+| 복잡도 | 에이전트               | 모델          |
+| ------ | ---------------------- | ------------- |
+| LOW    | - (직접 처리)          | -             |
+| MEDIUM | explore, code-reviewer | haiku, sonnet |
+| HIGH   | Plan, code-reviewer    | opus, sonnet  |
 
 ---
 
@@ -124,12 +128,20 @@ Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '인증 모듈 리팩
 
 ```typescript
 // HIGH 복잡도에서도 탐색은 병렬
-Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '현재 구조 분석'));
-Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '의존성 파악'));
-Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '테스트 현황'));
+Task(
+  (subagent_type = "explore"),
+  (model = "haiku"),
+  (prompt = "현재 구조 분석"),
+);
+Task((subagent_type = "explore"), (model = "haiku"), (prompt = "의존성 파악"));
+Task((subagent_type = "explore"), (model = "haiku"), (prompt = "테스트 현황"));
 
 // 결과 수집 후 순차적 계획
-Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '분석 결과 기반 계획'));
+Task(
+  (subagent_type = "Plan"),
+  (model = "opus"),
+  (prompt = "분석 결과 기반 계획"),
+);
 ```
 
 ---
@@ -137,16 +149,16 @@ Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '분석 결과 기반
 ## 자동 복잡도 판단
 
 ```typescript
-const judgeComplexity = (task: string): 'LOW' | 'MEDIUM' | 'HIGH' => {
+const judgeComplexity = (task: string): "LOW" | "MEDIUM" | "HIGH" => {
   // 파일 수 기반
-  if (affectedFiles.length <= 1) return 'LOW';
-  if (affectedFiles.length <= 5) return 'MEDIUM';
-  return 'HIGH';
+  if (affectedFiles.length <= 1) return "LOW";
+  if (affectedFiles.length <= 5) return "MEDIUM";
+  return "HIGH";
 
   // 또는 키워드 기반
-  if (task.includes('리팩토링') || task.includes('아키텍처')) return 'HIGH';
-  if (task.includes('추가') || task.includes('수정')) return 'MEDIUM';
-  return 'LOW';
+  if (task.includes("리팩토링") || task.includes("아키텍처")) return "HIGH";
+  if (task.includes("추가") || task.includes("수정")) return "MEDIUM";
+  return "LOW";
 };
 ```
 
