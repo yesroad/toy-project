@@ -1,5 +1,12 @@
-// Supabase recipe_cache 테이블 행 타입
+// Supabase 테이블 행 타입
 import type { Ingredient, CoupangLinks } from '@/types/api/routeApi/response';
+
+export interface IngredientLinkRow {
+  name: string;
+  label: string | null;
+  link: string;
+  created_at: string;
+}
 
 export interface RecipeCacheRow {
   id: string;

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { chunkCaption } from '@/lib/caption';
 import type { RecipeRequest } from '@/types/api/routeApi/request';
-import type { Recipe } from '@/types/api/routeApi/response';
+import type { Recipe, CoupangLinks } from '@/types/api/routeApi/response';
 import type { RecipeAnalysis } from '@/types/api/openai/response';
 
 function getBaseUrl(request: Request): string {
@@ -95,6 +95,22 @@ export async function POST(request: Request) {
       }),
     );
     const merged = mergeRecipeAnalyses(analyses);
+
+    // 4. ingredient_links DB에서 재료 링크 조회 (exact match, 실패해도 계속 진행)
+    let coupangLinks: CoupangLinks | undefined;
+    try {
+      const names = merged.ingredients.map((i) => i.name).join(',');
+      const linkRes = await fetch(
+        `${baseUrl}/api/ingredient-links?names=${encodeURIComponent(names)}`,
+      );
+      if (linkRes.ok) {
+        const { links } = await linkRes.json();
+        if (Object.keys(links).length > 0) coupangLinks = links;
+      }
+    } catch {
+      // 링크 조회 실패해도 레시피 반환에 영향 없음
+    }
+
     recipe = {
       videoId,
       title: '', // 검색 결과에서 전달받지 않으므로 빈 값 (클라이언트가 VideoItem 보유)
@@ -102,13 +118,14 @@ export async function POST(request: Request) {
       channelName: '',
       ingredients: merged.ingredients,
       steps: merged.steps,
+      coupangLinks,
       rawCaption: caption,
     };
   } catch {
     return NextResponse.json({ error: '레시피 분석에 실패했습니다' }, { status: 503 });
   }
 
-  // 4. Supabase 캐시 저장 (비차단 — 실패해도 응답에 영향 없음)
+  // 5. Supabase 캐시 저장 (비차단 — 실패해도 응답에 영향 없음)
   fetch(`${baseUrl}/api/supabase`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
