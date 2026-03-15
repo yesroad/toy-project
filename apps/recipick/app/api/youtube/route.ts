@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { parseTimedTextXml } from '@/lib/caption';
 import {
-  filterVideoByTitle,
-  isVideoShorts,
+  filterVideo,
+  parseDurationSeconds,
   normalizeThumbnailUrl,
-  CHANNEL_WHITELIST,
-  MIN_VIEW_COUNT,
+  HARD_EXCLUDE_KEYWORDS,
 } from '@/lib/youtube';
 import { getCachedSearch, setCachedSearch } from '@/lib/youtubeCache';
 import { serverEnv } from '@/env/server';
@@ -57,17 +56,28 @@ function extractUpstreamMessage(payload: unknown, fallback: string): string {
 }
 
 /**
- * videos.list API로 조회수 및 Shorts 여부를 배치 조회
- * @returns videoId → { viewCount, isShorts } 맵
+ * videos.list API로 영상 상세 정보(통계, 스니펫, contentDetails)를 배치 조회
+ * @returns videoId → { viewCount, categoryId, durationSeconds, description, tags } 맵
  */
-async function getVideoViewCounts(
+async function getVideoDetails(
   videoIds: string[],
   apiKey: string,
-): Promise<Map<string, { viewCount: number; isShorts: boolean }>> {
+): Promise<
+  Map<
+    string,
+    {
+      viewCount: number;
+      categoryId: string;
+      durationSeconds: number;
+      description: string;
+      tags: string[];
+    }
+  >
+> {
   if (videoIds.length === 0) return new Map();
 
   const params = new URLSearchParams({
-    part: 'statistics,snippet',
+    part: 'statistics,snippet,contentDetails',
     id: videoIds.join(','),
     key: apiKey,
   });
@@ -76,14 +86,27 @@ async function getVideoViewCounts(
   if (!res.ok) return new Map();
 
   const data: YouTubeVideoDetailsResponse = await res.json();
-  const viewCountMap = new Map<string, { viewCount: number; isShorts: boolean }>();
+  const detailsMap = new Map<
+    string,
+    {
+      viewCount: number;
+      categoryId: string;
+      durationSeconds: number;
+      description: string;
+      tags: string[];
+    }
+  >();
+
   for (const item of data.items) {
-    viewCountMap.set(item.id, {
+    detailsMap.set(item.id, {
       viewCount: parseInt(item.statistics.viewCount ?? '0', 10),
-      isShorts: isVideoShorts(item.snippet.description, item.snippet.tags),
+      categoryId: item.snippet.categoryId ?? '',
+      durationSeconds: parseDurationSeconds(item.contentDetails?.duration ?? ''),
+      description: item.snippet.description,
+      tags: item.snippet.tags ?? [],
     });
   }
-  return viewCountMap;
+  return detailsMap;
 }
 
 async function searchVideos(q: string, pageToken?: string): Promise<SearchResult> {
@@ -96,9 +119,9 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
 
   const params = new URLSearchParams({
     part: 'snippet',
-    q: `${q} 레시피 요리`,
+    q: `${q} 레시피`,
     type: 'video',
-    maxResults: '20',
+    maxResults: '25',
     regionCode: 'KR',
     relevanceLanguage: 'ko',
     key: apiKey,
@@ -117,19 +140,31 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
 
   const data: YouTubeSearchResponse = await res.json();
 
-  // 1차 필터: 제목 키워드 (포함/제외)
-  const titleFiltered = data.items.filter((item) => filterVideoByTitle(item.snippet.title));
+  // 1차 필터: Hard exclude 키워드만 (검색 단계에서 명백한 비요리 영상 제거)
+  const hardFiltered = data.items.filter(
+    (item) =>
+      !HARD_EXCLUDE_KEYWORDS.some((kw) =>
+        item.snippet.title.toLowerCase().includes(kw.toLowerCase()),
+      ),
+  );
 
-  // 2차 필터: 조회수 (화이트리스트 채널은 통과)
-  const videoIds = titleFiltered.map((item) => item.id.videoId);
-  const viewCountMap = await getVideoViewCounts(videoIds, apiKey);
+  // videos.list로 상세 정보 배치 조회 (statistics + snippet + contentDetails)
+  const videoIds = hardFiltered.map((item) => item.id.videoId);
+  const detailsMap = await getVideoDetails(videoIds, apiKey);
 
-  const videos: VideoItem[] = titleFiltered
+  // 통합 필터: 다중 신호(카테고리, 키워드, 조회수, duration) 종합 판별
+  const videos: VideoItem[] = hardFiltered
     .filter((item) => {
-      if (CHANNEL_WHITELIST.includes(item.snippet.channelId)) return true;
-      const details = viewCountMap.get(item.id.videoId);
-      if (details?.isShorts) return false;
-      return (details?.viewCount ?? 0) >= MIN_VIEW_COUNT;
+      const details = detailsMap.get(item.id.videoId);
+      return filterVideo({
+        channelId: item.snippet.channelId,
+        title: item.snippet.title,
+        description: details?.description ?? '',
+        tags: details?.tags,
+        categoryId: details?.categoryId,
+        viewCount: details?.viewCount ?? 0,
+        durationSeconds: details?.durationSeconds ?? 0,
+      });
     })
     .map((item) => ({
       videoId: item.id.videoId,

@@ -19,6 +19,7 @@ export interface YouTubeVideoSnippet {
   channelTitle: string;
   liveBroadcastContent: string;
   tags?: string[];
+  categoryId?: string;
 }
 
 export interface YouTubeVideoId {
@@ -55,6 +56,9 @@ export interface YouTubeVideoDetailsItem {
     commentCount?: string;
   };
   snippet: YouTubeVideoSnippet;
+  contentDetails?: {
+    duration: string; // ISO 8601 (예: "PT15M33S")
+  };
 }
 
 export interface YouTubeVideoDetailsResponse {
