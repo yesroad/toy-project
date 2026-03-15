@@ -63,6 +63,20 @@ export interface YouTubeVideoStatisticsResponse {
   items: YouTubeVideoStatisticsItem[];
 }
 
+// YouTube Videos API (snippet)
+export interface YouTubeVideoSnippetItem {
+  kind: string;
+  etag: string;
+  id: string;
+  snippet: YouTubeVideoSnippet;
+}
+
+export interface YouTubeVideoSnippetResponse {
+  kind: string;
+  etag: string;
+  items: YouTubeVideoSnippetItem[];
+}
+
 // YouTube Captions API
 export interface CaptionTrack {
   kind: string;

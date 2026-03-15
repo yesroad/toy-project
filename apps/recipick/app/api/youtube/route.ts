@@ -12,6 +12,7 @@ import type { SearchResult, VideoItem } from '@/types/api/routeApi/response';
 import type {
   YouTubeSearchResponse,
   YouTubeVideoStatisticsResponse,
+  YouTubeVideoSnippetResponse,
 } from '@/types/api/youtube/response';
 
 class ApiRouteError extends Error {
@@ -145,20 +146,53 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
   return result;
 }
 
-async function getCaption(videoId: string): Promise<string> {
-  const url = `https://www.youtube.com/api/timedtext?lang=ko&v=${videoId}&fmt=srv3`;
-  const res = await fetch(url, { cache: 'no-store' });
+type CaptionResult = { text: string; lang: 'ko' | 'en' };
 
-  if (!res.ok || res.status === 204) {
-    const asrUrl = `https://www.youtube.com/api/timedtext?lang=ko&v=${videoId}&kind=asr&fmt=srv3`;
-    const asrRes = await fetch(asrUrl, { cache: 'no-store' });
-    if (!asrRes.ok) throw new Error(`자막을 찾을 수 없습니다: ${videoId}`);
-    const xml = await asrRes.text();
-    return parseTimedTextXml(xml);
-  }
-
+async function fetchTimedText(videoId: string, lang: string, asr?: boolean): Promise<string> {
+  const params = new URLSearchParams({ lang, v: videoId, fmt: 'srv3' });
+  if (asr) params.set('kind', 'asr');
+  const res = await fetch(`https://www.youtube.com/api/timedtext?${params}`, {
+    cache: 'no-store',
+  });
+  if (!res.ok || res.status === 204) return '';
   const xml = await res.text();
   return parseTimedTextXml(xml);
+}
+
+async function getCaption(videoId: string): Promise<CaptionResult> {
+  // 1. 수동 자막 (ko)
+  const koManual = await fetchTimedText(videoId, 'ko');
+  if (koManual.trim().length > 0) return { text: koManual, lang: 'ko' };
+
+  // 2. 수동 자막 (en)
+  const enManual = await fetchTimedText(videoId, 'en');
+  if (enManual.trim().length > 0) return { text: enManual, lang: 'en' };
+
+  // 3. ASR 자막 (ko)
+  const koAsr = await fetchTimedText(videoId, 'ko', true);
+  if (koAsr.trim().length > 0) return { text: koAsr, lang: 'ko' };
+
+  // 4. ASR 자막 (en)
+  const enAsr = await fetchTimedText(videoId, 'en', true);
+  if (enAsr.trim().length > 0) return { text: enAsr, lang: 'en' };
+
+  throw new Error(`자막을 찾을 수 없습니다: ${videoId}`);
+}
+
+async function getVideoDetail(videoId: string): Promise<{ title: string; description: string }> {
+  const params = new URLSearchParams({
+    part: 'snippet',
+    id: videoId,
+    key: serverEnv.youtubeDataApiKey,
+  });
+  const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?${params}`);
+  if (!res.ok) throw new Error(`YouTube API 오류: ${res.status}`);
+
+  const data: YouTubeVideoSnippetResponse = await res.json();
+  const item = data.items?.[0];
+  if (!item) throw new Error('영상을 찾을 수 없습니다');
+
+  return { title: item.snippet.title, description: item.snippet.description };
 }
 
 export async function GET(request: Request) {
@@ -199,8 +233,8 @@ export async function GET(request: Request) {
     }
 
     try {
-      const caption = await getCaption(videoId.trim());
-      return NextResponse.json({ caption });
+      const result = await getCaption(videoId.trim());
+      return NextResponse.json({ caption: result.text, lang: result.lang });
     } catch {
       return NextResponse.json(
         { error: '자막이 없거나 접근할 수 없는 영상입니다' },
@@ -209,8 +243,23 @@ export async function GET(request: Request) {
     }
   }
 
+  if (action === 'videoDetail') {
+    const videoId = searchParams.get('videoId');
+
+    if (!videoId || videoId.trim() === '') {
+      return NextResponse.json({ error: 'videoId가 필요합니다' }, { status: 400 });
+    }
+
+    try {
+      const detail = await getVideoDetail(videoId.trim());
+      return NextResponse.json(detail);
+    } catch {
+      return NextResponse.json({ error: '영상 정보를 가져올 수 없습니다' }, { status: 503 });
+    }
+  }
+
   return NextResponse.json(
-    { error: 'action 파라미터가 필요합니다 (search | caption)' },
+    { error: 'action 파라미터가 필요합니다 (search | caption | videoDetail)' },
     { status: 400 },
   );
 }

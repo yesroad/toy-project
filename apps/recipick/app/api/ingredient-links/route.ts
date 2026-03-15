@@ -29,7 +29,8 @@ async function createSupabaseClient() {
 /**
  * GET /api/ingredient-links?names=간장,진간장,소금
  *
- * 재료명 배열을 받아 ingredient_links 테이블에서 exact match 조회.
+ * 재료명 배열을 받아 ingredient_links 테이블에서 exact match + aliases overlap 조회.
+ * alias로 매칭된 경우 요청한 재료명을 key로 사용.
  * 매칭된 재료만 { [name]: link } 형태로 반환 (미매칭은 포함 안 함).
  */
 export async function GET(request: Request) {
@@ -51,15 +52,32 @@ export async function GET(request: Request) {
 
   try {
     const supabase = await createSupabaseClient();
-    const { data, error } = await supabase.from(TABLE).select('name, link').in('name', names);
+
+    // exact match + aliases overlap 통합 조회
+    const quotedNames = names.map((n) => `"${n.replace(/"/g, '\\"')}"`).join(',');
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select('name, link, aliases')
+      .or(`name.in.(${quotedNames}),aliases.ov.{${quotedNames}}`);
 
     if (error || !data) {
       return NextResponse.json({ links: {} });
     }
 
     const links: CoupangLinks = {};
-    for (const row of data as Pick<IngredientLinkRow, 'name' | 'link'>[]) {
-      links[row.name] = row.link;
+    for (const row of data as (Pick<IngredientLinkRow, 'name' | 'link'> & {
+      aliases?: string[];
+    })[]) {
+      // exact match
+      if (names.includes(row.name)) {
+        links[row.name] = row.link;
+      }
+      // alias match — 요청한 재료명을 key로 사용
+      for (const reqName of names) {
+        if (!links[reqName] && row.aliases?.includes(reqName)) {
+          links[reqName] = row.link;
+        }
+      }
     }
 
     return NextResponse.json({ links });
