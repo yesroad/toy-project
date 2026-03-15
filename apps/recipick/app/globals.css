@@ -1,0 +1,24 @@
+/* Recipick 어스톤 테마 — @workspace/ui/globals.css 이후 로드 */
+
+:root {
+  --background: #faf7f2;
+  --foreground: #3d2b1f;
+  --card: #ffffff;
+  --card-foreground: #3d2b1f;
+  --popover: #ffffff;
+  --popover-foreground: #3d2b1f;
+  --primary: #c4724a;
+  --primary-foreground: #ffffff;
+  --secondary: #f5ede0;
+  --secondary-foreground: #7d5f42;
+  --muted: #f5ede0;
+  --muted-foreground: #7d6550;
+  --accent: #f5ede0;
+  --accent-foreground: #7d5f42;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #ddd0bc;
+  --input: #ddd0bc;
+  --ring: #c4724a;
+  --radius: 10px;
+}

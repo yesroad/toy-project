@@ -110,6 +110,84 @@ Tailwind v4에서는 `@container` 쿼리가 기본 내장됩니다. 컴포넌트
 
 ---
 
+## Step 3.5: HTML 목업 작성 및 사용자 확인 (필수)
+
+> **왜 필수인가?** HTML 목업은 "디자인 계약서"입니다. React 구현 전에 색상·레이아웃·상태(state)·인터랙션을 사용자와 합의해두면, 컴포넌트 구현 중 방향 수정이 없어집니다. 작은 수정(텍스트 정렬, 색상 변경, 요소 제거)을 HTML에서 하는 것이 React 코드를 고치는 것보다 훨씬 빠릅니다.
+
+**다음 경우에만 생략 가능:**
+- 단일 버튼/뱃지처럼 명백히 단순한 컴포넌트 1개 추가
+- 사용자가 "목업 없이 바로 구현해줘"라고 명시한 경우
+
+### 목업 파일 생성 규칙
+
+파일 위치: `docs/{project-name}-mockup.html`
+(docs 폴더가 없으면 프로젝트 루트에 `{project-name}-mockup.html`로 저장)
+
+### 목업에 반드시 포함할 내용
+
+**1. 상단 목업 네비게이션 바**
+```html
+<!-- 목업임을 명확히 표시 -->
+<nav style="position:fixed; top:0; background:#1a1a1a; color:#fff; padding:8px 16px; font-size:13px; z-index:9999; display:flex; gap:8px; align-items:center;">
+  <span style="background:#c4724a; color:#fff; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:700;">MOCKUP</span>
+  <span>{프로젝트명} — UI 목업</span>
+</nav>
+```
+
+**2. 디자인 시스템 섹션 (컬러 팔레트 스와치)**
+선택한 스타일의 주요 컬러를 시각적으로 표시
+
+**3. 모든 컴포넌트를 개별 섹션으로**
+각 섹션마다 점선 테두리 + 라벨로 구분:
+```html
+<div style="border: 2px dashed #ddd; border-radius:12px; padding:24px; margin-bottom:32px; position:relative;">
+  <span style="position:absolute; top:-12px; left:16px; background:#333; color:#fff; font-size:11px; padding:3px 10px; border-radius:99px; text-transform:uppercase;">ComponentName</span>
+  <!-- 컴포넌트 내용 -->
+</div>
+```
+
+**4. 각 컴포넌트의 주요 상태 표시**
+
+| 상태 | 설명 |
+|------|------|
+| 기본 | 기본 렌더링 상태 |
+| hover | CSS `:hover`로 마우스 오버 효과 |
+| 로딩/스켈레톤 | shimmer 애니메이션 (데이터 패칭 UI) |
+| 비어있음 | 결과 없음 / 초기 상태 |
+| 에러 | 실패/경고 상태 (해당하는 경우) |
+
+**5. 전체 레이아웃 미리보기 섹션**
+실제 페이지처럼 조합된 최종 레이아웃을 마지막에 표시
+
+### 목업 CSS 원칙
+
+- **외부 의존성 없이** 순수 HTML + CSS + 인라인 스타일만 사용 (브라우저에서 즉시 열 수 있어야 함)
+- CSS 변수로 컬러 토큰 정의 (`--color-primary` 등)
+- hover 효과는 CSS만으로 구현 (JS 최소화)
+- `break-keep: always`로 한국어 줄바꿈 처리
+- 스켈레톤 shimmer는 `@keyframes` + `background: linear-gradient(90deg, ...)` 패턴 사용
+
+### 사용자 확인 절차
+
+목업 파일 생성 후 **반드시 다음 메시지로 사용자에게 확인을 요청**하세요:
+
+```
+docs/{파일명}.html 에 목업을 생성했습니다.
+브라우저에서 열어서 확인해보세요.
+
+수정하고 싶은 부분이 있으면 말씀해 주세요.
+확정되면 React 컴포넌트 구현을 시작하겠습니다.
+```
+
+**사용자가 수정을 요청하면:**
+- HTML 파일만 수정 (React 코드 작성 금지)
+- 수정 완료 후 다시 확인 요청
+
+**사용자가 확인("좋아", "진행하자", "OK" 등)하면:**
+→ Step 4로 진행
+
+---
+
 ## Step 4: 구현
 
 ### Tailwind v4 설정 (CSS-first)

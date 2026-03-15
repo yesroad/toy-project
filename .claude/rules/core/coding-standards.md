@@ -232,6 +232,144 @@ setTimeout(callback, DEBOUNCE_DELAY_MS);
 
 ---
 
+## 배럴 Export (index.ts)
+
+같은 폴더 안에 export가 2개 이상이면 `index.ts`를 만들어 한 곳에서 내보낸다.
+
+```typescript
+// ✅ 좋은 예: src/components/index.ts
+export { default as SearchBar } from './SearchBar';
+export { default as VideoCard } from './VideoCard';
+export { default as RecipeModal } from './RecipeModal';
+export { default as IngredientChip } from './IngredientChip';
+
+// 사용하는 곳에서 깔끔하게 import
+import { SearchBar, VideoCard } from '@/components';
+
+// ❌ 나쁜 예: 개별 경로로 분산 import
+import SearchBar from '@/components/SearchBar';
+import VideoCard from '@/components/VideoCard';
+import RecipeModal from '@/components/RecipeModal';
+```
+
+**적용 대상 폴더:**
+
+| 폴더 | 예시 |
+|------|------|
+| `components/` | UI 컴포넌트 모음 |
+| `queries/` | TanStack Query 훅 모음 |
+| `services/` | API 서비스 함수 모음 |
+| `types/` | 타입 정의 모음 |
+| `lib/` | 유틸리티 함수 모음 |
+
+**규칙:**
+- 폴더 내 export가 2개 이상이면 `index.ts` 생성
+- 새 파일 추가 시 해당 폴더의 `index.ts`에도 즉시 추가
+- `index.ts` 내부에서는 로직 작성 금지 — re-export만 허용
+
+---
+
+## services / queries 폴더 구조 규칙
+
+### services 구조
+
+**모노레포 환경** (`@workspace/services`가 있는 경우):
+
+```
+packages/services/          ← HTTP 클라이언트 베이스 (axios wrapper)
+  core/base.ts              ← BaseServices 클래스
+  core/interceptors.ts      ← 공통 인터셉터
+  index.ts                  ← Services 클래스 export
+
+apps/{app}/src/services/api/  ← 도메인별 서비스 (BaseServices 상속)
+  search.ts
+  recipe.ts
+  coupang.ts
+  index.ts                  ← re-export 배럴
+```
+
+도메인 서비스는 반드시 `@workspace/services`를 상속받아 작성한다:
+
+```typescript
+// ✅ services/api/search.ts
+import Services from '@workspace/services';
+
+class SearchServices extends Services {
+  constructor() {
+    super({ baseURL: '/api/search' });
+  }
+
+  getSearchVideos(query: string, pageToken?: string) {
+    return this.get<SearchResult>('', { q: query, pageToken });
+  }
+}
+
+export default new SearchServices(); // 싱글턴으로 export
+```
+
+**비모노레포 환경** (`@workspace/services`가 없는 경우):
+
+```
+src/services/
+  core/base.ts              ← BaseServices 클래스 (직접 정의)
+  core/interceptors.ts
+  api/
+    search.ts
+    recipe.ts
+    index.ts                ← re-export 배럴
+  index.ts                  ← 전체 re-export
+```
+
+---
+
+### queries 구조
+
+TanStack Query 훅은 도메인별 폴더로 분리한다. 각 폴더는 훅과 쿼리 키를 함께 관리한다:
+
+```
+src/queries/
+  {domain}/
+    index.ts        ← useXxxQuery, useXxxMutation 훅
+    queryKeys.ts    ← 쿼리 키 팩토리
+  index.ts          ← 전체 re-export 배럴 (선택)
+```
+
+**queryKeys.ts 패턴:**
+
+```typescript
+// queries/search/queryKeys.ts
+export const searchKeys = {
+  all: ['search'] as const,
+  list: (query: string) => [...searchKeys.all, 'list', query] as const,
+};
+```
+
+**index.ts 패턴:**
+
+```typescript
+// queries/search/index.ts
+'use client';
+
+import { useInfiniteQuery } from '@tanstack/react-query';
+import searchServices from '@/services/api/search';
+import { searchKeys } from './queryKeys';
+
+export function useInfiniteSearchQuery(query: string) {
+  return useInfiniteQuery({ ... });
+}
+```
+
+**규칙 요약:**
+
+| 규칙 | 내용 |
+|------|------|
+| 도메인 분리 | 1도메인 = 1폴더 (`search/`, `recipe/`, `coupang/`) |
+| 파일 분리 | 훅(`index.ts`) + 쿼리 키(`queryKeys.ts`) 항상 분리 |
+| 서비스 연결 | 훅 내부에서 `services/api/{domain}` 직접 호출 |
+| Client 선언 | 훅 파일 최상단에 `'use client'` 필수 |
+
+---
+
 ## enum 타입 호환성
 
 ### 다중 모듈 enum 충돌

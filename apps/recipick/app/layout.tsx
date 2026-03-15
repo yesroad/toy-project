@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import '@workspace/ui/globals.css';
+import './globals.css';
 import QueryProvider from '@/provider/QueryProvider';
 
 export const metadata: Metadata = {
