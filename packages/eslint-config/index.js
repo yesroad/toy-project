@@ -1,32 +1,24 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-import tailwindcss from "eslint-plugin-tailwindcss";
+import tsParser from "@typescript-eslint/parser";
 import eslintPluginPrettier from "eslint-plugin-prettier";
 import unusedImports from "eslint-plugin-unused-imports";
 import prettier from "eslint-config-prettier";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
 export default [
-  ...compat.extends("next", "next/core-web-vitals", "next/typescript"),
+  {
+    ignores: [".next/**", "node_modules/**", "dist/**"],
+  },
 
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
+      parser: tsParser,
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: "module",
+        ecmaFeatures: { jsx: true },
       },
     },
     plugins: {
-      tailwindcss,
       prettier: eslintPluginPrettier,
       "unused-imports": unusedImports,
     },
@@ -43,7 +35,6 @@ export default [
           bracketSameLine: false,
         },
       ],
-      "tailwindcss/classnames-order": "warn",
       "unused-imports/no-unused-imports": "warn",
     },
   },

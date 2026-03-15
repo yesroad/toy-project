@@ -4,7 +4,7 @@ description: PR 리뷰 코멘트 분석 및 대응. "리뷰 반영", "코멘트 
 user-invocable: true
 allowed-tools: Bash, Read, Edit, Grep, Glob
 metadata:
-  version: "1.0.0"
+  version: '1.0.0'
   category: development
   priority: high
 ---
@@ -99,11 +99,7 @@ gh api repos/{owner}/{repo}/pulls/{PR번호}/comments
 
 ```typescript
 // 같은 파일 수정은 한 번에 처리
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "변경 대상 파일 분석"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '변경 대상 파일 분석'));
 ```
 
 **구현 순서:**

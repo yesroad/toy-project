@@ -46,9 +46,9 @@ Edit({ ... })  // 읽지 않고 수정
 
 ```typescript
 // ✅ 필수: 병렬 읽기 (단일 메시지)
-Read({ file_path: "file1.ts" });
-Read({ file_path: "file2.ts" });
-Read({ file_path: "file3.ts" });
+Read({ file_path: 'file1.ts' });
+Read({ file_path: 'file2.ts' });
+Read({ file_path: 'file3.ts' });
 ```
 
 ---
@@ -85,7 +85,7 @@ function getOrders(params: any): any {
 const { data } = useItemListQuery(params);
 
 const mutation = useUpdateMutation({
-  onSuccess: () => queryClient.invalidateQueries(["items"]),
+  onSuccess: () => queryClient.invalidateQueries(['items']),
 });
 
 // ❌ 금지: useState로 서버 상태 관리
@@ -99,10 +99,10 @@ useEffect(() => fetchItems().then(setItems), []);
 
 ```typescript
 // ✅ 필수 순서
-import { useQuery } from "@tanstack/react-query"; // 1. 외부
-import { Button } from "@/components"; // 2. 내부 패키지
-import { useOrder } from "@/order/hooks"; // 3. @/ alias
-import { Table } from "./components"; // 4. 상대 경로
+import { useQuery } from '@tanstack/react-query'; // 1. 외부
+import { Button } from '@/components'; // 2. 내부 패키지
+import { useOrder } from '@/order/hooks'; // 3. @/ alias
+import { Table } from './components'; // 4. 상대 경로
 ```
 
 ---

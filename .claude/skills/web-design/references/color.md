@@ -103,18 +103,18 @@
 ```ts
 // tailwind.config.ts
 export default {
-  darkMode: "class", // HTML에 .dark 클래스 토글 방식
+  darkMode: 'class', // HTML에 .dark 클래스 토글 방식
   theme: {
     extend: {
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        card: "hsl(var(--card))",
-        border: "hsl(var(--border))",
-        muted: "hsl(var(--muted))",
-        "muted-foreground": "hsl(var(--muted-foreground))",
-        primary: "hsl(var(--primary))",
-        "primary-foreground": "hsl(var(--primary-foreground))",
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: 'hsl(var(--card))',
+        border: 'hsl(var(--border))',
+        muted: 'hsl(var(--muted))',
+        'muted-foreground': 'hsl(var(--muted-foreground))',
+        primary: 'hsl(var(--primary))',
+        'primary-foreground': 'hsl(var(--primary-foreground))',
       },
     },
   },
@@ -148,20 +148,20 @@ export default {
 
 ```tsx
 // 다크모드 토글 버튼
-"use client";
-import { useEffect, useState } from "react";
+'use client';
+import { useEffect, useState } from 'react';
 
 export function DarkModeToggle() {
   const [dark, setDark] = useState(false);
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
   return (
     <button
       onClick={() => setDark(!dark)}
       className="p-2 rounded-full transition-colors hover:bg-muted"
     >
-      {dark ? "☀️" : "🌙"}
+      {dark ? '☀️' : '🌙'}
     </button>
   );
 }
@@ -175,8 +175,8 @@ npm install next-themes
 
 ```tsx
 // app/providers.tsx
-"use client";
-import { ThemeProvider } from "next-themes";
+'use client';
+import { ThemeProvider } from 'next-themes';
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -186,7 +186,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 
 // app/layout.tsx
-import { Providers } from "./providers";
+import { Providers } from './providers';
 export default function RootLayout({ children }) {
   return (
     <html lang="ko" suppressHydrationWarning>
@@ -200,16 +200,16 @@ export default function RootLayout({ children }) {
 
 ```tsx
 // 다크모드 토글 컴포넌트
-"use client";
-import { useTheme } from "next-themes";
+'use client';
+import { useTheme } from 'next-themes';
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       className="p-2 rounded-full hover:bg-muted transition-colors"
     >
-      {theme === "dark" ? "☀️" : "🌙"}
+      {theme === 'dark' ? '☀️' : '🌙'}
     </button>
   );
 }

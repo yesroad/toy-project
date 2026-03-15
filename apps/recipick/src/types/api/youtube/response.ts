@@ -45,20 +45,6 @@ export interface YouTubeSearchResponse {
   items: YouTubeSearchItem[];
 }
 
-// 앱 내부에서 사용하는 정제된 영상 타입
-export interface VideoItem {
-  videoId: string;
-  title: string;
-  channelName: string;
-  thumbnail: string;
-  publishedAt: string;
-}
-
-export interface SearchResult {
-  videos: VideoItem[];
-  nextPageToken?: string;
-}
-
 // YouTube Captions API
 export interface CaptionTrack {
   kind: string;

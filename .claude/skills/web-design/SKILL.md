@@ -118,7 +118,7 @@ Tailwind v4에서는 `@container` 쿼리가 기본 내장됩니다. 컴포넌트
 
 ```css
 /* app/globals.css */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* 다크모드 variant — next-themes의 .dark 클래스 방식 */
 @custom-variant dark (&:where(.dark, .dark *));

@@ -114,10 +114,7 @@ useEffect(() => {
 }, [items]);
 
 // ✅ 대안: useMemo로 파생 계산
-const filteredItems = useMemo(
-  () => items.filter((item) => item.active),
-  [items],
-);
+const filteredItems = useMemo(() => items.filter((item) => item.active), [items]);
 ```
 
 ---
@@ -149,9 +146,9 @@ src/
 ```typescript
 // queries/user/queryKeys.ts
 export const userKeys = {
-  all: ["user"] as const,
-  lists: () => [...userKeys.all, "list"] as const,
-  detail: (id: string) => [...userKeys.all, "detail", id] as const,
+  all: ['user'] as const,
+  lists: () => [...userKeys.all, 'list'] as const,
+  detail: (id: string) => [...userKeys.all, 'detail', id] as const,
 };
 ```
 
@@ -169,10 +166,10 @@ yarn workspace @apps/fit-track add jotai
 
 ```typescript
 // src/atoms/uiAtoms.ts
-import { atom } from "jotai";
+import { atom } from 'jotai';
 
 export const sidebarOpenAtom = atom(false);
-export const selectedTabAtom = atom<"all" | "active">("all");
+export const selectedTabAtom = atom<'all' | 'active'>('all');
 ```
 
 ### 금지 사항

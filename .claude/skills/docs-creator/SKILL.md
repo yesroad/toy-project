@@ -4,7 +4,7 @@ description: AI 코딩 도구 문서 작성. CLAUDE.md, AGENTS.md, SKILL.md, COM
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Write, Edit
 metadata:
-  version: "1.1.0"
+  version: '1.1.0'
 ---
 
 # Docs Creator Skill
@@ -165,7 +165,7 @@ description: 트리거 키워드를 포함한 한 줄 설명. "X", "Y" 입력 �
 user-invocable: true
 allowed-tools: Read, Edit, Bash
 metadata:
-  version: "1.0.0"
+  version: '1.0.0'
 ---
 
 # Skill Name

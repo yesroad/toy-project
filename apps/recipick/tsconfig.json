@@ -10,6 +10,11 @@
     "jsx": "preserve",
     "plugins": [{ "name": "next" }]
   },
-  "include": [".", ".next/types/**/*.ts"],
+  "include": [
+    ".",
+    ".next/types/**/*.ts",
+    "../../packages/services/core",
+    "src/types/services.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -184,11 +184,10 @@ VR 웹 경험               AR 제품 미리보기
 
 ```tsx
 // 버튼 hover/active 피드백
-className =
-  "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95";
+className = 'transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95';
 
 // 폼 에러 흔들림 (tailwind.config에 animate-shake 커스텀 정의 필요)
-className = "animate-shake border-red-500";
+className = 'animate-shake border-red-500';
 // tailwind.config.ts
 // keyframes: { shake: { '0%,100%': {transform:'translateX(0)'}, '25%': {transform:'translateX(-4px)'}, '75%': {transform:'translateX(4px)'} } }
 // animation: { shake: 'shake 0.3s ease-in-out' }
@@ -236,7 +235,7 @@ const [liked, setLiked] = useState(false)
 
 ```tsx
 // 패럴랙스 스크롤 (Framer Motion)
-import { useScroll, useTransform, motion } from "framer-motion";
+import { useScroll, useTransform, motion } from 'framer-motion';
 function ParallaxSection() {
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, -150]);
@@ -248,14 +247,14 @@ function ParallaxSection() {
 }
 
 // 다이나믹 커서 (포트폴리오·에이전시 전용)
-("use client");
-import { useEffect, useState } from "react";
+('use client');
+import { useEffect, useState } from 'react';
 function DynamicCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   useEffect(() => {
     const move = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
+    window.addEventListener('mousemove', move);
+    return () => window.removeEventListener('mousemove', move);
   }, []);
   return (
     <div
@@ -263,17 +262,17 @@ function DynamicCursor() {
       style={{
         left: pos.x - 8,
         top: pos.y - 8,
-        transition: "left 0.05s, top 0.05s",
+        transition: 'left 0.05s, top 0.05s',
       }}
     />
   );
 }
 
 // Bold Kinetic Typography (스크롤 연동 텍스트)
-import { useScroll, useTransform, motion } from "framer-motion";
+import { useScroll, useTransform, motion } from 'framer-motion';
 function KineticHeadline() {
   const { scrollYProgress } = useScroll();
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
+  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-30%']);
   return (
     <div className="overflow-hidden">
       <motion.h1

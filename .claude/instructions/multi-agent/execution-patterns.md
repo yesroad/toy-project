@@ -26,29 +26,29 @@
 
 ```typescript
 // 팀 생성
-TeamCreate({ team_name: "commit-analysis", description: "커밋 분석 및 계획" });
+TeamCreate({ team_name: 'commit-analysis', description: '커밋 분석 및 계획' });
 
 // 팀원 spawn (병렬) - 모두 general-purpose + 역할 프롬프트
 Task(
-  (subagent_type = "general-purpose"),
-  (team_name = "commit-analysis"),
-  (name = "lint-analyzer"),
-  (model = "sonnet"),
-  (prompt = "린트/타입 에러 분석"),
+  (subagent_type = 'general-purpose'),
+  (team_name = 'commit-analysis'),
+  (name = 'lint-analyzer'),
+  (model = 'sonnet'),
+  (prompt = '린트/타입 에러 분석'),
 );
 Task(
-  (subagent_type = "general-purpose"),
-  (team_name = "commit-analysis"),
-  (name = "commit-planner"),
-  (model = "opus"),
-  (prompt = "커밋 분리 계획 수립"),
+  (subagent_type = 'general-purpose'),
+  (team_name = 'commit-analysis'),
+  (name = 'commit-planner'),
+  (model = 'opus'),
+  (prompt = '커밋 분리 계획 수립'),
 );
 Task(
-  (subagent_type = "general-purpose"),
-  (team_name = "commit-analysis"),
-  (name = "risk-checker"),
-  (model = "sonnet"),
-  (prompt = "시크릿/위험 파일 검출"),
+  (subagent_type = 'general-purpose'),
+  (team_name = 'commit-analysis'),
+  (name = 'risk-checker'),
+  (model = 'sonnet'),
+  (prompt = '시크릿/위험 파일 검출'),
 );
 
 // 수명주기: 완료 → shutdown → TeamDelete
@@ -72,28 +72,16 @@ Task(
 
 ```typescript
 // 단순 구조 탐색: haiku
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "src/ 폴더 구조 파악"),
-);
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "src/queries 파일 목록"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = 'src/ 폴더 구조 파악'));
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = 'src/queries 파일 목록'));
 
 // 정책/로직 분석: sonnet
 Task(
-  (subagent_type = "explore"),
-  (model = "sonnet"),
-  (prompt = "필터 조건 분석 - disabled, 기본값"),
+  (subagent_type = 'explore'),
+  (model = 'sonnet'),
+  (prompt = '필터 조건 분석 - disabled, 기본값'),
 );
-Task(
-  (subagent_type = "explore"),
-  (model = "sonnet"),
-  (prompt = "날짜 범위 계산 로직 분석"),
-);
+Task((subagent_type = 'explore'), (model = 'sonnet'), (prompt = '날짜 범위 계산 로직 분석'));
 ```
 
 ---
@@ -105,26 +93,22 @@ Task(
 ```typescript
 // Fan-Out: 도메인별 분석 (sonnet - 정책 이해 필요)
 Task(
-  (subagent_type = "explore"),
-  (model = "sonnet"),
-  (prompt = "{도메인A} 분석 → .claude/temp/domain-a.md"),
+  (subagent_type = 'explore'),
+  (model = 'sonnet'),
+  (prompt = '{도메인A} 분석 → .claude/temp/domain-a.md'),
 );
 Task(
-  (subagent_type = "explore"),
-  (model = "sonnet"),
-  (prompt = "{도메인B} 분석 → .claude/temp/domain-b.md"),
+  (subagent_type = 'explore'),
+  (model = 'sonnet'),
+  (prompt = '{도메인B} 분석 → .claude/temp/domain-b.md'),
 );
 
 // Fan-In: 결과 수집
-Read(".claude/temp/domain-a.md");
-Read(".claude/temp/domain-b.md");
+Read('.claude/temp/domain-a.md');
+Read('.claude/temp/domain-b.md');
 
 // 통합 분석 (opus - 복잡한 관계 파악)
-Task(
-  (subagent_type = "Plan"),
-  (model = "opus"),
-  (prompt = "도메인 간 관계 분석"),
-);
+Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '도메인 간 관계 분석'));
 ```
 
 ---
@@ -135,39 +119,19 @@ Task(
 
 ```typescript
 // 1단계: 구조 탐색 (haiku)
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "파일 구조 파악"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '파일 구조 파악'));
 
 // 2단계: 정책 분석 (sonnet/opus)
-Task(
-  (subagent_type = "explore"),
-  (model = "sonnet"),
-  (prompt = "비즈니스 로직 분석"),
-);
+Task((subagent_type = 'explore'), (model = 'sonnet'), (prompt = '비즈니스 로직 분석'));
 
 // 3단계: 계획 수립 (opus)
-Task(
-  (subagent_type = "Plan"),
-  (model = "opus"),
-  (prompt = "분석 결과 기반 구현 계획"),
-);
+Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '분석 결과 기반 구현 계획'));
 
 // 4단계: 구현 (sonnet)
-Task(
-  (subagent_type = "implementation-executor"),
-  (model = "sonnet"),
-  (prompt = "계획대로 구현"),
-);
+Task((subagent_type = 'implementation-executor'), (model = 'sonnet'), (prompt = '계획대로 구현'));
 
 // 5단계: 검증 (sonnet)
-Task(
-  (subagent_type = "code-reviewer"),
-  (model = "sonnet"),
-  (prompt = "정책 준수 코드 리뷰"),
-);
+Task((subagent_type = 'code-reviewer'), (model = 'sonnet'), (prompt = '정책 준수 코드 리뷰'));
 ```
 
 ---
@@ -179,16 +143,16 @@ Task(
 ```typescript
 // 린트 수정: haiku (단순 수정)
 Task(
-  (subagent_type = "lint-fixer"),
-  (model = "haiku"),
-  (prompt = "파일 처리: file1.ts, file2.ts, file3.ts"),
+  (subagent_type = 'lint-fixer'),
+  (model = 'haiku'),
+  (prompt = '파일 처리: file1.ts, file2.ts, file3.ts'),
 );
 
 // 타입 수정: sonnet (타입 이해 필요)
 Task(
-  (subagent_type = "lint-fixer"),
-  (model = "sonnet"),
-  (prompt = "복잡한 타입 오류 수정: file4.ts, file5.ts"),
+  (subagent_type = 'lint-fixer'),
+  (model = 'sonnet'),
+  (prompt = '복잡한 타입 오류 수정: file4.ts, file5.ts'),
 );
 ```
 
@@ -201,10 +165,10 @@ Task(
 ```typescript
 // 코드 리뷰: sonnet (백그라운드)
 Task(
-  (subagent_type = "code-reviewer"),
-  (model = "sonnet"),
+  (subagent_type = 'code-reviewer'),
+  (model = 'sonnet'),
   (run_in_background = true),
-  (prompt = "전체 변경사항 코드 리뷰"),
+  (prompt = '전체 변경사항 코드 리뷰'),
 );
 ```
 
@@ -217,8 +181,8 @@ Task(
 ```typescript
 // 1단계: 복잡도 판단 (haiku - 빠른 초기 파악)
 Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
+  (subagent_type = 'explore'),
+  (model = 'haiku'),
   (prompt = `
   작업: {작업내용}
   복잡도 판단:
@@ -235,8 +199,8 @@ Task(
 
 // 3단계: 정책 분석 (HIGH일 때 opus)
 Task(
-  (subagent_type = "Plan"),
-  (model = "opus"),
+  (subagent_type = 'Plan'),
+  (model = 'opus'),
   (prompt = `
   정책 분석:
   - 기존 비즈니스 로직
@@ -252,19 +216,15 @@ Task(
 
 ```typescript
 // 병렬 검증
+Task((subagent_type = 'lint-fixer'), (model = 'haiku'), (prompt = '린트 오류 수정'));
 Task(
-  (subagent_type = "lint-fixer"),
-  (model = "haiku"),
-  (prompt = "린트 오류 수정"),
-);
-Task(
-  (subagent_type = "code-reviewer"),
-  (model = "sonnet"),
-  (prompt = "코드 리뷰 - 규칙 준수 확인"),
+  (subagent_type = 'code-reviewer'),
+  (model = 'sonnet'),
+  (prompt = '코드 리뷰 - 규칙 준수 확인'),
 );
 
 // 결과 확인 후 PR 생성
-Bash("gh pr create ...");
+Bash('gh pr create ...');
 ```
 
 ---

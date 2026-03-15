@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { searchVideos } from '@/services/youtube';
+import type { SearchResult } from '@/types/api/routeApi/response';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,8 +10,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: '검색어(q)가 필요합니다' }, { status: 400 });
   }
 
+  const baseUrl = `${new URL(request.url).protocol}//${new URL(request.url).host}`;
+  const params = new URLSearchParams({ action: 'search', q: q.trim() });
+  if (pageToken) params.set('pageToken', pageToken);
+
   try {
-    const result = await searchVideos(q.trim(), pageToken);
+    const res = await fetch(`${baseUrl}/api/youtube?${params}`);
+    if (!res.ok) {
+      return NextResponse.json({ error: 'YouTube 검색에 실패했습니다' }, { status: 503 });
+    }
+    const result: SearchResult = await res.json();
     return NextResponse.json(result);
   } catch {
     return NextResponse.json({ error: 'YouTube 검색에 실패했습니다' }, { status: 503 });

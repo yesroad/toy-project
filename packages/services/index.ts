@@ -1,8 +1,9 @@
-import BaseServices from './core/base';
+import BaseServices, { type ServicesConfig } from './core/base';
 import { setupInterceptors } from './core/interceptors';
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import type { ServicesConfig } from '@/types/services';
+
+export type { ServicesConfig };
 
 class Services extends BaseServices {
   #api: AxiosInstance;

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>레시픽</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #FFF8F3;
+    --surface:   #FFFFFF;
+    --border:    #F0E6DC;
+    --primary:   #F0845C;
+    --primary-h: #DC6A44;
+    --primary-lt: #FEF0EA;
+    --primary-fg:#FFFFFF;
+    --accent:    #A78BFA;
+    --accent2:   #60C7A0;
+    --muted:     #FFF1EA;
+    --muted-fg:  #A08070;
+    --fg:        #2D1A0E;
+    --fg-soft:   #8B6D5E;
+    --tag-bg:    #FDE8DA;
+    --tag-fg:    #C4603A;
+    --shadow-card: 0 2px 8px rgba(240,132,92,.09), 0 1px 2px rgba(240,132,92,.06);
+    --shadow-hover: 0 8px 28px rgba(240,132,92,.18), 0 2px 6px rgba(240,132,92,.1);
+    --shadow-modal: 0 32px 80px rgba(45,26,14,.18), 0 8px 24px rgba(45,26,14,.1);
+    --radius:    16px;
+  }
+
+  body {
+    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+  }
+
+  /* ────────────────────────────
+     헤더: 로고만, 아주 얇게
+  ──────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: -1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-desc {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted-fg);
+    letter-spacing: 0;
+  }
+  .header-beta {
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--primary-lt);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  /* ────────────────────────────
+     검색 + 탭: 배경 없이 페이지에 자연스럽게
+  ──────────────────────────── */
+  .search-section {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 32px 32px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .search-wrap {
+    width: 100%;
+    max-width: 620px;
+    display: flex;
+    gap: 8px;
+  }
+  .search-input {
+    flex: 1;
+    height: 50px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 0 20px;
+    font-size: 15px;
+    background: var(--surface);
+    color: var(--fg);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    box-shadow: 0 2px 8px rgba(240,132,92,.06);
+  }
+  .search-input::placeholder { color: #C4A898; }
+  .search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(240,132,92,.12), 0 2px 8px rgba(240,132,92,.08);
+  }
+  .search-btn {
+    height: 50px;
+    padding: 0 28px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s, transform .1s, box-shadow .15s;
+    box-shadow: 0 4px 12px rgba(240,132,92,.3);
+    white-space: nowrap;
+  }
+  .search-btn:hover {
+    background: var(--primary-h);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(240,132,92,.38);
+  }
+
+  /* 탭: 검색 바 너비에 맞춰 왼쪽 정렬 */
+  .tabs-row {
+    width: 100%;
+    max-width: 620px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 14px 0 0;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .tabs-row::-webkit-scrollbar { display: none; }
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface);
+    color: var(--muted-fg);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 15px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .tab.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(240,132,92,.3);
+  }
+  .tab:hover:not(.active) {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .tab-x {
+    font-size: 10px;
+    opacity: .55;
+    margin-left: 1px;
+    transition: opacity .1s;
+  }
+  .tab:hover .tab-x { opacity: .9; }
+
+  /* ────────────────────────────
+     결과 섹션: 자연스럽게 이어짐
+  ──────────────────────────── */
+  .result-section {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 28px 32px 40px;
+  }
+  .result-meta {
+    font-size: 13px;
+    color: var(--muted-fg);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .result-meta strong { color: var(--fg); font-weight: 700; }
+  .result-divider {
+    width: 1px; height: 12px;
+    background: var(--border);
+    display: inline-block;
+  }
+
+  /* ── 비디오 그리드 ── */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .video-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .18s, box-shadow .18s, border-color .18s;
+    box-shadow: var(--shadow-card);
+  }
+  .video-card:hover {
+    transform: translateY(-4px) scale(1.005);
+    box-shadow: var(--shadow-hover);
+    border-color: #F9C4AD;
+  }
+  .thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    position: relative;
+  }
+  .thumb-1 { background: linear-gradient(135deg, #FFE5D9 0%, #FDCFB8 100%); }
+  .thumb-2 { background: linear-gradient(135deg, #FDE8E8 0%, #FECACA 100%); }
+  .thumb-3 { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); }
+  .thumb-4 { background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%); }
+  .thumb-5 { background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); }
+  .thumb-6 { background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%); }
+
+  .play-btn {
+    position: absolute;
+    bottom: 8px; right: 10px;
+    background: rgba(255,255,255,.8);
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 10px;
+    color: var(--fg-soft);
+    font-weight: 600;
+  }
+
+  .card-body { padding: 13px 15px 16px; }
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--fg);
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: keep-all;
+  }
+  .card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-ch {
+    font-size: 12px;
+    color: var(--muted-fg);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .ch-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; }
+  .card-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: #F3E8FF;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  /* ────────────────────────────
+     모달
+  ──────────────────────────── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(45,26,14,.35);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal {
+    background: var(--surface);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-modal);
+    border: 1.5px solid #FDE8DA;
+    scrollbar-width: none;
+  }
+  .modal::-webkit-scrollbar { display: none; }
+
+  .modal-thumb {
+    width: 100%;
+    aspect-ratio: 16/6;
+    background: linear-gradient(135deg, #FFE5D9 0%, #FECACA 60%, #FDE68A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    border-radius: 22px 22px 0 0;
+    position: relative;
+  }
+  .modal-thumb-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(255,248,243,.95) 100%);
+    border-radius: 22px 22px 0 0;
+  }
+
+  .modal-inner { padding: 0 24px 28px; }
+
+  .modal-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 16px;
+  }
+  .modal-title {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.45;
+    color: var(--fg);
+    word-break: keep-all;
+  }
+  .modal-close {
+    background: var(--muted);
+    border: none;
+    border-radius: 50%;
+    width: 34px; height: 34px;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--fg-soft);
+    transition: background .12s;
+  }
+  .modal-close:hover { background: var(--border); }
+
+  .modal-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-cached { background: #EDE9FE; color: #6D28D9; }
+  .badge-new    { background: var(--primary-lt); color: var(--primary); }
+  .ch-name { font-size: 13px; color: var(--muted-fg); }
+
+  .modal-divider { height: 1px; background: var(--border); margin: 18px 0 0; }
+
+  .modal-block { padding-top: 18px; }
+  .modal-block-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--fg);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .block-icon {
+    width: 24px; height: 24px;
+    border-radius: 8px;
+    background: var(--primary-lt);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+
+  .ingredient-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 15px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .15s;
+    user-select: none;
+  }
+  .chip:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    transform: scale(1.03);
+    box-shadow: 0 3px 10px rgba(240,132,92,.3);
+  }
+  .chip-name { font-weight: 700; }
+  .chip-amount { color: var(--muted-fg); font-size: 12px; }
+  .chip:hover .chip-amount { color: rgba(255,255,255,.78); }
+  .chip-cart { font-size: 11px; opacity: 0; transition: opacity .12s; }
+  .chip:hover .chip-cart { opacity: 1; }
+
+  .steps-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 13px 16px;
+    background: var(--muted);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(240,132,92,.4);
+  }
+  .step-text { font-size: 14px; line-height: 1.6; padding-top: 3px; word-break: keep-all; }
+
+  .modal-cta {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+  .btn-outline {
+    flex: 0 0 auto;
+    height: 50px;
+    padding: 0 20px;
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: 14px;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-outline:hover { background: var(--primary-lt); }
+  .btn-primary {
+    flex: 1;
+    height: 50px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px; font-weight: 800;
+    cursor: pointer;
+    transition: background .15s, transform .1s, box-shadow .15s;
+    box-shadow: 0 4px 16px rgba(240,132,92,.35);
+  }
+  .btn-primary:hover {
+    background: var(--primary-h);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(240,132,92,.45);
+  }
+</style>
+</head>
+<body>
+
+<!-- ── 헤더 ── -->
+<header>
+  <div class="logo">
+    레시픽
+    <span class="logo-desc">유튜브 레시피 자동 추출</span>
+  </div>
+  <span class="header-beta">BETA</span>
+</header>
+
+<!-- ── 검색 + 탭 (배경 없이 페이지로 자연스럽게) ── -->
+<div class="search-section">
+  <div class="search-wrap">
+    <input class="search-input" type="text"
+      placeholder="요리명 또는 재료를 입력하세요  (예: 된장찌개, 파스타)"
+      value="된장찌개">
+    <button class="search-btn">검색</button>
+  </div>
+  <div class="tabs-row">
+    <button class="tab active">된장찌개 <span class="tab-x">✕</span></button>
+    <button class="tab">파스타 <span class="tab-x">✕</span></button>
+    <button class="tab">김치찌개 <span class="tab-x">✕</span></button>
+    <button class="tab">닭갈비 <span class="tab-x">✕</span></button>
+    <button class="tab">비빔밥 <span class="tab-x">✕</span></button>
+  </div>
+</div>
+
+<!-- ── 결과 리스트 (자연스럽게 이어짐) ── -->
+<div class="result-section">
+  <div class="result-meta">
+    <strong>된장찌개</strong>
+    <span class="result-divider"></span>
+    영상 12개
+  </div>
+
+  <div class="video-grid">
+    <div class="video-card">
+      <div class="thumb thumb-1">🍲<span class="play-btn">▶ 레시피 추출</span></div>
+      <div class="card-body">
+        <div class="card-title">백종원 된장찌개 황금 레시피 | 집에서도 식당맛 그대로</div>
+        <div class="card-bottom">
+          <div class="card-ch"><span class="ch-dot"></span>백종원의 요리비책</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="thumb thumb-2">🥘<span class="play-btn">▶ 레시피 추출</span></div>
+      <div class="card-body">
+        <div class="card-title">초간단 된장찌개 만들기 | 10분 완성 자취요리</div>
+        <div class="card-bottom">
+          <div class="card-ch"><span class="ch-dot"></span>자취생 쿡방</div>
+          <span class="card-tag">인기</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="thumb thumb-3">🍜<span class="play-btn">▶ 레시피 추출</span></div>
+      <div class="card-body">
+        <div class="card-title">깊은 맛 된장찌개 | 육수부터 직접 만드는 정통 레시피</div>
+        <div class="card-bottom">
+          <div class="card-ch"><span class="ch-dot"></span>한식 마스터</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="thumb thumb-4">🥘<span class="play-btn">▶ 레시피 추출</span></div>
+      <div class="card-body">
+        <div class="card-title">두부 된장찌개 비법 공개! 아침에 딱 좋은 든든한 한끼</div>
+        <div class="card-bottom">
+          <div class="card-ch"><span class="ch-dot"></span>쿡킹 스튜디오</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="thumb thumb-5">🌿<span class="play-btn">▶ 레시피 추출</span></div>
+      <div class="card-body">
+        <div class="card-title">채식 된장찌개 만들기 | 멸치 육수 없이도 깊은 맛</div>
+        <div class="card-bottom">
+          <div class="card-ch"><span class="ch-dot"></span>비건 레시피</div>
+          <span class="card-tag">채식</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="thumb thumb-6">🍵<span class="play-btn">▶ 레시피 추출</span></div>
+      <div class="card-body">
+        <div class="card-title">할머니표 된장찌개 | 손맛 그대로 재현하는 비법 공개</div>
+        <div class="card-bottom">
+          <div class="card-ch"><span class="ch-dot"></span>정통 한식 채널</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 모달 ── -->
+<div class="overlay">
+  <div class="modal">
+    <div class="modal-thumb">
+      🍲
+      <div class="modal-thumb-overlay"></div>
+    </div>
+
+    <div class="modal-inner">
+      <div class="modal-title-row">
+        <div class="modal-title">백종원 된장찌개 황금 레시피 | 집에서도 식당맛 그대로</div>
+        <button class="modal-close">✕</button>
+      </div>
+      <div class="modal-meta">
+        <span class="badge badge-cached">✨ 캐시됨</span>
+        <span class="ch-name">백종원의 요리비책</span>
+      </div>
+
+      <div class="modal-divider"></div>
+
+      <div class="modal-block">
+        <div class="modal-block-title">
+          <span class="block-icon">🥬</span>
+          재료 (4인분)
+        </div>
+        <div class="ingredient-chips">
+          <span class="chip"><span class="chip-name">된장</span><span class="chip-amount">3큰술</span><span class="chip-cart">🛒</span></span>
+          <span class="chip"><span class="chip-name">두부</span><span class="chip-amount">1/2모</span><span class="chip-cart">🛒</span></span>
+          <span class="chip"><span class="chip-name">애호박</span><span class="chip-amount">1/2개</span><span class="chip-cart">🛒</span></span>
+          <span class="chip"><span class="chip-name">감자</span><span class="chip-amount">1개</span><span class="chip-cart">🛒</span></span>
+          <span class="chip"><span class="chip-name">양파</span><span class="chip-amount">1/4개</span><span class="chip-cart">🛒</span></span>
+          <span class="chip"><span class="chip-name">대파</span><span class="chip-amount">1/3대</span><span class="chip-cart">🛒</span></span>
+          <span class="chip"><span class="chip-name">고추</span><span class="chip-amount">1개</span><span class="chip-cart">🛒</span></span>
+          <span class="chip"><span class="chip-name">다시마 육수</span><span class="chip-amount">600ml</span><span class="chip-cart">🛒</span></span>
+        </div>
+      </div>
+
+      <div class="modal-block">
+        <div class="modal-block-title">
+          <span class="block-icon">👨‍🍳</span>
+          요리 순서
+        </div>
+        <ul class="steps-list">
+          <li class="step"><span class="step-num">1</span><span class="step-text">다시마 육수 600ml를 냄비에 넣고 중불로 끓입니다.</span></li>
+          <li class="step"><span class="step-num">2</span><span class="step-text">감자와 애호박을 먹기 좋은 크기로 깍뚝썰기 합니다.</span></li>
+          <li class="step"><span class="step-num">3</span><span class="step-text">육수가 끓으면 된장 3큰술을 체에 걸러 풀어 넣습니다.</span></li>
+          <li class="step"><span class="step-num">4</span><span class="step-text">감자, 양파, 고추를 넣고 5분간 끓입니다.</span></li>
+          <li class="step"><span class="step-num">5</span><span class="step-text">두부, 애호박, 대파를 넣고 2~3분 더 끓여 완성합니다.</span></li>
+        </ul>
+      </div>
+
+      <div class="modal-cta">
+        <button class="btn-outline">닫기</button>
+        <button class="btn-primary">🛒 재료 전체 구매하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -50,12 +50,8 @@
 
 ```tsx
 <section className="min-h-screen flex flex-col justify-center items-center text-center px-4">
-  <h1 className="text-[clamp(3rem,8vw,7rem)] font-black break-keep leading-tight">
-    핵심 헤드라인
-  </h1>
-  <p className="text-lg text-muted-foreground mt-4 max-w-xl break-keep">
-    서브 메시지 (간결하게)
-  </p>
+  <h1 className="text-[clamp(3rem,8vw,7rem)] font-black break-keep leading-tight">핵심 헤드라인</h1>
+  <p className="text-lg text-muted-foreground mt-4 max-w-xl break-keep">서브 메시지 (간결하게)</p>
   <div className="mt-8 flex gap-4">
     <Button size="lg">지금 시작하기</Button>
     <Button size="lg" variant="outline">
@@ -85,9 +81,7 @@
   </div>
   {/* 오버레이 텍스트 */}
   <div className="relative z-10 mt-40 ml-12 max-w-sm">
-    <p className="text-sm uppercase tracking-widest text-muted-foreground">
-      브랜드 레이블
-    </p>
+    <p className="text-sm uppercase tracking-widest text-muted-foreground">브랜드 레이블</p>
     <h2 className="text-5xl font-bold mt-2 leading-tight break-keep">
       당신의
       <br />

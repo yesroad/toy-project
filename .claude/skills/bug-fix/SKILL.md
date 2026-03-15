@@ -4,7 +4,7 @@ description: 버그 분석 및 수정. "버그", "오류", "에러", "동작 안
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash, Edit
 metadata:
-  version: "1.0.0"
+  version: '1.0.0'
 ---
 
 # Bug Fix Skill
@@ -87,8 +87,8 @@ $ARGUMENTS 있음 → 다음 단계 진행
 ```typescript
 // 에러 관련 파일 탐색
 Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
+  (subagent_type = 'explore'),
+  (model = 'haiku'),
   (prompt = `
   에러 증상: {에러 메시지}
   관련 키워드로 코드베이스 검색
@@ -195,11 +195,11 @@ git diff HEAD~5 -- {관련파일}
 Bash("{패키지매니저} test -- --testPathPattern='{관련테스트}'");
 
 // 수정 적용
-Edit("{파일}", "{old_string}", "{new_string}");
+Edit('{파일}', '{old_string}', '{new_string}');
 
 // 린트/타입 검증
-Bash("{패키지매니저} lint");
-Bash("{패키지매니저} build");
+Bash('{패키지매니저} lint');
+Bash('{패키지매니저} build');
 ```
 
 ---
@@ -237,20 +237,20 @@ Bash("{패키지매니저} build");
 복잡한 버그 (HIGH) 분석 시 팀 기반 병렬 협업:
 
 ```typescript
-TeamCreate({ team_name: "bugfix-team", description: "버그 분석 및 수정" });
+TeamCreate({ team_name: 'bugfix-team', description: '버그 분석 및 수정' });
 Task(
-  (subagent_type = "explore"),
-  (team_name = "bugfix-team"),
-  (name = "root-cause"),
-  (model = "sonnet"),
-  (prompt = "근본 원인 분석"),
+  (subagent_type = 'explore'),
+  (team_name = 'bugfix-team'),
+  (name = 'root-cause'),
+  (model = 'sonnet'),
+  (prompt = '근본 원인 분석'),
 );
 Task(
-  (subagent_type = "explore"),
-  (team_name = "bugfix-team"),
-  (name = "impact-check"),
-  (model = "haiku"),
-  (prompt = "영향 범위 파악"),
+  (subagent_type = 'explore'),
+  (team_name = 'bugfix-team'),
+  (name = 'impact-check'),
+  (model = 'haiku'),
+  (prompt = '영향 범위 파악'),
 );
 // 완료 후 → shutdown_request → TeamDelete
 ```
@@ -260,16 +260,8 @@ Task(
 독립적인 버그 수정은 병렬로:
 
 ```typescript
-Task(
-  (subagent_type = "lint-fixer"),
-  (model = "haiku"),
-  (prompt = "파일1 린트 에러 수정"),
-);
-Task(
-  (subagent_type = "lint-fixer"),
-  (model = "haiku"),
-  (prompt = "파일2 린트 에러 수정"),
-);
+Task((subagent_type = 'lint-fixer'), (model = 'haiku'), (prompt = '파일1 린트 에러 수정'));
+Task((subagent_type = 'lint-fixer'), (model = 'haiku'), (prompt = '파일2 린트 에러 수정'));
 ```
 
 ### 심각도별 병렬 전략
@@ -299,8 +291,8 @@ Task(
 
 ```typescript
 // 기존 동작 캡처 테스트 작성
-describe("버그 수정 후 정책 유지", () => {
-  it("기존 정책이 그대로 동작해야 함", () => {
+describe('버그 수정 후 정책 유지', () => {
+  it('기존 정책이 그대로 동작해야 함', () => {
     // 수정 전 동작 테스트
   });
 });

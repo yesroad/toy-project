@@ -1,7 +1,7 @@
-import { HookFormProvider } from "@/provider";
-import { LoginForm, LogoBlock } from "./components";
-import { LoginFieldValues } from "./types";
-import { Button } from "@workspace/ui/components/button";
+import { HookFormProvider } from '@/provider';
+import { LoginForm, LogoBlock } from './components';
+import { LoginFieldValues } from './types';
+import { Button } from '@workspace/ui/components/button';
 
 import {
   Card,
@@ -9,11 +9,11 @@ import {
   CardContent,
   CardDescription,
   CardFooter,
-} from "@workspace/ui/components/card";
+} from '@workspace/ui/components/card';
 
 const defaultValues: LoginFieldValues = {
-  email: "",
-  password: "",
+  email: '',
+  password: '',
 };
 
 const Login = () => {

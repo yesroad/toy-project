@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipick — C. 소프트 파스텔</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #FFF8F3;
+    --surface:   #FFFFFF;
+    --border:    #F0E6DC;
+    --primary:   #F0845C;
+    --primary-h: #DC6A44;
+    --primary-fg:#FFFFFF;
+    --accent:    #A78BFA;
+    --accent2:   #60C7A0;
+    --muted:     #FFF1EA;
+    --muted-fg:  #A08070;
+    --fg:        #2D1A0E;
+    --fg-soft:   #8B6D5E;
+    --tag-bg:    #FDE8DA;
+    --tag-fg:    #C4603A;
+    --shadow:    0 2px 8px rgba(240,132,92,.1), 0 1px 3px rgba(240,132,92,.08);
+    --radius:    16px;
+  }
+
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif; background: var(--bg); color: var(--fg); min-height: 100vh; }
+
+  /* ── 헤더 ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 68px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo { font-size: 21px; font-weight: 800; color: var(--primary); letter-spacing: -1px; white-space: nowrap; }
+  .logo-dot { color: var(--accent); font-size: 28px; line-height: 0; vertical-align: -3px; }
+
+  .search-wrap { flex: 1; max-width: 560px; display: flex; gap: 8px; }
+  .search-input {
+    flex: 1; height: 42px; border: 2px solid var(--border); border-radius: 999px;
+    padding: 0 18px; font-size: 14px; background: var(--muted); color: var(--fg);
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(240,132,92,.12); }
+  .search-btn {
+    height: 42px; padding: 0 22px; background: var(--primary); color: #fff;
+    border: none; border-radius: 999px; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .search-btn:hover { background: var(--primary-h); transform: scale(1.02); }
+
+  /* ── 탭 ── */
+  .tabs-wrap { padding: 14px 24px 0; display: flex; gap: 8px; overflow-x: auto; }
+  .tabs-wrap::-webkit-scrollbar { display: none; }
+  .tab {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); color: var(--muted-fg);
+    border: 1.5px solid var(--border); border-radius: 999px; padding: 7px 16px;
+    font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+    transition: all .12s;
+  }
+  .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .tab:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+  .tab-x { font-size: 10px; opacity: .6; margin-left: 2px; }
+
+  /* ── 메인 ── */
+  main { max-width: 1140px; margin: 0 auto; padding: 24px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--muted-fg); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .section-title::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+
+  /* ── 비디오 그리드 ── */
+  .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .video-card {
+    background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s;
+    box-shadow: var(--shadow);
+  }
+  .video-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 12px 32px rgba(240,132,92,.15); border-color: #F9C4AD; }
+  .thumb-placeholder { width: 100%; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .thumb-1 { background: linear-gradient(135deg, #FFE5D9 0%, #FECACA 100%); }
+  .thumb-2 { background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%); }
+  .thumb-3 { background: linear-gradient(135deg, #F0FDF4 0%, #BBF7D0 100%); }
+  .thumb-4 { background: linear-gradient(135deg, #FEF9C3 0%, #FDE68A 100%); }
+  .card-body { padding: 14px 16px 16px; }
+  .card-title { font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--fg); margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-ch { font-size: 12px; color: var(--muted-fg); display: flex; align-items: center; gap: 4px; }
+  .card-ch-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); }
+
+  /* ── 모달 오버레이 ── */
+  .overlay { position: fixed; inset: 0; background: rgba(45,26,14,.3); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+  .modal {
+    background: var(--surface); border-radius: 24px; width: 100%; max-width: 580px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 32px 80px rgba(240,132,92,.2), 0 8px 24px rgba(45,26,14,.12);
+    border: 1.5px solid #FDE8DA;
+  }
+  .modal-header { padding: 28px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .modal-title { font-size: 17px; font-weight: 800; line-height: 1.4; color: var(--fg); }
+  .modal-close { background: var(--muted); border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; font-size: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--muted-fg); transition: background .12s; }
+  .modal-close:hover { background: var(--border); }
+  .modal-meta { padding: 10px 24px 0; display: flex; align-items: center; gap: 8px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .badge-cached { background: #EDE9FE; color: #7C3AED; }
+  .channel-name { font-size: 13px; color: var(--muted-fg); }
+
+  .modal-section { padding: 20px 24px 0; }
+  .modal-section-title { font-size: 14px; font-weight: 800; color: var(--fg); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .modal-section-title .icon { font-size: 16px; }
+
+  .ingredient-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--muted); border: 1.5px solid var(--border); border-radius: 999px;
+    padding: 7px 16px; font-size: 13px; cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { background: var(--primary); border-color: var(--primary); color: #fff; transform: scale(1.03); }
+  .chip-name { font-weight: 700; }
+  .chip-amount { color: var(--muted-fg); font-size: 12px; }
+  .chip:hover .chip-amount { color: rgba(255,255,255,.8); }
+
+  .steps-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .step {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 14px 16px; background: var(--muted); border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff;
+    font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(240,132,92,.35);
+  }
+  .step-text { font-size: 14px; line-height: 1.6; color: var(--fg); padding-top: 3px; }
+
+  .modal-footer { padding: 24px; }
+  .btn-full {
+    width: 100%; height: 52px; background: var(--primary); color: #fff;
+    border: none; border-radius: 16px; font-size: 15px; font-weight: 800; cursor: pointer;
+    transition: background .15s, transform .1s, box-shadow .15s;
+    box-shadow: 0 4px 16px rgba(240,132,92,.35);
+  }
+  .btn-full:hover { background: var(--primary-h); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(240,132,92,.45); }
+
+  /* ── 스타일 라벨 ── */
+  .style-label { position: fixed; top: 16px; right: 16px; background: var(--primary); color: #fff; padding: 6px 16px; border-radius: 999px; font-size: 12px; font-weight: 800; z-index: 999; box-shadow: 0 4px 12px rgba(240,132,92,.4); }
+</style>
+</head>
+<body>
+
+<div class="style-label">C. 소프트 파스텔</div>
+
+<header>
+  <div class="logo">Recipick<span class="logo-dot">·</span></div>
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="요리명 또는 재료 검색 (예: 된장찌개, 파스타)" value="된장찌개">
+    <button class="search-btn">검색 🔍</button>
+  </div>
+</header>
+
+<div class="tabs-wrap">
+  <button class="tab active">된장찌개 <span class="tab-x">✕</span></button>
+  <button class="tab">파스타 <span class="tab-x">✕</span></button>
+  <button class="tab">김치찌개 <span class="tab-x">✕</span></button>
+  <button class="tab">닭갈비 <span class="tab-x">✕</span></button>
+  <button class="tab">비빔밥 <span class="tab-x">✕</span></button>
+</div>
+
+<main>
+  <p class="section-title">된장찌개 검색 결과 12개</p>
+  <div class="video-grid">
+    <div class="video-card">
+      <div class="thumb-placeholder thumb-1">🍲</div>
+      <div class="card-body">
+        <div class="card-title">백종원 된장찌개 황금 레시피 | 집에서도 식당맛 그대로</div>
+        <div class="card-ch"><span class="card-ch-dot"></span>백종원의 요리비책</div>
+      </div>
+    </div>
+    <div class="video-card">
+      <div class="thumb-placeholder thumb-2">🥘</div>
+      <div class="card-body">
+        <div class="card-title">초간단 된장찌개 만들기 | 10분 완성 자취요리</div>
+        <div class="card-ch"><span class="card-ch-dot"></span>자취생 쿡방</div>
+      </div>
+    </div>
+    <div class="video-card">
+      <div class="thumb-placeholder thumb-3">🍜</div>
+      <div class="card-body">
+        <div class="card-title">깊은 맛 된장찌개 | 육수부터 직접 만드는 정통 레시피</div>
+        <div class="card-ch"><span class="card-ch-dot"></span>한식 마스터</div>
+      </div>
+    </div>
+    <div class="video-card">
+      <div class="thumb-placeholder thumb-4">🥗</div>
+      <div class="card-body">
+        <div class="card-title">두부 된장찌개 비법 공개! 아침에 딱 좋은 든든한 한끼</div>
+        <div class="card-ch"><span class="card-ch-dot"></span>쿡킹 스튜디오</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">백종원 된장찌개 황금 레시피 | 집에서도 식당맛 그대로</div>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-meta">
+      <span class="badge badge-cached">✨ 캐시됨</span>
+      <span class="channel-name">백종원의 요리비책</span>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title"><span class="icon">🥬</span> 재료 (4인분)</div>
+      <div class="ingredient-chips">
+        <span class="chip"><span class="chip-name">된장</span><span class="chip-amount">3큰술</span></span>
+        <span class="chip"><span class="chip-name">두부</span><span class="chip-amount">1/2모</span></span>
+        <span class="chip"><span class="chip-name">애호박</span><span class="chip-amount">1/2개</span></span>
+        <span class="chip"><span class="chip-name">감자</span><span class="chip-amount">1개</span></span>
+        <span class="chip"><span class="chip-name">양파</span><span class="chip-amount">1/4개</span></span>
+        <span class="chip"><span class="chip-name">대파</span><span class="chip-amount">1/3대</span></span>
+        <span class="chip"><span class="chip-name">고추</span><span class="chip-amount">1개</span></span>
+        <span class="chip"><span class="chip-name">다시마 육수</span><span class="chip-amount">600ml</span></span>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title"><span class="icon">👨‍🍳</span> 요리 순서</div>
+      <ul class="steps-list">
+        <li class="step"><span class="step-num">1</span><span class="step-text">다시마 육수 600ml를 냄비에 넣고 중불로 끓입니다.</span></li>
+        <li class="step"><span class="step-num">2</span><span class="step-text">감자와 애호박을 먹기 좋은 크기로 깍뚝썰기 합니다.</span></li>
+        <li class="step"><span class="step-num">3</span><span class="step-text">육수가 끓으면 된장 3큰술을 체에 걸러 풀어 넣습니다.</span></li>
+        <li class="step"><span class="step-num">4</span><span class="step-text">감자, 양파, 고추를 넣고 5분간 끓입니다.</span></li>
+        <li class="step"><span class="step-num">5</span><span class="step-text">두부, 애호박, 대파를 넣고 2~3분 더 끓여 완성합니다.</span></li>
+      </ul>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-full">🛒 재료 전체 구매하기</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

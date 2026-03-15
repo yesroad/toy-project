@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@workspace/ui": "*",
@@ -22,6 +22,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@workspace/eslint-config": "*",
+    "eslint": "^9",
     "tailwindcss": "^4",
     "typescript": "^5.9.3"
   }

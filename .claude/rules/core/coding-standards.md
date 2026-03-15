@@ -21,12 +21,12 @@
 
 ```typescript
 // ✅ 좋은 예: 설명적 이름
-const marketSearchQuery = "election";
+const marketSearchQuery = 'election';
 const isUserAuthenticated = true;
 const totalRevenue = 1000;
 
 // ❌ 나쁜 예: 불명확한 이름
-const q = "election";
+const q = 'election';
 const flag = true;
 const x = 1000;
 ```
@@ -51,13 +51,13 @@ function status(s) {}
 // ✅ 항상 spread 연산자 사용
 const updatedOrder = {
   ...order,
-  status: "completed",
+  status: 'completed',
 };
 
 const updatedItems = [...items, newItem];
 
 // ❌ 직접 변형 금지
-order.status = "completed"; // 금지
+order.status = 'completed'; // 금지
 items.push(newItem); // 금지
 
 // ✅ 불변 정렬: toSorted() 사용 (원본 배열 유지)
@@ -85,8 +85,8 @@ async function fetchOrderDetail(orderId: string) {
 
     return response.data;
   } catch (error) {
-    console.error("Order fetch failed:", error);
-    throw new Error("주문 정보를 불러올 수 없습니다");
+    console.error('Order fetch failed:', error);
+    throw new Error('주문 정보를 불러올 수 없습니다');
   }
 }
 
@@ -123,7 +123,7 @@ const stats = await fetchStats();
 // ✅ 좋은 예: 적절한 타입
 interface Order {
   id: string;
-  status: "pending" | "active" | "completed" | "cancelled";
+  status: 'pending' | 'active' | 'completed' | 'cancelled';
   createdAt: Date;
   items: OrderItem[];
 }
@@ -142,7 +142,7 @@ function getOrder(id: any): Promise<any> {
 
 ```typescript
 // ✅ 좋은 예: Optional chaining
-const userName = user?.profile?.name ?? "알 수 없음";
+const userName = user?.profile?.name ?? '알 수 없음';
 
 // ❌ 나쁜 예: 체크 없이 접근
 const userName = user.profile.name; // 런타임 에러 가능
@@ -241,10 +241,10 @@ setTimeout(callback, DEBOUNCE_DELAY_MS);
 ```typescript
 // ❌ 금지: 잘못된 모듈에서 import
 // payment/types.ts에서 PaymentMethodType을 사용하는 코드인데
-import { PaymentMethodType } from "@/shared/constants/order"; // 다른 모듈의 enum
+import { PaymentMethodType } from '@/shared/constants/order'; // 다른 모듈의 enum
 
 // ✅ 올바른 방법: 서비스/타입이 정의된 모듈에서 직접 import
-import { PaymentMethodType } from "@/payment/types"; // 실제 사용 모듈
+import { PaymentMethodType } from '@/payment/types'; // 실제 사용 모듈
 ```
 
 **규칙**:

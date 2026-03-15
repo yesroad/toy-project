@@ -29,8 +29,7 @@
 const getData = (id) => api.get(`/orders/${id}`);
 
 // ✅ 허용
-const getData = (id: string): Promise<OrderResponse> =>
-  api.get(`/orders/${id}`);
+const getData = (id: string): Promise<OrderResponse> => api.get(`/orders/${id}`);
 ```
 
 ---
@@ -66,11 +65,11 @@ const { data: orders } = useItemListQuery(params);
 
 ```typescript
 // ❌ 금지: barrel 파일 경유 (라이브러리에 따라 수천 개 re-export)
-import { IconHome, IconSearch, IconUser } from "some-icon-library";
+import { IconHome, IconSearch, IconUser } from 'some-icon-library';
 
 // ✅ 허용: 직접 경로로 import
-import { IconHome } from "some-icon-library/icons/IconHome";
-import { IconSearch } from "some-icon-library/icons/IconSearch";
+import { IconHome } from 'some-icon-library/icons/IconHome';
+import { IconSearch } from 'some-icon-library/icons/IconSearch';
 ```
 
 > **예외**: 프로젝트 디자인 시스템 패키지의 공식 barrel은 허용 (관리된 export)
@@ -172,10 +171,10 @@ const Content = ({ onClose }: { onClose: () => void }) => {
 
 ```typescript
 // ❌ 금지
-const res = await axios.get("https://api.example.com/orders");
+const res = await axios.get('https://api.example.com/orders');
 
 // ✅ 허용
-const res = await api.get("/api/orders");
+const res = await api.get('/api/orders');
 ```
 
 ---

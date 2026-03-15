@@ -1,7 +1,8 @@
-// services/core/base.ts
 import axios, { type AxiosInstance } from 'axios';
 
-import type { ServicesConfig } from '@/types/services';
+export interface ServicesConfig {
+  baseURL: string;
+}
 
 class BaseServices {
   #axios: AxiosInstance;

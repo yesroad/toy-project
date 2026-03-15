@@ -29,24 +29,16 @@
 
 ```typescript
 // 단순 구조 탐색: haiku
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "src/ 폴더 구조 파악"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = 'src/ 폴더 구조 파악'));
 
 // 정책/로직 분석: sonnet
-Task(
-  (subagent_type = "explore"),
-  (model = "sonnet"),
-  (prompt = "필터 disabled 조건 분석"),
-);
+Task((subagent_type = 'explore'), (model = 'sonnet'), (prompt = '필터 disabled 조건 분석'));
 
 // 복잡한 비즈니스 로직: opus
 Task(
-  (subagent_type = "explore"),
-  (model = "opus"),
-  (prompt = "날짜 계산 로직 분석 - 비즈니스 규칙 파악"),
+  (subagent_type = 'explore'),
+  (model = 'opus'),
+  (prompt = '날짜 계산 로직 분석 - 비즈니스 규칙 파악'),
 );
 ```
 
@@ -60,8 +52,8 @@ Task(
 
 ```typescript
 Task(
-  (subagent_type = "code-reviewer"),
-  (model = "sonnet"),
+  (subagent_type = 'code-reviewer'),
+  (model = 'sonnet'),
   (prompt = `
      대상: src/
      기준:
@@ -85,11 +77,7 @@ Task(
 **목적**: ESLint/Prettier 오류 자동 수정
 
 ```typescript
-Task(
-  (subagent_type = "lint-fixer"),
-  (model = "haiku"),
-  (prompt = "src/ 린트 오류 수정"),
-);
+Task((subagent_type = 'lint-fixer'), (model = 'haiku'), (prompt = 'src/ 린트 오류 수정'));
 ```
 
 **실행 명령**:
@@ -106,11 +94,7 @@ yarn format
 **목적**: 복잡한 작업의 아키텍처 설계 및 구현 계획
 
 ```typescript
-Task(
-  (subagent_type = "Plan"),
-  (model = "opus"),
-  (prompt = "인증 모듈 리팩토링 계획 수립"),
-);
+Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '인증 모듈 리팩토링 계획 수립'));
 ```
 
 **참조**: `@../workflow-patterns/sequential-thinking.md` (HIGH 복잡도 단계)
@@ -124,8 +108,8 @@ Task(
 ```typescript
 // Plan 결과 후 실행
 Task(
-  (subagent_type = "implementation-executor"),
-  (model = "sonnet"),
+  (subagent_type = 'implementation-executor'),
+  (model = 'sonnet'),
   (prompt = `
      규칙: @../../rules/core/react-nextjs-conventions.md
      작업: {구현 내용}
@@ -143,48 +127,28 @@ Task(
 
 ```typescript
 // 1. 복잡도 판단 (haiku)
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "영향 파일 수, 정책 키워드 확인"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '영향 파일 수, 정책 키워드 확인'));
 
 // 2. 정책 분석 (sonnet/opus - 키워드에 따라)
-Task(
-  (subagent_type = "explore"),
-  (model = "sonnet"),
-  (prompt = "기존 패턴 분석 - 정책 영향 확인"),
-);
-Task(
-  (subagent_type = "explore"),
-  (model = "opus"),
-  (prompt = "날짜 계산 로직 분석"),
-); // 정책 키워드 포함
+Task((subagent_type = 'explore'), (model = 'sonnet'), (prompt = '기존 패턴 분석 - 정책 영향 확인'));
+Task((subagent_type = 'explore'), (model = 'opus'), (prompt = '날짜 계산 로직 분석')); // 정책 키워드 포함
 
 // 3. 계획 수립 (opus - 정책 관련)
-Task(
-  (subagent_type = "Plan"),
-  (model = "opus"),
-  (prompt = "분석 결과 기반 구현 계획"),
-);
+Task((subagent_type = 'Plan'), (model = 'opus'), (prompt = '분석 결과 기반 구현 계획'));
 
 // 4. 구현 (sonnet)
-Task(
-  (subagent_type = "implementation-executor"),
-  (model = "sonnet"),
-  (prompt = "계획대로 구현"),
-);
+Task((subagent_type = 'implementation-executor'), (model = 'sonnet'), (prompt = '계획대로 구현'));
 ```
 
 ### 구현 → 검증 (정책 보호)
 
 ```typescript
 // 병렬 검증
-Task((subagent_type = "lint-fixer"), (model = "haiku"), (prompt = "린트 수정"));
+Task((subagent_type = 'lint-fixer'), (model = 'haiku'), (prompt = '린트 수정'));
 Task(
-  (subagent_type = "code-reviewer"),
-  (model = "sonnet"),
-  (prompt = "코드 리뷰 - 정책 준수 확인"),
+  (subagent_type = 'code-reviewer'),
+  (model = 'sonnet'),
+  (prompt = '코드 리뷰 - 정책 준수 확인'),
 );
 ```
 

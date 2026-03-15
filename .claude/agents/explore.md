@@ -69,9 +69,9 @@ model: haiku
 
 ```typescript
 // ✅ 올바름: 3개 도구 동시 실행
-Glob((pattern = "src/**/*.tsx"));
-Grep((pattern = "useListQuery"), (glob = "**/*.ts"));
-Bash((command = "git log --oneline -5 -- src/"));
+Glob((pattern = 'src/**/*.tsx'));
+Grep((pattern = 'useListQuery'), (glob = '**/*.ts'));
+Bash((command = 'git log --oneline -5 -- src/'));
 ```
 
 ### 4. 결과 구조화

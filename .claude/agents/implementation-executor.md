@@ -57,23 +57,19 @@ model: sonnet
 // "프로필 편집 - 보통 복잡도, 3개 파일"
 
 // 2. 탐색 (explore 에이전트 또는 직접)
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "프로필 관련 코드 구조 분석"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '프로필 관련 코드 구조 분석'));
 
 // 3. 기존 패턴 확인
-Read("src/{대상파일}");
+Read('src/{대상파일}');
 // styled.ts 분리, 훅 분리 패턴 확인
 
 // 4. 구현
-Write("새 컴포넌트");
-Edit("기존 파일 수정");
+Write('새 컴포넌트');
+Edit('기존 파일 수정');
 
 // 5. 검증
-Bash("{패키지매니저} lint");
-Bash("{패키지매니저} build");
+Bash('{패키지매니저} lint');
+Bash('{패키지매니저} build');
 ```
 
 ---

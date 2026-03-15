@@ -99,22 +99,16 @@ const { control } = useFormContext<LoginFieldValues>();
 ### shadcn/ui 컴포넌트 import 경로
 
 ```typescript
-import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardFooter } from "@workspace/ui/components/card";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
+import { Button } from '@workspace/ui/components/button';
+import { Card, CardContent, CardFooter } from '@workspace/ui/components/card';
+import { Form, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/form';
+import { Input } from '@workspace/ui/components/input';
 ```
 
 ### SVG import (SVGR)
 
 ```typescript
-import LogoIcon from "@/assets/logo.svg"; // React 컴포넌트로 사용
+import LogoIcon from '@/assets/logo.svg'; // React 컴포넌트로 사용
 ```
 
 ## Path Alias

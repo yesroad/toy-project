@@ -67,21 +67,9 @@ description: 작업 시작. 코드 분석 → 작업 계획 → 구현 확인.
 **대규모 분석 시 explore 에이전트 병렬 호출:**
 
 ```typescript
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "변경 대상 컴포넌트/훅 구조 분석"),
-);
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "기존 디자인 시스템 패턴 분석"),
-);
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "관련 API/서비스 파악"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '변경 대상 컴포넌트/훅 구조 분석'));
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '기존 디자인 시스템 패턴 분석'));
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '관련 API/서비스 파악'));
 ```
 
 작업 내용을 기반으로 변경할 파일/경로를 파악한다.
@@ -125,8 +113,8 @@ Task(
 
 ```typescript
 Task(
-  (subagent_type = "Plan"),
-  (model = "opus"),
+  (subagent_type = 'Plan'),
+  (model = 'opus'),
   (prompt = `
   작업: $ARGUMENTS
   요구사항: {요약된 요구사항}

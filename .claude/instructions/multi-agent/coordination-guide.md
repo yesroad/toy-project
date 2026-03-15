@@ -15,20 +15,12 @@
 
 ```typescript
 // ❌ 순차 실행 (120초)
-Task((subagent_type = "explore"), (prompt = "파일 구조 분석")); // 60초
-Task((subagent_type = "explore"), (prompt = "API 패턴 분석")); // 60초
+Task((subagent_type = 'explore'), (prompt = '파일 구조 분석')); // 60초
+Task((subagent_type = 'explore'), (prompt = 'API 패턴 분석')); // 60초
 
 // ✅ 병렬 실행 (60초) - 단일 메시지에서 호출
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "파일 구조 분석"),
-);
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "API 패턴 분석"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '파일 구조 분석'));
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = 'API 패턴 분석'));
 ```
 
 ---
@@ -50,29 +42,29 @@ Task(
 
 ```typescript
 // 1. 팀 생성
-TeamCreate({ team_name: "analysis-team", description: "코드 분석 및 리뷰" });
+TeamCreate({ team_name: 'analysis-team', description: '코드 분석 및 리뷰' });
 
 // 2. 팀원 spawn (병렬)
 Task(
-  (subagent_type = "explore"),
-  (team_name = "analysis-team"),
-  (name = "code-analyzer"),
-  (model = "haiku"),
-  (prompt = "코드 구조 분석"),
+  (subagent_type = 'explore'),
+  (team_name = 'analysis-team'),
+  (name = 'code-analyzer'),
+  (model = 'haiku'),
+  (prompt = '코드 구조 분석'),
 );
 Task(
-  (subagent_type = "explore"),
-  (team_name = "analysis-team"),
-  (name = "pattern-checker"),
-  (model = "haiku"),
-  (prompt = "패턴 분석"),
+  (subagent_type = 'explore'),
+  (team_name = 'analysis-team'),
+  (name = 'pattern-checker'),
+  (model = 'haiku'),
+  (prompt = '패턴 분석'),
 );
 Task(
-  (subagent_type = "code-reviewer"),
-  (team_name = "analysis-team"),
-  (name = "reviewer"),
-  (model = "sonnet"),
-  (prompt = "코드 리뷰"),
+  (subagent_type = 'code-reviewer'),
+  (team_name = 'analysis-team'),
+  (name = 'reviewer'),
+  (model = 'sonnet'),
+  (prompt = '코드 리뷰'),
 );
 ```
 
@@ -89,17 +81,9 @@ Task(
 
 ```typescript
 // Agent Teams 없이 병렬 실행
-Task(
-  (subagent_type = "explore"),
-  (model = "haiku"),
-  (prompt = "코드 구조 분석"),
-);
-Task((subagent_type = "explore"), (model = "haiku"), (prompt = "패턴 분석"));
-Task(
-  (subagent_type = "code-reviewer"),
-  (model = "sonnet"),
-  (prompt = "코드 리뷰"),
-);
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '코드 구조 분석'));
+Task((subagent_type = 'explore'), (model = 'haiku'), (prompt = '패턴 분석'));
+Task((subagent_type = 'code-reviewer'), (model = 'sonnet'), (prompt = '코드 리뷰'));
 ```
 
 ### 규칙/스킬 참조 범위
@@ -374,23 +358,17 @@ Task(subagent_type='general-purpose', model='sonnet',
 
 ```typescript
 // Agent 1: 분석 결과를 파일에 저장
-Task(
-  (subagent_type = "explore"),
-  (prompt = "분석 후 .claude/temp/analysis.md에 저장"),
-);
+Task((subagent_type = 'explore'), (prompt = '분석 후 .claude/temp/analysis.md에 저장'));
 
 // Agent 2: 파일 읽어서 작업 수행
-Task(
-  (subagent_type = "implementation-executor"),
-  (prompt = ".claude/temp/analysis.md 읽고 구현"),
-);
+Task((subagent_type = 'implementation-executor'), (prompt = '.claude/temp/analysis.md 읽고 구현'));
 ```
 
 ### 2. 프롬프트 내 컨텍스트 명시
 
 ```typescript
 Task(
-  (subagent_type = "test-generator"),
+  (subagent_type = 'test-generator'),
   (prompt = `
   대상: src/{대상파일}
   테스트 위치: __tests__/{파일명}.test.ts

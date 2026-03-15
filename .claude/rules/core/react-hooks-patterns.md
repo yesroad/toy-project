@@ -10,15 +10,12 @@
 
 ```typescript
 // ❌ 금지: 단순 계산에 useMemo 낭비
-const isActive = useMemo(() => status === "active", [status]);
-const fullName = useMemo(
-  () => `${firstName} ${lastName}`,
-  [firstName, lastName],
-);
+const isActive = useMemo(() => status === 'active', [status]);
+const fullName = useMemo(() => `${firstName} ${lastName}`, [firstName, lastName]);
 const count = useMemo(() => items.length, [items]);
 
 // ✅ 허용: 렌더링 중 직접 계산
-const isActive = status === "active";
+const isActive = status === 'active';
 const fullName = `${firstName} ${lastName}`;
 const count = items.length;
 ```
@@ -51,7 +48,7 @@ const [data, setData] = useState(expensiveFn());
 const [data, setData] = useState(() => expensiveFn());
 
 // ✅ localStorage 읽기도 동일하게 적용
-const [token, setToken] = useState(() => localStorage.getItem("token") ?? "");
+const [token, setToken] = useState(() => localStorage.getItem('token') ?? '');
 ```
 
 ---
@@ -63,9 +60,7 @@ const [token, setToken] = useState(() => localStorage.getItem("token") ?? "");
 
 ```typescript
 // ❌ 안티패턴: 렌더링에 사용되지 않는 값을 useState로 관리
-const [timerId, setTimerId] = useState<ReturnType<typeof setTimeout> | null>(
-  null,
-);
+const [timerId, setTimerId] = useState<ReturnType<typeof setTimeout> | null>(null);
 const [prevValue, setPrevValue] = useState(initialValue);
 
 // ✅ 렌더링 불필요한 값은 useRef
@@ -91,8 +86,8 @@ useEffect(() => {
 
 useEffect(() => {
   const handler = () => onScrollRef.current();
-  window.addEventListener("scroll", handler);
-  return () => window.removeEventListener("scroll", handler);
+  window.addEventListener('scroll', handler);
+  return () => window.removeEventListener('scroll', handler);
 }, []); // onScroll 변경 시 재구독 없음
 ```
 

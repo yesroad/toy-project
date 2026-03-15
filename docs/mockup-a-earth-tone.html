@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipick — A. 어스톤 미니멀</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #FAF7F2;
+    --surface:   #FFFFFF;
+    --border:    #E8E0D5;
+    --primary:   #9E7B5A;
+    --primary-h: #7D5F42;
+    --primary-fg:#FFFFFF;
+    --accent:    #C4724A;
+    --muted:     #F5EFE0;
+    --muted-fg:  #8A7060;
+    --fg:        #2C1F14;
+    --fg-soft:   #6B5744;
+    --tag-bg:    #EFE5D8;
+    --tag-fg:    #7D5F42;
+    --green:     #5F8A6A;
+    --shadow:    0 1px 3px rgba(158,123,90,.12), 0 4px 12px rgba(158,123,90,.08);
+    --radius:    12px;
+  }
+
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif; background: var(--bg); color: var(--fg); min-height: 100vh; }
+
+  /* ── 헤더 ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 64px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: -.5px; white-space: nowrap; }
+  .logo span { color: var(--accent); }
+
+  .search-wrap { flex: 1; max-width: 560px; display: flex; gap: 8px; }
+  .search-input {
+    flex: 1; height: 40px; border: 1.5px solid var(--border); border-radius: 999px;
+    padding: 0 16px; font-size: 14px; background: var(--muted); color: var(--fg);
+    outline: none; transition: border-color .15s;
+  }
+  .search-input:focus { border-color: var(--primary); background: var(--surface); }
+  .search-btn {
+    height: 40px; padding: 0 20px; background: var(--primary); color: #fff;
+    border: none; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background .15s;
+  }
+  .search-btn:hover { background: var(--primary-h); }
+
+  /* ── 탭 ── */
+  .tabs-wrap { padding: 12px 24px 0; display: flex; gap: 8px; overflow-x: auto; }
+  .tabs-wrap::-webkit-scrollbar { display: none; }
+  .tab {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--tag-bg); color: var(--tag-fg);
+    border: none; border-radius: 999px; padding: 6px 14px;
+    font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+    transition: background .12s;
+  }
+  .tab.active { background: var(--primary); color: #fff; }
+  .tab:hover:not(.active) { background: var(--border); }
+  .tab-x { font-size: 11px; opacity: .6; margin-left: 2px; }
+
+  /* ── 메인 ── */
+  main { max-width: 1140px; margin: 0 auto; padding: 24px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--muted-fg); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 14px; }
+
+  /* ── 비디오 그리드 ── */
+  .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .video-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; cursor: pointer; transition: transform .15s, box-shadow .15s;
+    box-shadow: var(--shadow);
+  }
+  .video-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(158,123,90,.16); }
+  .thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: var(--muted); position: relative; overflow: hidden; }
+  .thumb-placeholder { width: 100%; aspect-ratio: 16/9; background: linear-gradient(135deg, #E8E0D5 0%, #D4C8B8 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+  .card-body { padding: 12px 14px 14px; }
+  .card-title { font-size: 14px; font-weight: 600; line-height: 1.45; color: var(--fg); margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-ch { font-size: 12px; color: var(--muted-fg); }
+
+  /* ── 모달 오버레이 ── */
+  .overlay { position: fixed; inset: 0; background: rgba(44,31,20,.45); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+  .modal {
+    background: var(--surface); border-radius: 20px; width: 100%; max-width: 580px;
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(44,31,20,.3);
+  }
+  .modal-header { padding: 24px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .modal-title { font-size: 17px; font-weight: 700; line-height: 1.4; color: var(--fg); }
+  .modal-close { background: var(--muted); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--fg-soft); }
+  .modal-meta { padding: 8px 24px 0; display: flex; align-items: center; gap: 8px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge-cached { background: var(--muted); color: var(--primary); }
+  .badge-new { background: #FDECD8; color: var(--accent); }
+  .channel-name { font-size: 13px; color: var(--muted-fg); }
+
+  .modal-section { padding: 20px 24px 0; }
+  .modal-section-title { font-size: 13px; font-weight: 700; color: var(--fg); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .modal-section-title::before { content: ''; display: inline-block; width: 3px; height: 14px; background: var(--primary); border-radius: 2px; }
+
+  .ingredient-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--muted); border: 1px solid var(--border); border-radius: 999px;
+    padding: 6px 14px; font-size: 13px; cursor: pointer; transition: all .12s;
+  }
+  .chip:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .chip-name { font-weight: 600; }
+  .chip-amount { color: var(--muted-fg); font-size: 12px; }
+  .chip:hover .chip-amount { color: rgba(255,255,255,.75); }
+  .chip-icon { font-size: 11px; }
+
+  .steps-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .step {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 14px; background: var(--muted); border-radius: 10px;
+  }
+  .step-num {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff;
+    font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .step-text { font-size: 14px; line-height: 1.55; color: var(--fg); }
+
+  .modal-footer { padding: 24px; }
+  .btn-full { width: 100%; height: 48px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s; }
+  .btn-full:hover { background: var(--primary-h); }
+
+  /* ── 스타일 라벨 ── */
+  .style-label { position: fixed; top: 16px; right: 16px; background: var(--primary); color: #fff; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; z-index: 999; }
+</style>
+</head>
+<body>
+
+<div class="style-label">A. 어스톤 미니멀</div>
+
+<!-- 헤더 -->
+<header>
+  <div class="logo">Reci<span>pick</span></div>
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="요리명 또는 재료 검색 (예: 된장찌개, 파스타)" value="된장찌개">
+    <button class="search-btn">검색</button>
+  </div>
+</header>
+
+<!-- 검색 기록 탭 -->
+<div class="tabs-wrap">
+  <button class="tab active">된장찌개 <span class="tab-x">✕</span></button>
+  <button class="tab">파스타 <span class="tab-x">✕</span></button>
+  <button class="tab">김치찌개 <span class="tab-x">✕</span></button>
+  <button class="tab">닭갈비 <span class="tab-x">✕</span></button>
+  <button class="tab">비빔밥 <span class="tab-x">✕</span></button>
+</div>
+
+<!-- 비디오 그리드 -->
+<main>
+  <p class="section-title">된장찌개 · 영상 12개</p>
+  <div class="video-grid">
+    <div class="video-card">
+      <div class="thumb-placeholder">🍲</div>
+      <div class="card-body">
+        <div class="card-title">백종원 된장찌개 황금 레시피 | 집에서도 식당맛 그대로</div>
+        <div class="card-ch">백종원의 요리비책</div>
+      </div>
+    </div>
+    <div class="video-card">
+      <div class="thumb-placeholder">🥘</div>
+      <div class="card-body">
+        <div class="card-title">초간단 된장찌개 만들기 | 10분 완성 자취요리</div>
+        <div class="card-ch">자취생 쿡방</div>
+      </div>
+    </div>
+    <div class="video-card">
+      <div class="thumb-placeholder">🍜</div>
+      <div class="card-body">
+        <div class="card-title">깊은 맛 된장찌개 | 육수부터 직접 만드는 정통 레시피</div>
+        <div class="card-ch">한식 마스터</div>
+      </div>
+    </div>
+    <div class="video-card">
+      <div class="thumb-placeholder">🥗</div>
+      <div class="card-body">
+        <div class="card-title">두부 된장찌개 비법 공개! 아침에 딱 좋은 든든한 한끼</div>
+        <div class="card-ch">쿡킹 스튜디오</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 레시피 모달 -->
+<div class="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">백종원 된장찌개 황금 레시피 | 집에서도 식당맛 그대로</div>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-meta">
+      <span class="badge badge-cached">✦ 캐시됨</span>
+      <span class="channel-name">백종원의 요리비책</span>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">재료 (4인분)</div>
+      <div class="ingredient-chips">
+        <span class="chip"><span class="chip-name">된장</span><span class="chip-amount">3큰술</span><span class="chip-icon">🛒</span></span>
+        <span class="chip"><span class="chip-name">두부</span><span class="chip-amount">1/2모</span><span class="chip-icon">🛒</span></span>
+        <span class="chip"><span class="chip-name">애호박</span><span class="chip-amount">1/2개</span><span class="chip-icon">🛒</span></span>
+        <span class="chip"><span class="chip-name">감자</span><span class="chip-amount">1개</span><span class="chip-icon">🛒</span></span>
+        <span class="chip"><span class="chip-name">양파</span><span class="chip-amount">1/4개</span><span class="chip-icon">🛒</span></span>
+        <span class="chip"><span class="chip-name">대파</span><span class="chip-amount">1/3대</span><span class="chip-icon">🛒</span></span>
+        <span class="chip"><span class="chip-name">고추</span><span class="chip-amount">1개</span><span class="chip-icon">🛒</span></span>
+        <span class="chip"><span class="chip-name">다시마 육수</span><span class="chip-amount">600ml</span><span class="chip-icon">🛒</span></span>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">요리 순서</div>
+      <ul class="steps-list">
+        <li class="step"><span class="step-num">1</span><span class="step-text">다시마 육수 600ml를 냄비에 넣고 중불로 끓입니다.</span></li>
+        <li class="step"><span class="step-num">2</span><span class="step-text">감자와 애호박을 먹기 좋은 크기로 깍뚝썰기 합니다.</span></li>
+        <li class="step"><span class="step-num">3</span><span class="step-text">육수가 끓으면 된장 3큰술을 체에 걸러 풀어 넣습니다.</span></li>
+        <li class="step"><span class="step-num">4</span><span class="step-text">감자, 양파, 고추를 넣고 5분간 끓입니다.</span></li>
+        <li class="step"><span class="step-num">5</span><span class="step-text">두부, 애호박, 대파를 넣고 2~3분 더 끓여 완성합니다.</span></li>
+      </ul>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-full">재료 전체 구매하기 🛒</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

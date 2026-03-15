@@ -24,7 +24,7 @@ yarn workspace @apps/fit-track lint
 - `npm` 또는 `pnpm` 대신 반드시 `yarn` 사용. `.yarnrc.yml` + `yarn.lock` 기반.
 - SVG 파일은 `@svgr/webpack` 플러그인으로 React 컴포넌트로 import 가능:
   ```tsx
-  import LogoIcon from "@/assets/logo.svg"; // ReactComponent로 사용
+  import LogoIcon from '@/assets/logo.svg'; // ReactComponent로 사용
   ```
   일반 `<img src="...">` 방식도 작동하지만 SVGR 방식을 우선 사용.
 - **Tailwind CSS v4** 사용 중. v3와 설정 방식이 다름:
