@@ -6,17 +6,20 @@
 
 ## 📦 프로젝트
 
-- `fit-track`: [`apps/fit-track`](apps/fit-track/)
+- `recipick`: [`apps/recipick`](apps/recipick/) — 유튜브 요리 영상 검색 · 레시피/재료 추출 앱
+- `fit-track`: [`apps/fit-track`](apps/fit-track/) — 운동/식단 기록 앱
 
 ## 🏗️ 모노레포 구조
 
 ```
 toy-project/
-├── apps/                    # 개별 애플리케이션
-│   └── fit-track/          # 운동/식단 기록 앱
+├── apps/
+│   ├── fit-track/          # 운동/식단 기록 앱
+│   └── recipick/           # 요리 영상 레시피 앱 (YouTube + OpenAI + Supabase)
 │
 ├── packages/
 │   ├── ui/                 # shadcn/ui 공통 컴포넌트
+│   ├── services/           # HTTP 클라이언트 베이스 (BaseServices)
 │   ├── typescript-config/  # 공통 TypeScript 설정
 │   └── eslint-config/      # 공통 ESLint 설정
 │
@@ -34,7 +37,10 @@ yarn install
 ### 개발 서버 실행
 
 ```bash
+# 전체 앱 동시 실행
 yarn dev
 
+# 앱별 실행
 yarn workspace fit-track dev
+yarn workspace recipick dev
 ```

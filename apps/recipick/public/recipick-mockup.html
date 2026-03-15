@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipick — UI 목업</title>
+  <style>
+    /* ═══════════════════════════════════════════
+       🎨 디자인 결정
+       스타일: 어스톤 미니멀 (Earth Tone Minimal)
+       이유: 요리/푸드 앱 — 따뜻하고 식욕을 자극하는 팔레트
+       컬러: 크림(#FAF7F2) · 모카(#9E7B5A) · 테라코타(#C4724A) · 세이지(#8FAF7E)
+    ═══════════════════════════════════════════ */
+
+    /* ── 리셋 & 기본 ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:        #FAF7F2;
+      --cream-dark:   #F2EDE4;
+      --mocha:        #9E7B5A;
+      --mocha-light:  #C4A882;
+      --mocha-dark:   #7D5F42;
+      --espresso:     #3D2B1F;
+      --terracotta:   #C4724A;
+      --terra-light:  #D9906E;
+      --sage:         #8FAF7E;
+      --sage-dark:    #6B7C45;
+      --warm-gray:    #A89880;
+      --muted:        #F5EDE0;
+      --muted-fg:     #7D6550;
+      --border:       #DDD0BC;
+      --white:        #FFFFFF;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 3px rgba(61,43,31,.08), 0 1px 2px rgba(61,43,31,.06);
+      --shadow-md: 0 4px 12px rgba(61,43,31,.12), 0 2px 6px rgba(61,43,31,.08);
+      --shadow-lg: 0 12px 40px rgba(61,43,31,.16), 0 4px 12px rgba(61,43,31,.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: var(--cream);
+      color: var(--espresso);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── 목업 네비게이션 ── */
+    .mockup-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9999;
+      background: var(--espresso);
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .mockup-nav span { color: var(--mocha-light); }
+    .mockup-nav .badge {
+      background: var(--terracotta);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .section-label {
+      position: absolute;
+      top: -10px; left: -2px;
+      background: var(--terracotta);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      z-index: 10;
+    }
+
+    /* ── 레이아웃 ── */
+    .page-wrapper {
+      padding-top: 44px;
+    }
+
+    .main-layout {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px 80px;
+    }
+
+    /* ── 헤더 ── */
+    .app-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 48px 0 32px;
+      text-align: center;
+    }
+
+    .app-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--terracotta);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .app-name {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--espresso);
+      letter-spacing: -0.5px;
+    }
+
+    .app-name span {
+      color: var(--terracotta);
+    }
+
+    .app-tagline {
+      font-size: 15px;
+      color: var(--muted-fg);
+      max-width: 400px;
+      break-keep: always;
+    }
+
+    /* ── 섹션 래퍼 ── */
+    .section {
+      position: relative;
+      margin-bottom: 48px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--warm-gray);
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+
+    /* ════════════════════════════════════
+       1. SearchBar 컴포넌트
+    ════════════════════════════════════ */
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 8px 8px 8px 20px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-bar:focus-within {
+      border-color: var(--mocha);
+      box-shadow: 0 0 0 3px rgba(158,123,90,.12), var(--shadow-sm);
+    }
+
+    .search-icon {
+      color: var(--warm-gray);
+      flex-shrink: 0;
+      font-size: 17px;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: var(--espresso);
+      background: transparent;
+      font-family: inherit;
+    }
+    .search-input::placeholder { color: var(--warm-gray); }
+
+    .search-btn {
+      background: var(--terracotta);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s, transform .1s;
+      min-height: 40px;
+      min-width: 80px;
+    }
+    .search-btn:hover { background: #B5623D; transform: translateY(-1px); }
+    .search-btn:active { transform: translateY(0); }
+
+    /* ════════════════════════════════════
+       2. SearchHistoryTabs 컴포넌트
+    ════════════════════════════════════ */
+    .history-tabs-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .history-label {
+      font-size: 12px;
+      color: var(--warm-gray);
+      font-weight: 500;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 6px 12px 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--espresso);
+      cursor: pointer;
+      transition: all .15s;
+      box-shadow: var(--shadow-sm);
+    }
+    .tab-chip:hover {
+      border-color: var(--mocha);
+      background: var(--muted);
+      color: var(--mocha-dark);
+    }
+    .tab-chip.active {
+      background: var(--mocha);
+      border-color: var(--mocha);
+      color: var(--white);
+    }
+    .tab-chip.active .tab-close {
+      color: rgba(255,255,255,.7);
+    }
+    .tab-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      color: var(--warm-gray);
+      font-size: 12px;
+      transition: background .15s, color .15s;
+      cursor: pointer;
+    }
+    .tab-close:hover {
+      background: rgba(158,123,90,.15);
+      color: var(--mocha-dark);
+    }
+
+    /* ════════════════════════════════════
+       3. VideoCard 컴포넌트
+    ════════════════════════════════════ */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .video-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      border: 1.5px solid var(--border);
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+    .video-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--mocha-light);
+    }
+
+    .video-thumbnail-wrap {
+      position: relative;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: var(--muted);
+    }
+
+    .video-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .3s;
+    }
+    .video-card:hover .video-thumbnail { transform: scale(1.03); }
+
+    .video-duration {
+      position: absolute;
+      bottom: 8px; right: 8px;
+      background: rgba(30,18,10,.75);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: .3px;
+    }
+
+    .video-play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30,18,10,.0);
+      transition: background .2s;
+    }
+    .video-card:hover .video-play-overlay { background: rgba(30,18,10,.25); }
+    .play-icon {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,.92);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      opacity: 0;
+      transform: scale(.8);
+      transition: opacity .2s, transform .2s;
+    }
+    .video-card:hover .play-icon { opacity: 1; transform: scale(1); }
+
+    .video-info {
+      padding: 14px 16px 16px;
+    }
+
+    .video-channel {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .channel-avatar {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--mocha-light), var(--terracotta));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: white;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .channel-name {
+      font-size: 12px;
+      color: var(--muted-fg);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .video-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--espresso);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      break-keep: always;
+      margin-bottom: 10px;
+    }
+
+    .video-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .video-date {
+      font-size: 11px;
+      color: var(--warm-gray);
+    }
+
+    .recipe-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--muted);
+      color: var(--mocha-dark);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    /* ════════════════════════════════════
+       4. EmptyState 컴포넌트
+    ════════════════════════════════════ */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .empty-illustration {
+      width: 120px;
+      height: 120px;
+      background: var(--muted);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+    }
+
+    .empty-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--espresso);
+      break-keep: always;
+    }
+
+    .empty-desc {
+      font-size: 14px;
+      color: var(--muted-fg);
+      max-width: 280px;
+      break-keep: always;
+    }
+
+    .empty-hint-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .hint-chip {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-size: 13px;
+      color: var(--mocha);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .hint-chip:hover {
+      border-color: var(--mocha);
+      background: var(--muted);
+    }
+
+    /* ════════════════════════════════════
+       5. IngredientChip 컴포넌트
+    ════════════════════════════════════ */
+    .ingredient-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ingredient-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--muted);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--espresso);
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+    }
+    .ingredient-chip:hover {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chip-name { font-weight: 600; }
+    .chip-amount { color: var(--muted-fg); font-size: 12px; }
+    .ingredient-chip:hover .chip-amount { color: rgba(255,255,255,.8); }
+
+    .chip-cart-icon {
+      font-size: 14px;
+      margin-left: 4px;
+      opacity: 0.45;
+      transition: opacity .15s;
+    }
+    .ingredient-chip:hover .chip-cart-icon { opacity: 1; }
+
+    /* ════════════════════════════════════
+       6. RecipeModal 컴포넌트
+    ════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(30,18,10,.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0 0 0;
+    }
+
+    @media (min-width: 640px) {
+      .modal-overlay {
+        align-items: center;
+        padding: 24px;
+      }
+    }
+
+    .modal-content {
+      background: var(--white);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      width: 100%;
+      max-width: 640px;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp .25s cubic-bezier(.16,1,.3,1);
+    }
+
+    @media (min-width: 640px) {
+      .modal-content {
+        border-radius: var(--radius-xl);
+        max-height: 85vh;
+      }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .modal-hero {
+      position: relative;
+      aspect-ratio: 16/7;
+      overflow: hidden;
+      background: var(--muted);
+    }
+
+    .modal-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .modal-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(30,18,10,.7) 0%, transparent 60%);
+    }
+
+    .modal-hero-info {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      padding: 20px;
+    }
+
+    .modal-cached-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--sage);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      margin-bottom: 6px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.3;
+      break-keep: always;
+    }
+
+    .modal-channel {
+      font-size: 13px;
+      color: rgba(255,255,255,.75);
+      margin-top: 4px;
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(30,18,10,.5);
+      border: none;
+      color: white;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .15s;
+      line-height: 1;
+    }
+    .modal-close-btn:hover { background: rgba(30,18,10,.75); }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-section {
+      margin-bottom: 28px;
+    }
+
+    .modal-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .modal-section-icon {
+      width: 30px; height: 30px;
+      border-radius: var(--radius-sm);
+      background: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .modal-section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--espresso);
+    }
+
+    .modal-section-count {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--muted-fg);
+      background: var(--muted);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    /* 재료 목록 */
+    .ingredient-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .ingredient-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--cream);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: all .15s;
+    }
+
+    .ingredient-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ingredient-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--mocha-light);
+      flex-shrink: 0;
+    }
+
+    .ingredient-item-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--espresso);
+    }
+
+    .ingredient-item-amount {
+      font-size: 13px;
+      color: var(--muted-fg);
+    }
+
+    .ingredient-coupang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--terracotta);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .ingredient-coupang-btn:hover { background: #B5623D; transform: translateY(-1px); }
+
+    /* 조리 단계 */
+    .recipe-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .recipe-step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      width: 28px; height: 28px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--mocha);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-text {
+      font-size: 14px;
+      color: var(--espresso);
+      line-height: 1.6;
+      padding-top: 3px;
+      break-keep: always;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 20px;
+      background: var(--border);
+      margin-left: 13px;
+      margin-top: 4px;
+      border-radius: 2px;
+    }
+
+    /* ── 스켈레톤 (로딩 상태) ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--muted) 25%, var(--cream-dark) 37%, var(--muted) 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+      border-radius: 4px;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 100% 50%; }
+      100% { background-position: 0%   50%; }
+    }
+
+    .skeleton-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+
+    .skeleton-thumb {
+      aspect-ratio: 16/9;
+      width: 100%;
+    }
+
+    .skeleton-body {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .skeleton-line { height: 14px; }
+    .skeleton-line.w-40 { width: 40%; }
+    .skeleton-line.w-70 { width: 70%; }
+    .skeleton-line.w-90 { width: 90%; }
+    .skeleton-line.w-60 { width: 60%; }
+
+    /* ── 구분선 ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    /* ── 버튼 스타일 ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all .15s;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--terracotta);
+      color: white;
+      border-radius: var(--radius-md);
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+    .btn-primary:hover { background: #B5623D; transform: translateY(-1px); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--mocha);
+      border: 1.5px solid var(--mocha);
+      border-radius: var(--radius-md);
+      padding: 9px 18px;
+      font-size: 13px;
+    }
+    .btn-outline:hover { background: var(--muted); }
+
+    /* ── 배지 ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: var(--radius-full);
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-mocha { background: var(--muted); color: var(--mocha-dark); }
+    .badge-sage { background: rgba(143,175,126,.2); color: var(--sage-dark); }
+    .badge-terra { background: rgba(196,114,74,.15); color: var(--terracotta); }
+
+    /* ── 섹션 구분 (목업 전용) ── */
+    .mockup-section {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 32px;
+      position: relative;
+      background: var(--cream);
+    }
+
+    .mockup-section-title {
+      position: absolute;
+      top: -13px; left: 16px;
+      background: var(--espresso);
+      color: var(--cream);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    /* 로드 더 버튼 */
+    .load-more {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    /* ── 반응형 ── */
+    @media (max-width: 600px) {
+      .video-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .video-info { padding: 10px 12px 12px; }
+      .video-title { font-size: 12px; }
+    }
+    @media (max-width: 400px) {
+      .video-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── 스크롤바 ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── 상태 표시기 ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--muted);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      color: var(--muted-fg);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--sage);
+      flex-shrink: 0;
+    }
+    .status-dot.loading {
+      background: var(--mocha-light);
+      animation: pulse 1.2s ease infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
+    }
+
+    /* 컬러 팔레트 표시 (목업 전용) */
+    .palette {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .palette-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .palette-swatch {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid rgba(0,0,0,.08);
+    }
+    .palette-label { font-size: 10px; color: var(--muted-fg); text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- 목업 네비게이션 -->
+<nav class="mockup-nav">
+  <span class="badge">Mockup</span>
+  <span>Recipick Phase 5</span>
+  <span>— UI 목업 (어스톤 미니멀)</span>
+</nav>
+
+<div class="page-wrapper">
+  <div class="main-layout">
+
+    <!-- ═══ 앱 헤더 ═══ -->
+    <header class="app-header">
+      <div class="app-logo">
+        <div class="logo-icon">🍳</div>
+        <h1 class="app-name">Reci<span>pick</span></h1>
+      </div>
+      <p class="app-tagline">유튜브 요리 영상을 <span style="color:var(--terracotta);font-weight:600;">pick</span>하고<br>레시피와 재료를 한 번에 확인하세요</p>
+    </header>
+
+    <!-- ═══ 컬러 팔레트 (목업 전용) ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">디자인 시스템 — 어스톤 미니멀</span>
+      <div class="palette">
+        <div class="palette-item">
+          <div class="palette-swatch" style="background:#FAF7F2"></div>
+          <span class="palette-label">크림<br>#FAF7F2</span>
+        </div>
+        <div class="palette-item">
+          <div class="palette-swatch" style="background:#9E7B5A"></div>
+          <span class="palette-label">모카<br>#9E7B5A</span>
+        </div>
+        <div class="palette-item">
+          <div class="palette-swatch" style="background:#7D5F42"></div>
+          <span class="palette-label">딥모카<br>#7D5F42</span>
+        </div>
+        <div class="palette-item">
+          <div class="palette-swatch" style="background:#C4724A"></div>
+          <span class="palette-label">테라코타<br>#C4724A</span>
+        </div>
+        <div class="palette-item">
+          <div class="palette-swatch" style="background:#8FAF7E"></div>
+          <span class="palette-label">세이지<br>#8FAF7E</span>
+        </div>
+        <div class="palette-item">
+          <div class="palette-swatch" style="background:#F5EDE0"></div>
+          <span class="palette-label">뮤트<br>#F5EDE0</span>
+        </div>
+        <div class="palette-item">
+          <div class="palette-swatch" style="background:#3D2B1F"></div>
+          <span class="palette-label">에스프레소<br>#3D2B1F</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 1. SearchBar ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">SearchBar</span>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+
+        <!-- 기본 상태 -->
+        <p style="font-size: 12px; color: var(--warm-gray); margin-bottom: 4px;">기본 (빈 검색)</p>
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" placeholder="요리 채널을 검색해보세요 (예: 백종원, 1분요리)" />
+          <button class="search-btn">검색</button>
+        </div>
+
+        <!-- 포커스 상태 (시뮬레이션) -->
+        <p style="font-size: 12px; color: var(--warm-gray); margin-bottom: 4px;">입력 중</p>
+        <div class="search-bar" style="border-color: var(--mocha); box-shadow: 0 0 0 3px rgba(158,123,90,.12);">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" value="백종원 된장찌개" />
+          <button class="search-btn">검색</button>
+        </div>
+
+        <!-- 로딩 상태 -->
+        <p style="font-size: 12px; color: var(--warm-gray); margin-bottom: 4px;">검색 중 (로딩)</p>
+        <div class="search-bar" style="opacity: .7; pointer-events: none;">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" value="백종원 된장찌개" />
+          <button class="search-btn" style="opacity: .7;">검색 중…</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 2. SearchHistoryTabs ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">SearchHistoryTabs</span>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+
+        <!-- 탭 없음 -->
+        <p style="font-size: 12px; color: var(--warm-gray);">탭 없음 (초기 상태)</p>
+        <div class="history-tabs-wrap">
+          <span class="history-label">🕐 최근 검색</span>
+          <span style="font-size: 12px; color: var(--warm-gray);">검색 기록이 없습니다</span>
+        </div>
+
+        <!-- 탭 있음 -->
+        <p style="font-size: 12px; color: var(--warm-gray);">탭 있음 (최대 5개)</p>
+        <div class="history-tabs-wrap">
+          <span class="history-label">🕐</span>
+          <!-- 활성 탭 -->
+          <button class="tab-chip active">
+            백종원 된장찌개
+            <span class="tab-close">✕</span>
+          </button>
+          <button class="tab-chip">
+            1분요리 파스타
+            <span class="tab-close">✕</span>
+          </button>
+          <button class="tab-chip">
+            쉐프의 테이블
+            <span class="tab-close">✕</span>
+          </button>
+          <button class="tab-chip">
+            조리사 윤
+            <span class="tab-close">✕</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 3. VideoCard ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">VideoCard — 그리드</span>
+      <div class="video-grid">
+
+        <!-- 카드 1 -->
+        <article class="video-card">
+          <div class="video-thumbnail-wrap">
+            <img class="video-thumbnail"
+              src="https://picsum.photos/seed/food1/400/225"
+              alt="영상 썸네일"
+              onerror="this.style.background='var(--muted)'; this.style.display='block'"
+            />
+            <div class="video-play-overlay">
+              <div class="play-icon">▶</div>
+            </div>
+            <span class="video-duration">12:35</span>
+          </div>
+          <div class="video-info">
+            <div class="video-channel">
+              <div class="channel-avatar">백</div>
+              <span class="channel-name">백종원의 요리비책</span>
+            </div>
+            <h3 class="video-title">10분 만에 완성하는 된장찌개! 집에서 쉽게 따라하는 정통 레시피</h3>
+            <div class="video-meta">
+              <span class="video-date">2024.03.15</span>
+              <span class="recipe-badge">🍽 레시피 추출</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 카드 2 (스켈레톤) -->
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-thumb"></div>
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-line w-40"></div>
+            <div class="skeleton skeleton-line w-90"></div>
+            <div class="skeleton skeleton-line w-70"></div>
+            <div class="skeleton skeleton-line w-60"></div>
+          </div>
+        </div>
+
+        <!-- 카드 3 -->
+        <article class="video-card">
+          <div class="video-thumbnail-wrap">
+            <img class="video-thumbnail"
+              src="https://picsum.photos/seed/food2/400/225"
+              alt="영상 썸네일"
+            />
+            <div class="video-play-overlay">
+              <div class="play-icon">▶</div>
+            </div>
+            <span class="video-duration">8:20</span>
+          </div>
+          <div class="video-info">
+            <div class="video-channel">
+              <div class="channel-avatar">1</div>
+              <span class="channel-name">1분요리 뚝딱이형</span>
+            </div>
+            <h3 class="video-title">매운 김치찌개 황금레시피 — 1분이면 OK!</h3>
+            <div class="video-meta">
+              <span class="video-date">2024.02.28</span>
+              <span class="recipe-badge">🍽 레시피 추출</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 카드 4 (스켈레톤) -->
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-thumb"></div>
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-line w-40"></div>
+            <div class="skeleton skeleton-line w-90"></div>
+            <div class="skeleton skeleton-line w-70"></div>
+            <div class="skeleton skeleton-line w-60"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 무한 스크롤 더보기 버튼 -->
+      <div class="load-more">
+        <button class="btn btn-outline">더 불러오기 ↓</button>
+      </div>
+    </div>
+
+    <!-- ═══ 4. EmptyState ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">EmptyState</span>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+        <!-- 초기 상태 (검색 전) -->
+        <div>
+          <p style="font-size: 12px; color: var(--warm-gray); margin-bottom: 12px;">초기 상태 (검색 전)</p>
+          <div class="empty-state" style="padding: 40px 24px; background: var(--cream-dark); border-radius: var(--radius-lg);">
+            <div class="empty-illustration" style="width: 80px; height: 80px; font-size: 36px;">👨‍🍳</div>
+            <p class="empty-title" style="font-size: 17px;">오늘은 뭐 만들까요?</p>
+            <p class="empty-desc" style="font-size: 13px;">요리 채널을 검색하면 AI가 레시피를 자동으로 분석해드려요</p>
+            <div class="empty-hint-chips">
+              <button class="hint-chip">백종원</button>
+              <button class="hint-chip">1분요리</button>
+              <button class="hint-chip">쉐프의 테이블</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 결과 없음 상태 -->
+        <div>
+          <p style="font-size: 12px; color: var(--warm-gray); margin-bottom: 12px;">결과 없음</p>
+          <div class="empty-state" style="padding: 40px 24px; background: var(--cream-dark); border-radius: var(--radius-lg);">
+            <div class="empty-illustration" style="width: 80px; height: 80px; font-size: 36px;">🔍</div>
+            <p class="empty-title" style="font-size: 17px;">검색 결과가 없어요</p>
+            <p class="empty-desc" style="font-size: 13px;">"아이스크림 만들기"로 검색한 결과가 없습니다. 다른 키워드를 시도해보세요.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 5. IngredientChip ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">IngredientChip</span>
+      <div class="ingredient-chips">
+        <a class="ingredient-chip" href="#" onclick="return false;">
+          <span class="chip-name">된장</span>
+          <span class="chip-amount">3큰술</span>
+          <span class="chip-cart-icon">🛒</span>
+        </a>
+        <a class="ingredient-chip" href="#" onclick="return false;">
+          <span class="chip-name">두부</span>
+          <span class="chip-amount">1/2모</span>
+          <span class="chip-cart-icon">🛒</span>
+        </a>
+        <a class="ingredient-chip" href="#" onclick="return false;">
+          <span class="chip-name">애호박</span>
+          <span class="chip-amount">1/3개</span>
+          <span class="chip-cart-icon">🛒</span>
+        </a>
+        <a class="ingredient-chip" href="#" onclick="return false;">
+          <span class="chip-name">감자</span>
+          <span class="chip-amount">1개</span>
+          <span class="chip-cart-icon">🛒</span>
+        </a>
+        <a class="ingredient-chip" href="#" onclick="return false;">
+          <span class="chip-name">대파</span>
+          <span class="chip-amount">적당량</span>
+          <span class="chip-cart-icon">🛒</span>
+        </a>
+        <a class="ingredient-chip" href="#" onclick="return false;">
+          <span class="chip-name">멸치육수</span>
+          <span class="chip-amount">500ml</span>
+          <span class="chip-cart-icon">🛒</span>
+        </a>
+        <a class="ingredient-chip" href="#" onclick="return false;">
+          <span class="chip-name">마늘</span>
+          <span class="chip-amount">2쪽</span>
+          <span class="chip-cart-icon">🛒</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ═══ 6. RecipeModal (인라인 시뮬레이션) ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">RecipeModal</span>
+
+      <!-- 모달 목업 (인라인으로 표시) -->
+      <div style="border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-lg); max-width: 600px; margin: 0 auto;">
+
+        <!-- 히어로 썸네일 -->
+        <div class="modal-hero">
+          <img class="modal-thumbnail"
+            src="https://picsum.photos/seed/food3/640/280"
+            alt="레시피 썸네일"
+          />
+          <div class="modal-hero-overlay"></div>
+          <div class="modal-hero-info">
+            <h2 class="modal-title">10분 만에 완성하는 된장찌개! 집에서 쉽게 따라하는 정통 레시피</h2>
+            <p class="modal-channel">📺 백종원의 요리비책</p>
+          </div>
+          <button class="modal-close-btn">✕</button>
+        </div>
+
+        <!-- 모달 바디 -->
+        <div class="modal-body">
+
+          <!-- 숏츠 안내 배너 (숏츠 영상일 때 표시) -->
+          <div style="display:flex;align-items:flex-start;gap:8px;background:#f5ede0;border-radius:10px;padding:10px 12px;margin-bottom:20px;font-size:12px;color:#7d6550;line-height:1.6;word-break:keep-all;">
+            <span style="flex-shrink:0;">📱</span>
+            <span>숏츠 영상은 특성상 레시피와 재료 정보가 정확히 정리되지 않을 수 있습니다.</span>
+          </div>
+
+          <!-- 재료 섹션 -->
+          <div class="modal-section">
+            <div class="modal-section-header">
+              <div class="modal-section-icon">🥕</div>
+              <span class="modal-section-title">재료</span>
+              <span class="modal-section-count">7가지</span>
+            </div>
+
+            <!-- 쿠팡 파트너스 고지 (쿠팡 링크가 있을 때 표시) -->
+            <p style="font-size:11px;color:#9d8570;margin-bottom:12px;line-height:1.6;word-break:keep-all;">
+              * 재료 구매 링크는 쿠팡 파트너스 활동의 일환으로 이에 따른 일정액의 수수료를 제공받습니다.
+            </p>
+
+            <div class="ingredient-chips">
+              <a class="ingredient-chip" href="#" onclick="return false;">
+                <span class="chip-name">된장</span>
+                <span class="chip-amount">3큰술</span>
+                <span class="chip-cart-icon">🛒</span>
+              </a>
+              <a class="ingredient-chip" href="#" onclick="return false;">
+                <span class="chip-name">두부</span>
+                <span class="chip-amount">1/2모</span>
+                <span class="chip-cart-icon">🛒</span>
+              </a>
+              <a class="ingredient-chip" href="#" onclick="return false;">
+                <span class="chip-name">애호박</span>
+                <span class="chip-amount">1/3개</span>
+                <span class="chip-cart-icon">🛒</span>
+              </a>
+              <a class="ingredient-chip" href="#" onclick="return false;">
+                <span class="chip-name">감자</span>
+                <span class="chip-amount">1개</span>
+                <span class="chip-cart-icon">🛒</span>
+              </a>
+              <a class="ingredient-chip" href="#" onclick="return false;">
+                <span class="chip-name">대파</span>
+                <span class="chip-amount">적당량</span>
+                <span class="chip-cart-icon">🛒</span>
+              </a>
+              <a class="ingredient-chip" href="#" onclick="return false;">
+                <span class="chip-name">멸치육수</span>
+                <span class="chip-amount">500ml</span>
+                <span class="chip-cart-icon">🛒</span>
+              </a>
+              <a class="ingredient-chip" href="#" onclick="return false;">
+                <span class="chip-name">마늘</span>
+                <span class="chip-amount">2쪽</span>
+                <span class="chip-cart-icon">🛒</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 조리 단계 섹션 -->
+          <div class="modal-section" style="margin-bottom: 0;">
+            <div class="modal-section-header">
+              <div class="modal-section-icon">📋</div>
+              <span class="modal-section-title">조리 방법</span>
+              <span class="modal-section-count">5단계</span>
+            </div>
+
+            <div class="recipe-steps">
+              <div class="recipe-step">
+                <div class="step-number">1</div>
+                <p class="step-text">냄비에 멸치와 다시마를 넣고 물 500ml를 부어 육수를 끓입니다. 끓으면 다시마와 멸치를 건져냅니다.</p>
+              </div>
+              <div class="step-connector"></div>
+              <div class="recipe-step">
+                <div class="step-number">2</div>
+                <p class="step-text">감자와 애호박은 먹기 좋은 크기로 썰고, 두부는 2cm 크기로 깍둑썰기 합니다.</p>
+              </div>
+              <div class="step-connector"></div>
+              <div class="recipe-step">
+                <div class="step-number">3</div>
+                <p class="step-text">육수가 끓으면 된장 3큰술을 풀어 넣고 감자를 먼저 넣어 5분간 끓입니다.</p>
+              </div>
+              <div class="step-connector"></div>
+              <div class="recipe-step">
+                <div class="step-number">4</div>
+                <p class="step-text">두부, 애호박, 다진 마늘을 넣고 중불에서 3분 더 끓입니다.</p>
+              </div>
+              <div class="step-connector"></div>
+              <div class="recipe-step">
+                <div class="step-number">5</div>
+                <p class="step-text">마지막으로 대파를 넣고 한 번 더 끓인 뒤 불을 끕니다. 기호에 따라 청양고추를 추가해도 좋습니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 7. RecipeModal — 로딩 상태 ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">RecipeModal — 로딩 스켈레톤</span>
+      <div style="border-radius: var(--radius-xl); overflow: hidden; border: 1.5px solid var(--border); max-width: 600px; margin: 0 auto; background: var(--white);">
+        <div class="skeleton" style="aspect-ratio: 16/7; width: 100%; border-radius: 0;"></div>
+        <div style="padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+          <div class="skeleton skeleton-line w-60" style="height: 20px; border-radius: var(--radius-sm);"></div>
+          <div class="skeleton skeleton-line w-90" style="height: 14px;"></div>
+          <div class="skeleton skeleton-line w-70" style="height: 14px;"></div>
+          <div style="margin-top: 8px;">
+            <div class="skeleton skeleton-line w-40" style="height: 12px; margin-bottom: 10px;"></div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <div class="skeleton" style="height: 36px; width: 90px; border-radius: var(--radius-full);"></div>
+              <div class="skeleton" style="height: 36px; width: 80px; border-radius: var(--radius-full);"></div>
+              <div class="skeleton" style="height: 36px; width: 110px; border-radius: var(--radius-full);"></div>
+              <div class="skeleton" style="height: 36px; width: 75px; border-radius: var(--radius-full);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 8. HomeView 전체 (인라인 미리보기) ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">HomeView — 전체 레이아웃 미리보기</span>
+
+      <div style="border: 1.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--cream);">
+
+        <!-- 상단 헤더 & 검색 -->
+        <div style="background: linear-gradient(180deg, #F0E8DC 0%, var(--cream) 100%); padding: 32px 24px 24px; text-align: center;">
+          <div class="app-logo" style="justify-content: center; margin-bottom: 16px;">
+            <div class="logo-icon">🍳</div>
+            <h1 class="app-name">Reci<span>pick</span></h1>
+          </div>
+          <p class="app-tagline" style="font-size: 14px; margin-bottom: 20px;">유튜브 요리 영상에서 레시피를 자동 추출합니다</p>
+          <div class="search-bar" style="max-width: 600px; margin: 0 auto;">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" type="text" value="백종원 된장찌개" />
+            <button class="search-btn">검색</button>
+          </div>
+        </div>
+
+        <!-- 검색 기록 탭 -->
+        <div style="padding: 12px 24px; background: var(--white); border-bottom: 1px solid var(--border);">
+          <div class="history-tabs-wrap">
+            <span class="history-label">🕐</span>
+            <button class="tab-chip active">백종원 된장찌개 <span class="tab-close">✕</span></button>
+            <button class="tab-chip">1분요리 파스타 <span class="tab-close">✕</span></button>
+            <button class="tab-chip">쉐프의 테이블 <span class="tab-close">✕</span></button>
+          </div>
+        </div>
+
+        <!-- 영상 목록 -->
+        <div style="padding: 20px 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <p style="font-size: 13px; color: var(--muted-fg);">"백종원 된장찌개" — 42개 결과</p>
+            <span class="badge badge-mocha">요리 채널만</span>
+          </div>
+          <div class="video-grid">
+            <article class="video-card">
+              <div class="video-thumbnail-wrap">
+                <img class="video-thumbnail" src="https://picsum.photos/seed/food4/400/225" alt="" />
+                <div class="video-play-overlay"><div class="play-icon">▶</div></div>
+                <span class="video-duration">12:35</span>
+              </div>
+              <div class="video-info">
+                <div class="video-channel">
+                  <div class="channel-avatar">백</div>
+                  <span class="channel-name">백종원의 요리비책</span>
+                </div>
+                <h3 class="video-title">정통 된장찌개 완벽 레시피 공개</h3>
+                <div class="video-meta">
+                  <span class="video-date">2024.03.15</span>
+                  <span class="recipe-badge">🍽</span>
+                </div>
+              </div>
+            </article>
+            <div class="skeleton-card">
+              <div class="skeleton skeleton-thumb"></div>
+              <div class="skeleton-body">
+                <div class="skeleton skeleton-line w-40"></div>
+                <div class="skeleton skeleton-line w-90"></div>
+                <div class="skeleton skeleton-line w-70"></div>
+              </div>
+            </div>
+            <article class="video-card">
+              <div class="video-thumbnail-wrap">
+                <img class="video-thumbnail" src="https://picsum.photos/seed/food5/400/225" alt="" />
+                <div class="video-play-overlay"><div class="play-icon">▶</div></div>
+                <span class="video-duration">8:12</span>
+              </div>
+              <div class="video-info">
+                <div class="video-channel">
+                  <div class="channel-avatar">요</div>
+                  <span class="channel-name">요리쿡 TV</span>
+                </div>
+                <h3 class="video-title">집밥 된장찌개 초간단 레시피</h3>
+                <div class="video-meta">
+                  <span class="video-date">2024.02.20</span>
+                  <span class="recipe-badge">🍽</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 상태 표시 예시 ═══ -->
+    <div class="mockup-section">
+      <span class="mockup-section-title">상태 표시 / 피드백</span>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="status-bar">
+          <span class="status-dot"></span>
+          레시피 분석 완료 — 캐시에서 불러왔습니다 (0.1초)
+          <span class="badge badge-sage" style="margin-left: auto;">✓ 캐시됨</span>
+        </div>
+        <div class="status-bar">
+          <span class="status-dot loading"></span>
+          레시피를 분석 중입니다... (보통 3~5초 소요)
+        </div>
+        <div class="status-bar" style="background: rgba(196,114,74,.08);">
+          <span style="font-size: 16px;">⚠️</span>
+          이 영상에는 자막이 없어 레시피를 추출할 수 없습니다
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // 탭 인터랙션 시뮬레이션
+  document.querySelectorAll('.tab-close').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const chip = btn.closest('.tab-chip');
+      chip.style.opacity = '0';
+      chip.style.transform = 'scale(0.8)';
+      setTimeout(() => chip.remove(), 200);
+    });
+  });
+
+  // 영상 카드 호버 시뮬레이션
+  document.querySelectorAll('.video-card').forEach(card => {
+    card.addEventListener('click', () => {
+      card.style.border = '2px solid var(--terracotta)';
+      setTimeout(() => card.style.border = '', 500);
+    });
+  });
+</script>
+</body>
+</html>
