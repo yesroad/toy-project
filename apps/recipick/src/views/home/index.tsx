@@ -41,7 +41,7 @@ export default function HomeView() {
           </h1>
         </div>
         <p className="text-[14px] text-[#7d6550] mb-5 break-keep">
-          유튜브 요리 영상을 검색하고
+          유튜브 요리 영상을 <span className="text-[#c4724a] font-semibold">pick</span>하고
           <br />
           레시피와 재료를 한 번에 확인하세요
         </p>
