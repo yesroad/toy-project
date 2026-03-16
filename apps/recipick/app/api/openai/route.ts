@@ -5,10 +5,6 @@ import { z } from 'zod';
 import { serverEnv } from '@/env/server';
 import type { RecipeAnalysis } from '@/types/api/openai/response';
 
-const client = new OpenAI({
-  apiKey: serverEnv.openAiApiKey,
-});
-
 const RecipeAnalysisSchema = z.object({
   ingredients: z.array(
     z.object({
@@ -54,6 +50,10 @@ const TRANSLATE_SYSTEM_PROMPT = `당신은 전문 번역가입니다.
 요리 관련 용어는 한국에서 통용되는 표현을 사용하세요.`;
 
 export async function POST(request: Request) {
+  const client = new OpenAI({
+    apiKey: serverEnv.openAiApiKey,
+  });
+
   let body: { type?: string; caption?: string; content?: string };
   try {
     body = await request.json();
