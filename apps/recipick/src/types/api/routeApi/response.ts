@@ -39,3 +39,7 @@ export interface SearchResult {
 }
 
 export interface SearchResponse extends SearchResult {}
+
+export interface CachedSearchResponse {
+  videos: VideoItem[];
+}

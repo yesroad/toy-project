@@ -2,7 +2,7 @@ import 'server-only';
 
 import { createClient } from '@supabase/supabase-js';
 import { serverEnv } from '@/env/server';
-import type { SearchResult } from '@/types/api/routeApi/response';
+import type { SearchResult, VideoItem } from '@/types/api/routeApi/response';
 
 const CACHE_TTL_HOURS = 24;
 
@@ -41,6 +41,36 @@ export async function getCachedSearch(
   }
 
   return data.result as SearchResult;
+}
+
+export async function getAllCachedSearchVideos(query: string): Promise<VideoItem[]> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from('youtube_search_cache')
+    .select('result, created_at')
+    .eq('query', query);
+
+  if (error || !data || data.length === 0) return [];
+
+  const now = new Date();
+  const seenIds = new Set<string>();
+  const validVideos: VideoItem[] = [];
+
+  for (const row of data) {
+    const createdAt = new Date(row.created_at as string);
+    const expiredAt = new Date(createdAt.getTime() + CACHE_TTL_HOURS * 60 * 60 * 1000);
+    if (now > expiredAt) continue; // 만료된 행 건너뜀
+
+    for (const video of (row.result as SearchResult).videos) {
+      if (!seenIds.has(video.videoId)) {
+        seenIds.add(video.videoId);
+        validVideos.push(video);
+      }
+    }
+  }
+
+  return validVideos;
 }
 
 export async function setCachedSearch(
