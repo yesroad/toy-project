@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import he from 'he';
-import { parseTimedTextXml } from '@/lib/caption';
 import {
   filterVideo,
   parseDurationSeconds,
@@ -9,11 +8,11 @@ import {
 } from '@/lib/youtube';
 import { getCachedSearch, setCachedSearch } from '@/lib/youtubeCache';
 import { serverEnv } from '@/env/server';
+import { getCaption, getVideoDetail } from '@/services/captionService';
 import type { SearchResult, VideoItem } from '@/types/api/routeApi/response';
 import type {
   YouTubeSearchResponse,
   YouTubeVideoDetailsResponse,
-  YouTubeVideoSnippetResponse,
 } from '@/types/api/youtube/response';
 
 class ApiRouteError extends Error {
@@ -141,7 +140,6 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
 
   const data: YouTubeSearchResponse = await res.json();
 
-  // 1차 필터: Hard exclude 키워드만 (검색 단계에서 명백한 비요리 영상 제거)
   const hardFiltered = data.items.filter(
     (item) =>
       !HARD_EXCLUDE_KEYWORDS.some((kw) =>
@@ -149,11 +147,9 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
       ),
   );
 
-  // videos.list로 상세 정보 배치 조회 (statistics + snippet + contentDetails)
   const videoIds = hardFiltered.map((item) => item.id.videoId);
   const detailsMap = await getVideoDetails(videoIds, apiKey);
 
-  // 통합 필터: 다중 신호(카테고리, 키워드, 조회수, duration) 종합 판별
   const videos: VideoItem[] = hardFiltered
     .filter((item) => {
       const details = detailsMap.get(item.id.videoId);
@@ -180,146 +176,9 @@ async function searchVideos(q: string, pageToken?: string): Promise<SearchResult
     nextPageToken: data.nextPageToken,
   };
 
-  void setCachedSearch(q, cacheKey, result).catch(() => {
-    // 캐시 저장 실패는 응답에 영향 없음
-  });
+  void setCachedSearch(q, cacheKey, result).catch(() => {});
 
   return result;
-}
-
-type CaptionResult = { text: string; lang: 'ko' | 'en' };
-
-interface CaptionTrackInfo {
-  baseUrl: string;
-  lang: string;
-  isAsr: boolean;
-}
-
-const BROWSER_HEADERS = {
-  'User-Agent':
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-};
-
-/**
- * YouTube 영상 페이지에서 서명된 자막 track URL 목록 추출.
- * 직접 timedtext API 호출 시 서버 IP 차단(429)되므로, 브라우저처럼 페이지를 열어
- * ytInitialPlayerResponse의 서명된 URL(signature/expire 포함)을 사용.
- */
-async function getCaptionTracksFromPage(videoId: string): Promise<CaptionTrackInfo[]> {
-  const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
-    cache: 'no-store',
-    signal: AbortSignal.timeout(8000),
-    headers: BROWSER_HEADERS,
-  });
-  if (!res.ok) return [];
-
-  const html = await res.text();
-
-  // captionTracks 배열 시작 위치를 찾아 괄호 카운팅으로 정확히 추출
-  const keyIndex = html.indexOf('"captionTracks":');
-  if (keyIndex === -1) return [];
-
-  const arrayStart = html.indexOf('[', keyIndex);
-  if (arrayStart === -1) return [];
-
-  let depth = 0;
-  let arrayEnd = arrayStart;
-  for (let i = arrayStart; i < html.length; i++) {
-    const ch = html[i];
-    if (ch === '[' || ch === '{') depth++;
-    else if (ch === ']' || ch === '}') {
-      depth--;
-      if (depth === 0) {
-        arrayEnd = i;
-        break;
-      }
-    }
-  }
-
-  try {
-    const rawJson = html
-      .slice(arrayStart, arrayEnd + 1)
-      .replace(/\\u0026/g, '&')
-      .replace(/\\u003d/g, '=')
-      .replace(/\\u003c/g, '<')
-      .replace(/\\u003e/g, '>');
-    const tracks: Array<{ baseUrl: string; vssId?: string }> = JSON.parse(rawJson);
-
-    return tracks.map((track) => {
-      const vssId = track.vssId ?? '';
-      const isAsr = vssId.startsWith('a.');
-      const lang = vssId.replace(/^a\./, '').replace(/^\./, '') || 'ko';
-      return { baseUrl: track.baseUrl, lang, isAsr };
-    });
-  } catch {
-    return [];
-  }
-}
-
-async function getCaption(videoId: string): Promise<CaptionResult> {
-  const tracks = await getCaptionTracksFromPage(videoId);
-  if (tracks.length === 0) throw new Error(`자막을 찾을 수 없습니다: ${videoId}`);
-
-  // 우선순위: 수동 ko > 수동 en > ASR ko > ASR en
-  const orderedTracks = [
-    tracks.find((t) => t.lang === 'ko' && !t.isAsr),
-    tracks.find((t) => t.lang === 'en' && !t.isAsr),
-    tracks.find((t) => t.lang === 'ko' && t.isAsr),
-    tracks.find((t) => t.lang === 'en' && t.isAsr),
-  ].filter((t): t is CaptionTrackInfo => t !== undefined);
-
-  for (const track of orderedTracks) {
-    try {
-      const res = await fetch(`${track.baseUrl}&fmt=srv3`, {
-        cache: 'no-store',
-        signal: AbortSignal.timeout(4000),
-        headers: BROWSER_HEADERS,
-      });
-      if (!res.ok) continue;
-      const xml = await res.text();
-      const text = parseTimedTextXml(xml);
-      if (text.trim().length > 0) {
-        const lang: 'ko' | 'en' = track.lang === 'en' ? 'en' : 'ko';
-        return { text, lang };
-      }
-    } catch {
-      continue;
-    }
-  }
-
-  throw new Error(`자막을 찾을 수 없습니다: ${videoId}`);
-}
-
-async function getVideoDetail(videoId: string): Promise<{
-  title: string;
-  description: string;
-  thumbnail: string;
-  channelName: string;
-}> {
-  const params = new URLSearchParams({
-    part: 'snippet',
-    id: videoId,
-    key: serverEnv.youtubeDataApiKey,
-  });
-  const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?${params}`, {
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!res.ok) throw new Error(`YouTube API 오류: ${res.status}`);
-
-  const data: YouTubeVideoSnippetResponse = await res.json();
-  const item = data.items?.[0];
-  if (!item) throw new Error('영상을 찾을 수 없습니다');
-
-  const thumbnails = item.snippet.thumbnails;
-  const thumbnail = thumbnails?.high?.url ?? thumbnails?.medium?.url ?? thumbnails?.default?.url ?? '';
-
-  return {
-    title: item.snippet.title,
-    description: item.snippet.description,
-    thumbnail,
-    channelName: item.snippet.channelTitle,
-  };
 }
 
 export async function GET(request: Request) {

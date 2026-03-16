@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import { chunkCaption } from '@/lib/caption';
+import { getRecipeCache, saveRecipeCache } from '@/services/supabaseService';
+import { getVideoDetail, getCaption } from '@/services/captionService';
+import { analyzeDescription, analyzeCaption, translateText } from '@/services/openaiService';
+import { getIngredientLinks } from '@/services/ingredientService';
 import type { RecipeRequest } from '@/types/api/routeApi/request';
 import type { Recipe, CoupangLinks } from '@/types/api/routeApi/response';
 import type { RecipeAnalysis } from '@/types/api/openai/response';
 
 const MIN_INGREDIENTS_COUNT = 3;
-
-function getBaseUrl(request: Request): string {
-  const url = new URL(request.url);
-  return `${url.protocol}//${url.host}`;
-}
 
 function mergeRecipeAnalyses(analyses: RecipeAnalysis[]): RecipeAnalysis {
   const ingredientMap = new Map<string, string>();
@@ -46,30 +45,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'videoId가 필요합니다' }, { status: 400 });
   }
 
-  const baseUrl = getBaseUrl(request);
-
   // 1. Supabase 캐시 조회
   try {
-    const cacheRes = await fetch(`${baseUrl}/api/supabase?videoId=${encodeURIComponent(videoId)}`);
-    if (cacheRes.ok) {
-      const { recipe } = await cacheRes.json();
-      if (recipe) return NextResponse.json({ recipe: { ...recipe, cached: true } });
-    }
+    const cached = await getRecipeCache(videoId);
+    if (cached) return NextResponse.json({ recipe: { ...cached, cached: true } });
   } catch {
     // 캐시 조회 실패해도 계속 진행
   }
 
   // 2. videoDetail + caption 병렬 시작 (description 분석과 자막 fetch를 동시에)
   const [videoDetailResult, captionResult] = await Promise.allSettled([
-    fetch(`${baseUrl}/api/youtube?action=videoDetail&videoId=${encodeURIComponent(videoId)}`).then(
-      (res) => (res.ok ? (res.json() as Promise<{ title: string; description: string; thumbnail: string; channelName: string }>) : null),
-    ),
-    fetch(`${baseUrl}/api/youtube?action=caption&videoId=${encodeURIComponent(videoId)}`).then(
-      (res) =>
-        res.ok
-          ? (res.json() as Promise<{ caption: string; lang: string }>)
-          : Promise.reject(new Error(`caption fetch failed: ${res.status}`)),
-    ),
+    getVideoDetail(videoId),
+    getCaption(videoId),
   ]);
 
   // videoDetail에서 메타데이터 추출
@@ -80,7 +67,7 @@ export async function POST(request: Request) {
   };
   let descriptionAnalysis: RecipeAnalysis | null = null;
 
-  if (videoDetailResult.status === 'fulfilled' && videoDetailResult.value) {
+  if (videoDetailResult.status === 'fulfilled') {
     const detail = videoDetailResult.value;
     videoMeta.title = detail.title ?? '';
     videoMeta.thumbnail = detail.thumbnail ?? '';
@@ -89,16 +76,9 @@ export async function POST(request: Request) {
     // description으로 레시피 분석 시도
     if (detail.description && detail.description.trim().length > 0) {
       try {
-        const descRes = await fetch(`${baseUrl}/api/openai`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'description', content: detail.description }),
-        });
-        if (descRes.ok) {
-          const analysis: RecipeAnalysis = await descRes.json();
-          if (analysis.ingredients.length >= MIN_INGREDIENTS_COUNT) {
-            descriptionAnalysis = analysis;
-          }
+        const analysis = await analyzeDescription(detail.description);
+        if (analysis.ingredients.length >= MIN_INGREDIENTS_COUNT) {
+          descriptionAnalysis = analysis;
         }
       } catch {
         // description 분석 실패 → 자막으로 fallback
@@ -121,21 +101,13 @@ export async function POST(request: Request) {
       );
     }
 
-    let caption = captionResult.value.caption;
+    let caption = captionResult.value.text;
     const captionLang = captionResult.value.lang ?? 'ko';
 
     // 영어 자막이면 한국어로 번역 후 분석
     if (captionLang === 'en') {
       try {
-        const translateRes = await fetch(`${baseUrl}/api/openai`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'translate', content: caption }),
-        });
-        if (translateRes.ok) {
-          const { translatedText } = (await translateRes.json()) as { translatedText: string };
-          caption = translatedText;
-        }
+        caption = await translateText(caption);
       } catch {
         // 번역 실패 → 원본 영어로 계속 진행
       }
@@ -150,17 +122,7 @@ export async function POST(request: Request) {
     // 4. 자막 청킹 → OpenAI 병렬 분석
     try {
       const chunks = chunkCaption(caption);
-      const analyses = await Promise.all(
-        chunks.map(async (chunk) => {
-          const res = await fetch(`${baseUrl}/api/openai`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'caption', caption: chunk }),
-          });
-          if (!res.ok) throw new Error('OpenAI 분석 실패');
-          return res.json() as Promise<RecipeAnalysis>;
-        }),
-      );
+      const analyses = await Promise.all(chunks.map((chunk) => analyzeCaption(chunk)));
       mergedAnalysis = mergeRecipeAnalyses(analyses);
     } catch {
       return NextResponse.json({ error: '레시피 분석에 실패했습니다' }, { status: 503 });
@@ -175,14 +137,9 @@ export async function POST(request: Request) {
   // 6. ingredient_links DB에서 재료 링크 조회 (실패해도 계속 진행)
   let coupangLinks: CoupangLinks | undefined;
   try {
-    const names = mergedAnalysis.ingredients.map((i) => i.name).join(',');
-    const linkRes = await fetch(
-      `${baseUrl}/api/ingredient-links?names=${encodeURIComponent(names)}`,
-    );
-    if (linkRes.ok) {
-      const { links } = await linkRes.json();
-      if (Object.keys(links).length > 0) coupangLinks = links;
-    }
+    const names = mergedAnalysis.ingredients.map((i) => i.name);
+    const links = await getIngredientLinks(names);
+    if (Object.keys(links).length > 0) coupangLinks = links;
   } catch {
     // 링크 조회 실패해도 레시피 반환에 영향 없음
   }
@@ -199,11 +156,7 @@ export async function POST(request: Request) {
   };
 
   // 7. Supabase 캐시 저장 (비차단 — 실패해도 응답에 영향 없음)
-  fetch(`${baseUrl}/api/supabase`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ recipe }),
-  }).catch(() => {});
+  saveRecipeCache(recipe).catch(() => {});
 
   return NextResponse.json({ recipe: { ...recipe, cached: false } });
 }
