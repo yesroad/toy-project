@@ -4451,6 +4451,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/he@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "@types/he@npm:1.2.3"
+  checksum: 10c0/562e4ec00e31e3d464e79e6da4b8a5c21999d38ceca6a8facaa96e89c2d646f410bb58bb81f48a7472aeb4655ce40d27b7d77e5a4fa5a2d9caa0f3037caab5b7
+  languageName: node
+  linkType: hard
+
 "@types/inquirer@npm:^6.5.0":
   version: 6.5.0
   resolution: "@types/inquirer@npm:6.5.0"
@@ -6946,6 +6953,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"he@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "he@npm:1.2.0"
+  bin:
+    he: bin/he
+  checksum: 10c0/a27d478befe3c8192f006cdd0639a66798979dfa6e2125c6ac582a19a5ebfec62ad83e8382e6036170d873f46e4536a7e795bf8b95bf7c247f4cc0825ccc8c17
+  languageName: node
+  linkType: hard
+
 "header-case@npm:^1.0.0":
   version: 1.0.1
   resolution: "header-case@npm:1.0.1"
@@ -8958,6 +8974,7 @@ __metadata:
     "@tanstack/react-query-devtools": "npm:^5.74.4"
     "@testing-library/dom": "npm:^10.0.0"
     "@testing-library/react": "npm:^16.3.0"
+    "@types/he": "npm:^1.2.3"
     "@types/node": "npm:^20"
     "@types/qs": "npm:^6"
     "@types/react": "npm:^19"
@@ -8972,6 +8989,7 @@ __metadata:
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-unused-imports: "npm:^4.4.1"
+    he: "npm:^1.2.0"
     jsdom: "npm:^26.0.0"
     next: "npm:16.1.6"
     openai: "npm:^4.90.0"

@@ -1,32 +1,36 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useInfiniteSearchQuery } from '@/queries/search';
+
+const INITIAL_COUNT = 6;
+const LOAD_MORE_COUNT = 6;
 
 export function useVideoList(query: string) {
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useInfiniteSearchQuery(query);
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [displayCount, setDisplayCount] = useState(INITIAL_COUNT);
 
+  // 검색어 변경 시 displayCount 초기화
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || !hasNextPage) return;
+    setDisplayCount(INITIAL_COUNT);
+  }, [query]);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: '200px' },
-    );
+  const allVideos = data?.pages.flatMap((page) => page.videos) ?? [];
+  const videos = allVideos.slice(0, displayCount);
 
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const handleLoadMore = () => {
+    const nextCount = displayCount + LOAD_MORE_COUNT;
+    setDisplayCount(nextCount);
 
-  const videos = data?.pages.flatMap((page) => page.videos) ?? [];
+    // 표시할 데이터가 부족하면 다음 페이지 fetch
+    if (nextCount >= allVideos.length && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
 
-  return { videos, isLoading, isFetchingNextPage, sentinelRef };
+  const canLoadMore = displayCount < allVideos.length || (hasNextPage ?? false);
+
+  return { videos, isLoading, isFetchingNextPage, canLoadMore, handleLoadMore };
 }

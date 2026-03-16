@@ -59,19 +59,40 @@ export async function POST(request: Request) {
     // 캐시 조회 실패해도 계속 진행
   }
 
-  // 2. description 분석 (YouTube API quota 절약 — 자막 호출 전 우선 시도)
+  // 2. videoDetail + caption 병렬 시작 (description 분석과 자막 fetch를 동시에)
+  const [videoDetailResult, captionResult] = await Promise.allSettled([
+    fetch(`${baseUrl}/api/youtube?action=videoDetail&videoId=${encodeURIComponent(videoId)}`).then(
+      (res) => (res.ok ? (res.json() as Promise<{ title: string; description: string; thumbnail: string; channelName: string }>) : null),
+    ),
+    fetch(`${baseUrl}/api/youtube?action=caption&videoId=${encodeURIComponent(videoId)}`).then(
+      (res) =>
+        res.ok
+          ? (res.json() as Promise<{ caption: string; lang: string }>)
+          : Promise.reject(new Error(`caption fetch failed: ${res.status}`)),
+    ),
+  ]);
+
+  // videoDetail에서 메타데이터 추출
+  const videoMeta = {
+    title: '',
+    thumbnail: '',
+    channelName: '',
+  };
   let descriptionAnalysis: RecipeAnalysis | null = null;
-  try {
-    const detailRes = await fetch(
-      `${baseUrl}/api/youtube?action=videoDetail&videoId=${encodeURIComponent(videoId)}`,
-    );
-    if (detailRes.ok) {
-      const { description } = (await detailRes.json()) as { title: string; description: string };
-      if (description && description.trim().length > 0) {
+
+  if (videoDetailResult.status === 'fulfilled' && videoDetailResult.value) {
+    const detail = videoDetailResult.value;
+    videoMeta.title = detail.title ?? '';
+    videoMeta.thumbnail = detail.thumbnail ?? '';
+    videoMeta.channelName = detail.channelName ?? '';
+
+    // description으로 레시피 분석 시도
+    if (detail.description && detail.description.trim().length > 0) {
+      try {
         const descRes = await fetch(`${baseUrl}/api/openai`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'description', content: description }),
+          body: JSON.stringify({ type: 'description', content: detail.description }),
         });
         if (descRes.ok) {
           const analysis: RecipeAnalysis = await descRes.json();
@@ -79,10 +100,10 @@ export async function POST(request: Request) {
             descriptionAnalysis = analysis;
           }
         }
+      } catch {
+        // description 분석 실패 → 자막으로 fallback
       }
     }
-  } catch {
-    // description 분석 실패 → 자막으로 fallback
   }
 
   let mergedAnalysis: RecipeAnalysis;
@@ -92,31 +113,16 @@ export async function POST(request: Request) {
     // description에서 충분한 재료 추출 성공 → 자막 단계 건너뜀
     mergedAnalysis = descriptionAnalysis;
   } else {
-    // 3. YouTube 자막 추출 (수동 ko → 수동 en → ASR ko → ASR en)
-    let caption: string;
-    let captionLang = 'ko';
-    try {
-      const captionRes = await fetch(
-        `${baseUrl}/api/youtube?action=caption&videoId=${encodeURIComponent(videoId)}`,
-      );
-      if (!captionRes.ok) {
-        return NextResponse.json(
-          { error: '자막이 없거나 접근할 수 없는 영상입니다' },
-          { status: 422 },
-        );
-      }
-      const { caption: captionText, lang } = (await captionRes.json()) as {
-        caption: string;
-        lang: string;
-      };
-      caption = captionText;
-      captionLang = lang ?? 'ko';
-    } catch {
+    // 3. 병렬로 가져온 caption 사용 (이미 fetch 완료)
+    if (captionResult.status === 'rejected') {
       return NextResponse.json(
         { error: '자막이 없거나 접근할 수 없는 영상입니다' },
         { status: 422 },
       );
     }
+
+    let caption = captionResult.value.caption;
+    const captionLang = captionResult.value.lang ?? 'ko';
 
     // 영어 자막이면 한국어로 번역 후 분석
     if (captionLang === 'en') {
@@ -141,25 +147,7 @@ export async function POST(request: Request) {
 
     rawCaption = caption;
 
-    // 4. isCooking 체크 — 비요리 영상 API 낭비 방지
-    try {
-      const firstChunk = caption.substring(0, 2000);
-      const isCookingRes = await fetch(`${baseUrl}/api/openai`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'isCooking', content: firstChunk }),
-      });
-      if (isCookingRes.ok) {
-        const { isCooking } = (await isCookingRes.json()) as { isCooking: boolean };
-        if (!isCooking) {
-          return NextResponse.json({ error: '요리 레시피 영상이 아닙니다' }, { status: 422 });
-        }
-      }
-    } catch {
-      // isCooking 체크 실패 → 계속 진행
-    }
-
-    // 5. 자막 청킹 → OpenAI 병렬 분석
+    // 4. 자막 청킹 → OpenAI 병렬 분석
     try {
       const chunks = chunkCaption(caption);
       const analyses = await Promise.all(
@@ -178,13 +166,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '레시피 분석에 실패했습니다' }, { status: 503 });
     }
 
-    // 6. 재료 개수 검증 — 품질 낮은 결과 DB 저장 차단
+    // 5. 재료 개수 검증 — 품질 낮은 결과 DB 저장 차단
     if (mergedAnalysis.ingredients.length < MIN_INGREDIENTS_COUNT) {
       return NextResponse.json({ error: '레시피 정보가 충분하지 않습니다' }, { status: 422 });
     }
   }
 
-  // 7. ingredient_links DB에서 재료 링크 조회 (실패해도 계속 진행)
+  // 6. ingredient_links DB에서 재료 링크 조회 (실패해도 계속 진행)
   let coupangLinks: CoupangLinks | undefined;
   try {
     const names = mergedAnalysis.ingredients.map((i) => i.name).join(',');
@@ -201,16 +189,16 @@ export async function POST(request: Request) {
 
   const recipe: Omit<Recipe, 'cached'> = {
     videoId,
-    title: '',
-    thumbnail: '',
-    channelName: '',
+    title: videoMeta.title,
+    thumbnail: videoMeta.thumbnail,
+    channelName: videoMeta.channelName,
     ingredients: mergedAnalysis.ingredients,
     steps: mergedAnalysis.steps,
     coupangLinks,
     rawCaption,
   };
 
-  // 8. Supabase 캐시 저장 (비차단 — 실패해도 응답에 영향 없음)
+  // 7. Supabase 캐시 저장 (비차단 — 실패해도 응답에 영향 없음)
   fetch(`${baseUrl}/api/supabase`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

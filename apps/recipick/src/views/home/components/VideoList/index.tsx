@@ -11,7 +11,8 @@ interface VideoListProps {
 }
 
 export default function VideoList({ query, onVideoClick }: VideoListProps) {
-  const { videos, isLoading, isFetchingNextPage, sentinelRef } = useVideoList(query);
+  const { videos, isLoading, isFetchingNextPage, canLoadMore, handleLoadMore } =
+    useVideoList(query);
 
   if (isLoading) {
     return (
@@ -42,15 +43,24 @@ export default function VideoList({ query, onVideoClick }: VideoListProps) {
         ))}
       </div>
 
-      {isFetchingNextPage && (
-        <div className="flex justify-center items-center gap-2 mt-8 py-4 text-[#9e7b5a]">
-          <Loader2 size={20} className="animate-spin" />
-          <span className="text-[13px] text-[#7d6550]">더 불러오는 중…</span>
+      {canLoadMore && (
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={handleLoadMore}
+            disabled={isFetchingNextPage}
+            className="inline-flex items-center gap-1.5 px-[18px] py-[9px] rounded-[12px] border-[1.5px] border-[#9e7b5a] bg-transparent text-[13px] font-semibold text-[#9e7b5a] hover:bg-[#f5ede0] disabled:opacity-60 transition-all"
+          >
+            {isFetchingNextPage ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                <span>불러오는 중…</span>
+              </>
+            ) : (
+              <span>더 불러오기 ↓</span>
+            )}
+          </button>
         </div>
       )}
-
-      {/* Intersection Observer sentinel */}
-      <div ref={sentinelRef} className="h-1" />
     </div>
   );
 }
