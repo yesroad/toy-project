@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     return Response.json({ error: '요청 본문이 올바르지 않습니다' }, { status: 400 });
   }
 
-  const { videoId } = body;
+  const { videoId, caption: clientCaption, captionLang: clientCaptionLang } = body;
   if (!videoId || typeof videoId !== 'string') {
     return Response.json({ error: 'videoId가 필요합니다' }, { status: 400 });
   }
@@ -79,8 +79,11 @@ export async function POST(request: Request) {
         }
         t('cache-miss');
 
-        // 2. caption fetch를 백그라운드에서 즉시 시작 (videoDetail과 완전 병렬)
-        const captionPromise = getCaption(videoId);
+        // 2. caption 결정: 클라이언트가 브라우저에서 직접 취득한 자막이 있으면 우선 사용.
+        //    없으면 서버에서 자막 fetch (클라우드 IP → 차단될 수 있음).
+        const captionPromise = clientCaption
+          ? Promise.resolve({ text: clientCaption, lang: clientCaptionLang ?? 'ko' } as const)
+          : getCaption(videoId);
 
         // 3. videoDetail 완료 즉시 → video_detail 이벤트 전송 (체감 대기 감소)
         const videoMeta = { title: '', thumbnail: '', channelName: '' };

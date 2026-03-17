@@ -1,4 +1,5 @@
 import Services from '@workspace/services';
+import { fetchCaptionFromBrowser } from '@/lib/clientCaption';
 import type { Recipe, RecipeResponse } from '@/types/api/routeApi/response';
 
 type VideoDetail = { title: string; thumbnail: string; channelName: string };
@@ -26,10 +27,17 @@ class RecipeServices extends Services {
     handlers: StreamHandlers,
     signal?: AbortSignal,
   ): Promise<void> {
+    // 브라우저(주거용 IP + YouTube 쿠키)로 자막 먼저 시도.
+    // 서버(클라우드 IP)에서 차단되는 ASR 자막을 우회 취득.
+    const clientCaption = await fetchCaptionFromBrowser(videoId).catch(() => null);
+
     const res = await fetch('/api/recipe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ videoId }),
+      body: JSON.stringify({
+        videoId,
+        ...(clientCaption && { caption: clientCaption.text, captionLang: clientCaption.lang }),
+      }),
       signal: signal ?? AbortSignal.timeout(120_000),
     });
 
