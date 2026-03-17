@@ -14,7 +14,7 @@ interface RecipeModalProps {
 }
 
 export default function RecipeModal({ videoId, onClose }: RecipeModalProps) {
-  const { recipe, isLoading, isError } = useRecipeModal(videoId);
+  const { state } = useRecipeModal(videoId);
 
   return (
     <Dialog
@@ -29,19 +29,17 @@ export default function RecipeModal({ videoId, onClose }: RecipeModalProps) {
       >
         <DialogTitle className="sr-only">레시피</DialogTitle>
 
-        {isLoading && <ModalSkeleton />}
+        {state.phase === 'loading_detail' && <ModalSkeleton />}
 
-        {isError && (
-          <div className="p-10 text-center">
-            <p className="text-4xl mb-3">😅</p>
-            <p className="text-[15px] font-semibold text-[#3d2b1f]">레시피를 불러올 수 없습니다</p>
-            <p className="text-[13px] text-[#7d6550] mt-1">
-              이 영상에는 자막이 없거나 분석에 실패했습니다
-            </p>
-          </div>
+        {state.phase === 'detail_ready' && (
+          <VideoDetailSkeleton detail={state.detail} onClose={onClose} />
         )}
 
-        {recipe && <RecipeModalContent recipe={recipe} onClose={onClose} />}
+        {state.phase === 'error' && <ErrorMessage message={state.message} status={state.status} />}
+
+        {state.phase === 'recipe_ready' && (
+          <RecipeModalContent recipe={state.recipe} onClose={onClose} />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -145,6 +143,106 @@ function RecipeModalContent({ recipe, onClose }: RecipeModalContentProps) {
         </div>
       </div>
     </>
+  );
+}
+
+// video_detail 이벤트 수신 후 표시: 실제 썸네일/제목 + 재료 스켈레톤
+// 사용자가 "맞는 영상"임을 1-2초 내 확인 가능
+function VideoDetailSkeleton({
+  detail,
+  onClose,
+}: {
+  detail: { title: string; thumbnail: string; channelName: string };
+  onClose: () => void;
+}) {
+  return (
+    <>
+      <div className="relative aspect-[16/7] overflow-hidden bg-[#f5ede0]">
+        <Image
+          src={detail.thumbnail}
+          alt={detail.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 640px) 100vw, 672px"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0" />
+        <div className="absolute bottom-0 left-0 right-0 p-5">
+          <h2 className="text-[18px] font-bold text-white leading-snug break-keep">
+            {detail.title}
+          </h2>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-[13px] text-white/75">📺 {detail.channelName}</p>
+            <span className="text-[11px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full flex items-center gap-1">
+              <Loader2 size={10} className="animate-spin" />
+              레시피 분석 중
+            </span>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          aria-label="닫기"
+          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 hover:bg-black/75
+                     text-white flex items-center justify-center transition-colors cursor-pointer text-base"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="p-6 space-y-3">
+        <Skeleton className="h-5 w-3/5" />
+        <Skeleton className="h-4 w-4/5" />
+        <Skeleton className="h-4 w-2/3" />
+        <div className="flex flex-wrap gap-2 pt-2">
+          {[90, 75, 105, 80, 95].map((w, i) => (
+            <Skeleton key={i} className="h-9 rounded-full" style={{ width: `${w}px` }} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+const ERROR_CONFIG: Record<number, { emoji: string; title: string; desc: string }> = {
+  422: {
+    emoji: '🎬',
+    title: '레시피 정보가 없는 영상이에요',
+    desc: '자막이 없거나 레시피 내용이 부족한 영상입니다',
+  },
+  503: {
+    emoji: '🤖',
+    title: 'AI 분석에 실패했습니다',
+    desc: '잠시 후 다시 시도해주세요',
+  },
+  500: {
+    emoji: '⚠️',
+    title: '서버 오류가 발생했습니다',
+    desc: '잠시 후 다시 시도해주세요',
+  },
+  0: {
+    emoji: '📡',
+    title: '연결이 끊겼습니다',
+    desc: '네트워크 상태를 확인하고 다시 시도해주세요',
+  },
+};
+
+const DEFAULT_ERROR = {
+  emoji: '😅',
+  title: '레시피를 불러올 수 없습니다',
+  desc: '알 수 없는 오류가 발생했습니다',
+};
+
+function ErrorMessage({ status, message }: { status: number; message: string }) {
+  const config = ERROR_CONFIG[status] ?? DEFAULT_ERROR;
+  return (
+    <div className="p-10 text-center">
+      <p className="text-4xl mb-3">{config.emoji}</p>
+      <p className="text-[15px] font-semibold text-[#3d2b1f]">{config.title}</p>
+      <p className="text-[13px] text-[#7d6550] mt-1">{config.desc}</p>
+      {process.env.NODE_ENV === 'development' && (
+        <p className="text-[11px] text-[#bbb] mt-3 font-mono">
+          {status !== 0 ? `HTTP ${status}` : 'network'} — {message}
+        </p>
+      )}
+    </div>
   );
 }
 

@@ -11,28 +11,65 @@ interface CaptionTrackInfo {
   isAsr: boolean;
 }
 
-const BROWSER_HEADERS = {
-  'User-Agent':
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+// YouTube Android 앱이 내부적으로 사용하는 Innertube API 키 (공개값)
+const INNERTUBE_API_KEY = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM394';
+
+const INNERTUBE_CONTEXT = {
+  client: {
+    clientName: 'ANDROID',
+    clientVersion: '17.31.35',
+    androidSdkVersion: 30,
+    userAgent: 'com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip',
+    hl: 'ko',
+    gl: 'KR',
+  },
 };
 
 /**
- * YouTube 영상 페이지에서 서명된 자막 track URL 목록 추출.
- * 직접 timedtext API 호출 시 서버 IP 차단(429)되므로, 브라우저처럼 페이지를 열어
- * ytInitialPlayerResponse의 서명된 URL(signature/expire 포함)을 사용.
- * Vercel(AWS IP)에서는 YouTube HTML 스크래핑이 차단되므로 타임아웃을 3초로 단축.
+ * YouTube Innertube API로 자막 track 목록 조회.
+ * HTML 스크래핑과 달리 서버 IP(Vercel AWS) 차단을 받지 않음.
+ * YouTube Android 앱이 사용하는 /youtubei/v1/player 엔드포인트 활용.
  */
-export async function getCaptionTracksFromPage(videoId: string): Promise<CaptionTrackInfo[]> {
+async function getCaptionTracksViaInnertube(videoId: string): Promise<CaptionTrackInfo[]> {
+  const res = await fetch(`https://www.youtube.com/youtubei/v1/player?key=${INNERTUBE_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ videoId, context: INNERTUBE_CONTEXT }),
+    cache: 'no-store',
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) return [];
+
+  const data = await res.json();
+  const tracks: Array<{ baseUrl: string; vssId?: string; languageCode?: string }> =
+    data?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [];
+
+  return tracks.map((track) => {
+    const vssId = track.vssId ?? '';
+    const isAsr = vssId.startsWith('a.');
+    const langRaw = track.languageCode ?? (vssId.replace(/^a\./, '').replace(/^\./, '') || 'ko');
+    const lang = langRaw.split('-')[0];
+    return { baseUrl: track.baseUrl, lang, isAsr };
+  });
+}
+
+/**
+ * HTML 스크래핑 fallback: Innertube 실패 시에만 사용.
+ * Vercel(AWS IP)에서는 YouTube가 차단하는 경우가 많음.
+ */
+async function getCaptionTracksFromPage(videoId: string): Promise<CaptionTrackInfo[]> {
   const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
     cache: 'no-store',
-    signal: AbortSignal.timeout(3000),
-    headers: BROWSER_HEADERS,
+    signal: AbortSignal.timeout(5000),
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+    },
   });
   if (!res.ok) return [];
 
   const html = await res.text();
-
   const keyIndex = html.indexOf('"captionTracks":');
   if (keyIndex === -1) return [];
 
@@ -61,7 +98,6 @@ export async function getCaptionTracksFromPage(videoId: string): Promise<Caption
       .replace(/\\u003c/g, '<')
       .replace(/\\u003e/g, '>');
     const tracks: Array<{ baseUrl: string; vssId?: string }> = JSON.parse(rawJson);
-
     return tracks.map((track) => {
       const vssId = track.vssId ?? '';
       const isAsr = vssId.startsWith('a.');
@@ -74,7 +110,11 @@ export async function getCaptionTracksFromPage(videoId: string): Promise<Caption
 }
 
 export async function getCaption(videoId: string): Promise<CaptionResult> {
-  const tracks = await getCaptionTracksFromPage(videoId);
+  // Innertube 우선 시도 → 실패 시 HTML 스크래핑 fallback
+  let tracks = await getCaptionTracksViaInnertube(videoId);
+  if (tracks.length === 0) {
+    tracks = await getCaptionTracksFromPage(videoId);
+  }
   if (tracks.length === 0) throw new Error(`자막을 찾을 수 없습니다: ${videoId}`);
 
   const orderedTracks = [
@@ -89,7 +129,10 @@ export async function getCaption(videoId: string): Promise<CaptionResult> {
       const res = await fetch(`${track.baseUrl}&fmt=srv3`, {
         cache: 'no-store',
         signal: AbortSignal.timeout(4000),
-        headers: BROWSER_HEADERS,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
       });
       if (!res.ok) continue;
       const xml = await res.text();
