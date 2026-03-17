@@ -8,12 +8,20 @@ import { recipeKeys } from '@/queries/recipe/queryKeys';
 
 type VideoDetail = { title: string; thumbnail: string; channelName: string };
 
+export type RecipeErrorCode =
+  | 'CAPTION_UNAVAILABLE'
+  | 'CAPTION_EMPTY'
+  | 'INSUFFICIENT_INGREDIENTS'
+  | 'AI_ANALYSIS_FAILED'
+  | 'SERVER_ERROR'
+  | 'NETWORK_ERROR';
+
 export type RecipeLoadState =
   | { phase: 'idle' }
   | { phase: 'loading_detail' }
   | { phase: 'detail_ready'; detail: VideoDetail }
   | { phase: 'recipe_ready'; recipe: Recipe }
-  | { phase: 'error'; message: string; status: number };
+  | { phase: 'error'; message: string; status: number; errorCode: RecipeErrorCode };
 
 export function useRecipeModal(videoId: string | null) {
   const queryClient = useQueryClient();
@@ -47,14 +55,25 @@ export function useRecipeModal(videoId: string | null) {
             queryClient.setQueryData(recipeKeys.detail(videoId), recipe);
             setState({ phase: 'recipe_ready', recipe });
           },
-          onError: (err) => setState({ phase: 'error', message: err.message, status: err.status }),
+          onError: (err) =>
+            setState({
+              phase: 'error',
+              message: err.message,
+              status: err.status,
+              errorCode: (err.errorCode as RecipeErrorCode) ?? 'SERVER_ERROR',
+            }),
         },
         abortRef.current.signal,
       )
       .catch((err: unknown) => {
         // AbortError는 모달 닫기로 인한 정상 취소 → 무시
         if (err instanceof Error && err.name === 'AbortError') return;
-        setState({ phase: 'error', message: '연결이 끊겼습니다', status: 0 });
+        setState({
+          phase: 'error',
+          message: '연결이 끊겼습니다',
+          status: 0,
+          errorCode: 'NETWORK_ERROR',
+        });
       });
 
     return () => {

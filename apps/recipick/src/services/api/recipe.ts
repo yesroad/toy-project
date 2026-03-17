@@ -6,7 +6,7 @@ type VideoDetail = { title: string; thumbnail: string; channelName: string };
 interface StreamHandlers {
   onVideoDetail: (data: VideoDetail) => void;
   onRecipe: (data: Recipe) => void;
-  onError: (data: { message: string; status: number }) => void;
+  onError: (data: { message: string; status: number; errorCode?: string }) => void;
 }
 
 class RecipeServices extends Services {

@@ -35,7 +35,9 @@ export default function RecipeModal({ videoId, onClose }: RecipeModalProps) {
           <VideoDetailSkeleton detail={state.detail} onClose={onClose} />
         )}
 
-        {state.phase === 'error' && <ErrorMessage message={state.message} status={state.status} />}
+        {state.phase === 'error' && (
+          <ErrorMessage message={state.message} status={state.status} errorCode={state.errorCode} />
+        )}
 
         {state.phase === 'recipe_ready' && (
           <RecipeModalContent recipe={state.recipe} onClose={onClose} />
@@ -201,45 +203,59 @@ function VideoDetailSkeleton({
   );
 }
 
-const ERROR_CONFIG: Record<number, { emoji: string; title: string; desc: string }> = {
-  422: {
+import type { RecipeErrorCode } from './useRecipeModal';
+
+const ERROR_CONFIG: Record<RecipeErrorCode, { emoji: string; title: string; desc: string }> = {
+  CAPTION_UNAVAILABLE: {
     emoji: '🎬',
-    title: '레시피 정보가 없는 영상이에요',
-    desc: '자막이 없거나 레시피 내용이 부족한 영상입니다',
+    title: '자막을 가져올 수 없는 영상이에요',
+    desc: '자막이 없거나 비공개 영상일 수 있습니다',
   },
-  503: {
+  CAPTION_EMPTY: {
+    emoji: '🎬',
+    title: '자막 내용이 없는 영상이에요',
+    desc: '영상에 자막 트랙은 있지만 내용이 비어있습니다',
+  },
+  INSUFFICIENT_INGREDIENTS: {
+    emoji: '🥗',
+    title: '레시피 정보가 부족한 영상이에요',
+    desc: '요리 레시피가 아니거나 재료 설명이 너무 짧습니다',
+  },
+  AI_ANALYSIS_FAILED: {
     emoji: '🤖',
     title: 'AI 분석에 실패했습니다',
     desc: '잠시 후 다시 시도해주세요',
   },
-  500: {
+  SERVER_ERROR: {
     emoji: '⚠️',
     title: '서버 오류가 발생했습니다',
     desc: '잠시 후 다시 시도해주세요',
   },
-  0: {
+  NETWORK_ERROR: {
     emoji: '📡',
     title: '연결이 끊겼습니다',
     desc: '네트워크 상태를 확인하고 다시 시도해주세요',
   },
 };
 
-const DEFAULT_ERROR = {
-  emoji: '😅',
-  title: '레시피를 불러올 수 없습니다',
-  desc: '알 수 없는 오류가 발생했습니다',
-};
-
-function ErrorMessage({ status, message }: { status: number; message: string }) {
-  const config = ERROR_CONFIG[status] ?? DEFAULT_ERROR;
+function ErrorMessage({
+  status,
+  message,
+  errorCode,
+}: {
+  status: number;
+  message: string;
+  errorCode: RecipeErrorCode;
+}) {
+  const config = ERROR_CONFIG[errorCode];
   return (
     <div className="p-10 text-center">
       <p className="text-4xl mb-3">{config.emoji}</p>
       <p className="text-[15px] font-semibold text-[#3d2b1f]">{config.title}</p>
       <p className="text-[13px] text-[#7d6550] mt-1">{config.desc}</p>
       {process.env.NODE_ENV === 'development' && (
-        <p className="text-[11px] text-[#bbb] mt-3 font-mono">
-          {status !== 0 ? `HTTP ${status}` : 'network'} — {message}
+        <p className="text-[11px] text-[#bbb] mt-3 font-mono break-all">
+          [{errorCode}] {status !== 0 ? `HTTP ${status}` : 'network'} — {message}
         </p>
       )}
     </div>

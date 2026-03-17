@@ -127,7 +127,11 @@ export async function POST(request: Request) {
           try {
             captionData = await captionPromise;
           } catch {
-            send('error', { message: '자막이 없거나 접근할 수 없는 영상입니다', status: 422 });
+            send('error', {
+              message: '자막이 없거나 접근할 수 없는 영상입니다',
+              status: 422,
+              errorCode: 'CAPTION_UNAVAILABLE',
+            });
             controller.close();
             return;
           }
@@ -135,7 +139,11 @@ export async function POST(request: Request) {
           const caption = captionData.text;
 
           if (!caption || caption.trim().length === 0) {
-            send('error', { message: '자막 내용이 없습니다', status: 422 });
+            send('error', {
+              message: '자막 내용이 비어있습니다',
+              status: 422,
+              errorCode: 'CAPTION_EMPTY',
+            });
             controller.close();
             return;
           }
@@ -148,14 +156,22 @@ export async function POST(request: Request) {
             const analyses = await Promise.all(chunks.map((chunk) => analyzeCaption(chunk)));
             mergedAnalysis = mergeRecipeAnalyses(analyses);
           } catch {
-            send('error', { message: '레시피 분석에 실패했습니다', status: 503 });
+            send('error', {
+              message: 'AI 레시피 분석에 실패했습니다',
+              status: 503,
+              errorCode: 'AI_ANALYSIS_FAILED',
+            });
             controller.close();
             return;
           }
 
           // 6. 재료 개수 검증
           if (mergedAnalysis.ingredients.length < MIN_INGREDIENTS_COUNT) {
-            send('error', { message: '레시피 정보가 충분하지 않습니다', status: 422 });
+            send('error', {
+              message: `재료가 ${mergedAnalysis.ingredients.length}개만 추출됐습니다 (최소 ${MIN_INGREDIENTS_COUNT}개 필요)`,
+              status: 422,
+              errorCode: 'INSUFFICIENT_INGREDIENTS',
+            });
             controller.close();
             return;
           }
@@ -189,7 +205,11 @@ export async function POST(request: Request) {
 
         send('recipe', { ...recipe, cached: false });
       } catch {
-        send('error', { message: '서버 오류가 발생했습니다', status: 500 });
+        send('error', {
+          message: '서버 오류가 발생했습니다',
+          status: 500,
+          errorCode: 'SERVER_ERROR',
+        });
       } finally {
         controller.close();
       }
