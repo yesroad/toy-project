@@ -1,4 +1,5 @@
 import 'server-only';
+import { Innertube } from 'youtubei.js';
 import { parseTimedTextXml } from '@/lib/caption';
 import { serverEnv } from '@/env/server';
 import type { YouTubeVideoSnippetResponse } from '@/types/api/youtube/response';
@@ -11,45 +12,22 @@ interface CaptionTrackInfo {
   isAsr: boolean;
 }
 
-// YouTube Android 앱이 내부적으로 사용하는 Innertube API 키 (공개값)
-const INNERTUBE_API_KEY = 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM394';
-
-const INNERTUBE_CONTEXT = {
-  client: {
-    clientName: 'ANDROID',
-    clientVersion: '17.31.35',
-    androidSdkVersion: 30,
-    userAgent: 'com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip',
-    hl: 'ko',
-    gl: 'KR',
-  },
-};
-
 /**
- * YouTube Innertube API로 자막 track 목록 조회.
- * HTML 스크래핑과 달리 서버 IP(Vercel AWS) 차단을 받지 않음.
- * YouTube Android 앱이 사용하는 /youtubei/v1/player 엔드포인트 활용.
+ * youtubei.js 라이브러리로 자막 track 목록 조회.
+ * 라이브러리가 Innertube API 변경을 자동 추적하므로 직접 구현 대비 유지보수가 유리함.
+ * retrieve_player: false → 플레이어 JS 로드 생략으로 초기화 속도 개선.
  */
-async function getCaptionTracksViaInnertube(videoId: string): Promise<CaptionTrackInfo[]> {
-  const res = await fetch(`https://www.youtube.com/youtubei/v1/player?key=${INNERTUBE_API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ videoId, context: INNERTUBE_CONTEXT }),
-    cache: 'no-store',
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!res.ok) return [];
-
-  const data = await res.json();
-  const tracks: Array<{ baseUrl: string; vssId?: string; languageCode?: string }> =
-    data?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [];
+async function getCaptionTracksViaYoutubeiJs(videoId: string): Promise<CaptionTrackInfo[]> {
+  const yt = await Innertube.create({ retrieve_player: false, location: 'KR', lang: 'ko' });
+  const info = await yt.getBasicInfo(videoId, { client: 'ANDROID' });
+  const tracks = info.captions?.caption_tracks ?? [];
 
   return tracks.map((track) => {
-    const vssId = track.vssId ?? '';
+    const vssId = track.vss_id ?? '';
     const isAsr = vssId.startsWith('a.');
-    const langRaw = track.languageCode ?? (vssId.replace(/^a\./, '').replace(/^\./, '') || 'ko');
+    const langRaw = track.language_code ?? (vssId.replace(/^a\./, '').replace(/^\./, '') || 'ko');
     const lang = langRaw.split('-')[0];
-    return { baseUrl: track.baseUrl, lang, isAsr };
+    return { baseUrl: track.base_url, lang, isAsr };
   });
 }
 
@@ -110,8 +88,8 @@ async function getCaptionTracksFromPage(videoId: string): Promise<CaptionTrackIn
 }
 
 export async function getCaption(videoId: string): Promise<CaptionResult> {
-  // Innertube 우선 시도 → 실패 시 HTML 스크래핑 fallback
-  let tracks = await getCaptionTracksViaInnertube(videoId);
+  // youtubei.js 우선 시도 → 실패 시 HTML 스크래핑 fallback
+  let tracks = await getCaptionTracksViaYoutubeiJs(videoId).catch(() => [] as CaptionTrackInfo[]);
   if (tracks.length === 0) {
     tracks = await getCaptionTracksFromPage(videoId);
   }
