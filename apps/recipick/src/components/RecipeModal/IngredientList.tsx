@@ -9,9 +9,9 @@ interface IngredientListProps {
 export default function IngredientList({ ingredients, coupangLinks }: IngredientListProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      {ingredients.map((ingredient) => (
+      {ingredients.map((ingredient, index) => (
         <IngredientChip
-          key={ingredient.name}
+          key={`${index}-${ingredient.name}`}
           name={ingredient.name}
           amount={ingredient.amount}
           link={coupangLinks?.[ingredient.name]}

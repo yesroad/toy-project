@@ -3,7 +3,7 @@ import 'server-only';
 const LEGACY_ENV_KEYS = {
   youtubeDataApiKey: ['YOUTUBE_API_KEY'],
   supabaseUrl: ['NEXT_PUBLIC_SUPABASE_URL'],
-  supabaseAnonKey: ['NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY='],
+  supabaseAnonKey: ['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
 } as const;
 
 function readEnv(keys: readonly string[]): string | undefined {
@@ -44,7 +44,7 @@ export const serverEnv = {
   },
   get supabaseAnonKey(): string {
     return requireEnv({
-      key: 'SUPABASE_SERVICE_ROLE_KEY=',
+      key: 'SUPABASE_ANON_KEY',
       aliases: LEGACY_ENV_KEYS.supabaseAnonKey,
     });
   },

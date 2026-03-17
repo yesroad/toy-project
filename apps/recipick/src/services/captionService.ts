@@ -65,7 +65,7 @@ export async function getCaptionTracksFromPage(videoId: string): Promise<Caption
     return tracks.map((track) => {
       const vssId = track.vssId ?? '';
       const isAsr = vssId.startsWith('a.');
-      const lang = vssId.replace(/^a\./, '').replace(/^\./, '') || 'ko';
+      const lang = (vssId.replace(/^a\./, '').replace(/^\./, '') || 'ko').split('-')[0];
       return { baseUrl: track.baseUrl, lang, isAsr };
     });
   } catch {
@@ -95,7 +95,7 @@ export async function getCaption(videoId: string): Promise<CaptionResult> {
       const xml = await res.text();
       const text = parseTimedTextXml(xml);
       if (text.trim().length > 0) {
-        const lang: 'ko' | 'en' = track.lang === 'en' ? 'en' : 'ko';
+        const lang: 'ko' | 'en' = track.lang.startsWith('en') ? 'en' : 'ko';
         return { text, lang };
       }
     } catch {
