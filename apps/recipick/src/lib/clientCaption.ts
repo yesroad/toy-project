@@ -45,9 +45,30 @@ function decodeEntities(text: string): string {
     .replace(/&#x27;/g, "'");
 }
 
+const BROWSER_CAPTION_TIMEOUT_MS = 3000;
+
+async function fetchSingleCaption(
+  videoId: string,
+  lang: string,
+  kind: string,
+): Promise<{ text: string; lang: 'ko' | 'en' }> {
+  const kindParam = kind ? `&kind=${kind}` : '';
+  const url = `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}${kindParam}`;
+  const res = await fetch(url, {
+    credentials: 'include', // YouTube 세션 쿠키 포함
+    signal: AbortSignal.timeout(2500),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const xml = await res.text();
+  const text = parseTimedText(xml);
+  if (!text.trim()) throw new Error('empty caption');
+  return { text, lang: lang as 'ko' | 'en' };
+}
+
 export async function fetchCaptionFromBrowser(
   videoId: string,
 ): Promise<{ text: string; lang: 'ko' | 'en' } | null> {
+  // 4개 후보를 동시에 fetch → 첫 성공 반환, 전체 3초 cap
   const candidates = [
     { lang: 'ko', kind: 'asr' },
     { lang: 'ko', kind: '' },
@@ -55,24 +76,16 @@ export async function fetchCaptionFromBrowser(
     { lang: 'en', kind: '' },
   ];
 
-  for (const { lang, kind } of candidates) {
-    const kindParam = kind ? `&kind=${kind}` : '';
-    const url = `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}${kindParam}`;
-    try {
-      const res = await fetch(url, {
-        credentials: 'include', // YouTube 세션 쿠키 포함
-        signal: AbortSignal.timeout(5000),
-      });
-      if (!res.ok) continue;
-      const xml = await res.text();
-      const text = parseTimedText(xml);
-      if (text.trim().length > 0) {
-        return { text, lang: lang as 'ko' | 'en' };
-      }
-    } catch {
-      continue;
-    }
-  }
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('timeout')), BROWSER_CAPTION_TIMEOUT_MS),
+  );
 
-  return null;
+  try {
+    return await Promise.race([
+      Promise.any(candidates.map(({ lang, kind }) => fetchSingleCaption(videoId, lang, kind))),
+      timeout,
+    ]);
+  } catch {
+    return null;
+  }
 }
