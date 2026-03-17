@@ -4,6 +4,31 @@ import { parseTimedTextXml } from '@/lib/caption';
 import { serverEnv } from '@/env/server';
 import type { YouTubeVideoSnippetResponse } from '@/types/api/youtube/response';
 
+/**
+ * Vercel Edge Runtime(/api/caption)을 통해 자막을 조회.
+ * Edge Runtime은 Cloudflare 네트워크에서 실행 → AWS Lambda IP 차단 우회.
+ * VERCEL_URL 또는 NEXT_PUBLIC_APP_URL 환경변수로 자기 자신에게 요청.
+ */
+async function getCaptionViaEdgeRoute(videoId: string): Promise<CaptionResult> {
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
+
+  const res = await fetch(`${baseUrl}/api/caption`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ videoId }),
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!res.ok) throw new Error(`edge caption route failed: ${res.status}`);
+
+  const data = await res.json();
+  if (data.error || !data.text) throw new Error(data.error ?? 'no caption');
+
+  return { text: data.text, lang: data.lang ?? 'ko' };
+}
+
 export type CaptionResult = { text: string; lang: 'ko' | 'en' };
 
 interface CaptionTrackInfo {
@@ -88,7 +113,14 @@ async function getCaptionTracksFromPage(videoId: string): Promise<CaptionTrackIn
 }
 
 export async function getCaption(videoId: string): Promise<CaptionResult> {
-  // youtubei.js 우선 시도 → 실패 시 HTML 스크래핑 fallback
+  // 1차: Edge Runtime 경유 (Cloudflare IP → AWS 차단 우회)
+  try {
+    return await getCaptionViaEdgeRoute(videoId);
+  } catch {
+    // Edge Route 실패 시 기존 방식으로 fallback
+  }
+
+  // 2차: youtubei.js 라이브러리
   let tracks = await getCaptionTracksViaYoutubeiJs(videoId).catch(() => [] as CaptionTrackInfo[]);
   if (tracks.length === 0) {
     tracks = await getCaptionTracksFromPage(videoId);

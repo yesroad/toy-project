@@ -9014,6 +9014,7 @@ __metadata:
     tailwindcss: "npm:^4"
     typescript: "npm:^5.9.3"
     vitest: "npm:^3.1.1"
+    youtube-transcript: "npm:^1.3.0"
     youtubei.js: "npm:^17.0.1"
     zod: "npm:^3.24.2"
   languageName: unknown
@@ -10748,6 +10749,13 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10c0/dceb44c28578b31641e13695d200d34ec4ab3966a5729814d5445b194933c096b7ced71494ce53a0e8820685d1d010df8b2422e5bf2cdea7e469d97ffbea306f
+  languageName: node
+  linkType: hard
+
+"youtube-transcript@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "youtube-transcript@npm:1.3.0"
+  checksum: 10c0/cd63603430e7a89ad93ad5bc4930c8f2ae4f3dc063d87831498672899e88c54ec6b0a4f10c82caeb3a3658f1ec0953193b262da64300d9ab2a757ae5bc56c363
   languageName: node
   linkType: hard
 
