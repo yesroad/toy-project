@@ -6,10 +6,12 @@ import type { IngredientLinkRow } from '@/types/api/supabase/response';
 
 const TABLE = 'ingredient_links';
 
+const supabase = createClient(serverEnv.supabaseUrl, serverEnv.supabaseServiceRoleKey, {
+  auth: { persistSession: false },
+});
+
 export async function getIngredientLinks(names: string[]): Promise<CoupangLinks> {
   if (names.length === 0) return {};
-
-  const supabase = createClient(serverEnv.supabaseUrl, serverEnv.supabaseServiceRoleKey);
   const quotedNames = names.map((n) => `"${n.replace(/"/g, '\\"')}"`).join(',');
   const { data, error } = await supabase
     .from(TABLE)

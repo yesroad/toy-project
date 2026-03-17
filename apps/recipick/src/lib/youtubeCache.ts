@@ -6,18 +6,14 @@ import type { SearchResult, VideoItem } from '@/types/api/routeApi/response';
 
 const CACHE_TTL_HOURS = 24;
 
-function createAdminClient() {
-  return createClient(serverEnv.supabaseUrl, serverEnv.supabaseServiceRoleKey, {
-    auth: { persistSession: false },
-  });
-}
+const supabase = createClient(serverEnv.supabaseUrl, serverEnv.supabaseServiceRoleKey, {
+  auth: { persistSession: false },
+});
 
 export async function getCachedSearch(
   query: string,
   pageToken: string,
 ): Promise<SearchResult | null> {
-  const supabase = createAdminClient();
-
   const { data, error } = await supabase
     .from('youtube_search_cache')
     .select('result, created_at')
@@ -44,8 +40,6 @@ export async function getCachedSearch(
 }
 
 export async function getAllCachedSearchVideos(query: string): Promise<VideoItem[]> {
-  const supabase = createAdminClient();
-
   const { data, error } = await supabase
     .from('youtube_search_cache')
     .select('result, created_at')
@@ -78,8 +72,6 @@ export async function setCachedSearch(
   pageToken: string,
   result: SearchResult,
 ): Promise<void> {
-  const supabase = createAdminClient();
-
   await supabase
     .from('youtube_search_cache')
     .upsert(

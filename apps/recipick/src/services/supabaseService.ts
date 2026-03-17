@@ -1,30 +1,14 @@
 import 'server-only';
-import { createServerClient, type CookieOptions, type CookieMethodsServer } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { serverEnv } from '@/env/server';
 import type { Recipe } from '@/types/api/routeApi/response';
 import type { RecipeCacheRow } from '@/types/api/supabase/response';
 
 const TABLE = 'recipe_cache';
 
-export async function createSupabaseClient() {
-  const cookieStore = await cookies();
-
-  const cookieMethods: CookieMethodsServer = {
-    getAll() {
-      return cookieStore.getAll();
-    },
-    setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-      cookiesToSet.forEach(({ name, value, options }) => {
-        cookieStore.set(name, value, options);
-      });
-    },
-  };
-
-  return createServerClient(serverEnv.supabaseUrl, serverEnv.supabaseAnonKey, {
-    cookies: cookieMethods,
-  });
-}
+const supabase = createClient(serverEnv.supabaseUrl, serverEnv.supabaseServiceRoleKey, {
+  auth: { persistSession: false },
+});
 
 export function rowToRecipe(row: RecipeCacheRow, cached: boolean): Recipe {
   return {
@@ -42,10 +26,11 @@ export function rowToRecipe(row: RecipeCacheRow, cached: boolean): Recipe {
 }
 
 export async function getRecipeCache(videoId: string): Promise<Recipe | null> {
-  const supabase = await createSupabaseClient();
   const { data, error } = await supabase
     .from(TABLE)
-    .select('*')
+    .select(
+      'id, video_id, title, thumbnail, channel_name, ingredients, steps, coupang_links, created_at, updated_at',
+    )
     .eq('video_id', videoId.trim())
     .single<RecipeCacheRow>();
 
@@ -54,7 +39,6 @@ export async function getRecipeCache(videoId: string): Promise<Recipe | null> {
 }
 
 export async function saveRecipeCache(recipe: Omit<Recipe, 'cached'>): Promise<void> {
-  const supabase = await createSupabaseClient();
   const row: Omit<RecipeCacheRow, 'id' | 'created_at' | 'updated_at'> = {
     video_id: recipe.videoId,
     title: recipe.title,
