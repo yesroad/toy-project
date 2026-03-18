@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useInfiniteSearchQuery, useDbCachedSearchQuery } from '@/queries/search';
 import recipeServices from '@/services/api/recipe';
+import { mergeVideos } from '@/lib/youtube';
 import type { VideoItem } from '@/types/api/routeApi/response';
 
 const INITIAL_COUNT = 6;
@@ -29,13 +30,8 @@ export function useVideoList(query: string) {
   }, [query]);
 
   // 병합: DB 결과 먼저, API에서 중복 videoId 제거 후 추가
-  const allVideos: VideoItem[] = (() => {
-    const apiVideos = apiData?.pages.flatMap((page) => page.videos) ?? [];
-    if (!dbVideos || dbVideos.length === 0) return apiVideos;
-
-    const dbVideoIds = new Set(dbVideos.map((v) => v.videoId));
-    return [...dbVideos, ...apiVideos.filter((v) => !dbVideoIds.has(v.videoId))];
-  })();
+  const apiVideos = apiData?.pages.flatMap((page) => page.videos) ?? [];
+  const allVideos: VideoItem[] = mergeVideos(dbVideos ?? [], apiVideos);
 
   const videos = allVideos.slice(0, displayCount);
 

@@ -1,5 +1,7 @@
 import Services from '@workspace/services';
 import { fetchCaptionFromBrowser } from '@/lib/clientCaption';
+import { TIMEOUT } from '@/lib/constants';
+import { parseSseBlock } from '@/lib/sse';
 import type { Recipe, RecipeResponse } from '@/types/api/routeApi/response';
 
 type VideoDetail = { title: string; thumbnail: string; channelName: string };
@@ -13,7 +15,7 @@ interface StreamHandlers {
 class RecipeServices extends Services {
   constructor({ baseURL }: { baseURL: string }) {
     super({ baseURL });
-    this.getAxiosInstance().defaults.timeout = 120_000; // 2분: OpenAI + YouTube 스크래핑 소요 시간 고려
+    this.getAxiosInstance().defaults.timeout = TIMEOUT.RECIPE_HTTP; // 2분: OpenAI + YouTube 스크래핑 소요 시간 고려
   }
 
   getRecipe(videoId: string): Promise<RecipeResponse> {
@@ -38,7 +40,7 @@ class RecipeServices extends Services {
         videoId,
         ...(clientCaption && { caption: clientCaption.text, captionLang: clientCaption.lang }),
       }),
-      signal: signal ?? AbortSignal.timeout(120_000),
+      signal: signal ?? AbortSignal.timeout(TIMEOUT.RECIPE_HTTP),
     });
 
     if (!res.body) throw new Error('응답 스트림을 읽을 수 없습니다');
@@ -57,12 +59,10 @@ class RecipeServices extends Services {
       buffer = blocks.pop() ?? '';
 
       for (const block of blocks) {
-        const eventMatch = block.match(/^event: (\w+)/m);
-        const dataMatch = block.match(/^data: (.+)/m);
-        if (!eventMatch || !dataMatch) continue;
+        const { event, data: rawData } = parseSseBlock(block);
+        if (!event || !rawData) continue;
 
-        const event = eventMatch[1];
-        const data = JSON.parse(dataMatch[1]);
+        const data = JSON.parse(rawData);
 
         if (event === 'video_detail') handlers.onVideoDetail(data as VideoDetail);
         else if (event === 'recipe') handlers.onRecipe(data as Recipe);

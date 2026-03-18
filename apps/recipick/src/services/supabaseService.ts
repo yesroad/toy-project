@@ -2,7 +2,11 @@ import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 import { serverEnv } from '@/env/server';
 import type { Recipe } from '@/types/api/routeApi/response';
-import type { RecipeCacheRow, RecipeUnavailableRow, RecipeUnavailableReason } from '@/types/api/supabase/response';
+import type {
+  RecipeCacheRow,
+  RecipeUnavailableRow,
+  RecipeUnavailableReason,
+} from '@/types/api/supabase/response';
 
 const TABLE = 'recipe_cache';
 
@@ -25,9 +29,7 @@ export function rowToRecipe(row: RecipeCacheRow, cached: boolean): Recipe {
   };
 }
 
-export async function getRawCaption(
-  videoId: string,
-): Promise<{ text: string; lang: 'ko' } | null> {
+export async function getRawCaption(videoId: string): Promise<{ text: string; lang: 'ko' } | null> {
   const { data } = await supabase
     .from(TABLE)
     .select('raw_caption')
@@ -80,7 +82,5 @@ export async function saveRecipeUnavailable(
   videoId: string,
   reason: RecipeUnavailableReason,
 ): Promise<void> {
-  await supabase
-    .from(SKIP_TABLE)
-    .upsert({ video_id: videoId, reason }, { onConflict: 'video_id' });
+  await supabase.from(SKIP_TABLE).upsert({ video_id: videoId, reason }, { onConflict: 'video_id' });
 }

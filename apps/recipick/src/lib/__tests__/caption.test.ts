@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { chunkCaption, parseTimedTextXml } from '../caption';
+import {
+  chunkCaption,
+  parseTimedTextXml,
+  parseSrv3Format,
+  parseYouTubeCaptionXml,
+} from '../caption';
 
 describe('chunkCaption', () => {
   describe('정상 케이스', () => {
@@ -78,6 +83,62 @@ describe('parseTimedTextXml', () => {
 
     it('빈 문자열이면 빈 문자열 반환', () => {
       expect(parseTimedTextXml('')).toBe('');
+    });
+  });
+});
+
+describe('parseSrv3Format', () => {
+  describe('정상 케이스', () => {
+    it('<s> 태그가 있는 srv3 포맷에서 텍스트 추출', () => {
+      const xml = `<timedtext><p t="0" d="1000"><s>안녕하세요</s></p><p t="1000" d="1000"><s>오늘 요리할게요</s></p></timedtext>`;
+      const result = parseSrv3Format(xml);
+      expect(result).toContain('안녕하세요');
+      expect(result).toContain('오늘 요리할게요');
+    });
+
+    it('<s> 태그 없는 <p> 태그에서 텍스트 추출', () => {
+      const xml = `<timedtext><p t="0" d="1000">재료 설명</p></timedtext>`;
+      expect(parseSrv3Format(xml)).toContain('재료 설명');
+    });
+
+    it('HTML 엔티티를 디코딩', () => {
+      const xml = `<timedtext><p t="0"><s>재료 &amp; 도구</s></p></timedtext>`;
+      expect(parseSrv3Format(xml)).toContain('재료 & 도구');
+    });
+  });
+
+  describe('경계값', () => {
+    it('<p> 태그가 없으면 빈 문자열 반환', () => {
+      expect(parseSrv3Format('<timedtext></timedtext>')).toBe('');
+    });
+
+    it('빈 문자열이면 빈 문자열 반환', () => {
+      expect(parseSrv3Format('')).toBe('');
+    });
+  });
+});
+
+describe('parseYouTubeCaptionXml', () => {
+  describe('정상 케이스', () => {
+    it('srv3 포맷을 우선 파싱', () => {
+      const xml = `<timedtext><p t="0"><s>srv3 텍스트</s></p></timedtext>`;
+      expect(parseYouTubeCaptionXml(xml)).toContain('srv3 텍스트');
+    });
+
+    it('srv3 없으면 timedtext 포맷으로 fallback', () => {
+      const xml = `<timedtext><text start="1">timedtext 텍스트</text></timedtext>`;
+      expect(parseYouTubeCaptionXml(xml)).toContain('timedtext 텍스트');
+    });
+  });
+
+  describe('경계값', () => {
+    it('빈 문자열이면 빈 문자열 반환', () => {
+      expect(parseYouTubeCaptionXml('')).toBe('');
+    });
+
+    it('HTML 페이지(차단 응답)이면 빈 문자열 반환', () => {
+      const html = `<html><head><title>429</title></head><body>차단됨</body></html>`;
+      expect(parseYouTubeCaptionXml(html)).toBe('');
     });
   });
 });

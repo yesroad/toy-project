@@ -1,5 +1,12 @@
 import { truncateCaption } from '@/lib/caption';
-import { getRecipeCache, saveRecipeCache, getRecipeUnavailable, saveRecipeUnavailable } from '@/services/supabaseService';
+import { TIMEOUT } from '@/lib/constants';
+import { SSE_ERROR } from '../_shared/errors';
+import {
+  getRecipeCache,
+  saveRecipeCache,
+  getRecipeUnavailable,
+  saveRecipeUnavailable,
+} from '@/services/supabaseService';
 import { getVideoDetail, getCaption, DefinitiveCaptionError } from '@/services/captionService';
 import { analyzeDescription, analyzeCaption } from '@/services/openaiService';
 import { getIngredientLinks } from '@/services/ingredientService';
@@ -62,7 +69,10 @@ export async function POST(request: Request) {
 
         if (skipped) {
           t(`skip-cache-hit | reason=${skipped.reason}`);
-          const errorCode = skipped.reason === 'NO_CAPTION' ? 'CAPTION_UNAVAILABLE' : 'INSUFFICIENT_INGREDIENTS';
+          const errorCode =
+            skipped.reason === 'NO_CAPTION'
+              ? SSE_ERROR.NO_CAPTION
+              : SSE_ERROR.INSUFFICIENT_INGREDIENTS;
           const message =
             skipped.reason === 'NO_CAPTION'
               ? '자막이 없는 영상입니다'
@@ -81,7 +91,7 @@ export async function POST(request: Request) {
           ? Promise.resolve({ text: clientCaption, lang: clientCaptionLang ?? 'ko' } as const)
           : getCaption(videoId, captionAbortController!.signal);
 
-        const CAPTION_TIMEOUT_MS = 7_000;
+        const CAPTION_TIMEOUT_MS = TIMEOUT.CAPTION_ABORT;
         const captionTimeoutId = captionAbortController
           ? setTimeout(() => captionAbortController.abort(), CAPTION_TIMEOUT_MS)
           : null;
@@ -164,7 +174,7 @@ export async function POST(request: Request) {
           send('error', {
             message: '자막이 없거나 접근할 수 없는 영상입니다',
             status: 422,
-            errorCode: 'CAPTION_UNAVAILABLE',
+            errorCode: SSE_ERROR.NO_CAPTION,
           });
           controller.close();
           return;
@@ -176,7 +186,7 @@ export async function POST(request: Request) {
           send('error', {
             message: `재료가 ${mergedAnalysis.ingredients.length}개만 추출됐습니다 (최소 ${MIN_INGREDIENTS_COUNT}개 필요)`,
             status: 422,
-            errorCode: 'INSUFFICIENT_INGREDIENTS',
+            errorCode: SSE_ERROR.INSUFFICIENT_INGREDIENTS,
           });
           controller.close();
           return;
@@ -211,7 +221,7 @@ export async function POST(request: Request) {
         send('error', {
           message: '서버 오류가 발생했습니다',
           status: 500,
-          errorCode: 'SERVER_ERROR',
+          errorCode: SSE_ERROR.UNKNOWN,
         });
       } finally {
         controller.close();

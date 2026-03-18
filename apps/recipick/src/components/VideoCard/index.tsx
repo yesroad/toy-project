@@ -16,8 +16,7 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
   });
 
   const initial = video.channelName.charAt(0);
-  const isShorts =
-    video.title.toLowerCase().includes('#shorts') || video.title.includes('#쇼츠');
+  const isShorts = video.title.toLowerCase().includes('#shorts') || video.title.includes('#쇼츠');
 
   return (
     <article

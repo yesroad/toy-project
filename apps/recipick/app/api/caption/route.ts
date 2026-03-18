@@ -2,8 +2,12 @@
  * Edge Runtime으로 YouTube 자막을 조회하는 내부 API.
  * Vercel Edge Runtime은 Cloudflare 네트워크 사용 → AWS Lambda IP 차단 우회.
  * captionService.ts에서 1차 시도로 호출하며, 실패 시 기존 방식으로 fallback.
+ *
+ * Edge Runtime은 server-only 모듈 사용 불가이므로 lib/caption에서 직접 import.
  */
 export const runtime = 'edge';
+
+import { parseYouTubeCaptionXml } from '@/lib/caption';
 
 const CLIENTS = [
   {
@@ -28,51 +32,6 @@ const CLIENTS = [
 
 const WEB_UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-
-/** <text start=".." dur="..">content</text> 형식 파싱 */
-function parseTextFormat(xml: string): string {
-  const matches = xml.match(/<text[^>]*>([\s\S]*?)<\/text>/g) ?? [];
-  return matches
-    .map((m) => m.replace(/<text[^>]*>/, '').replace(/<\/text>/, '').trim())
-    .map(decodeEntities)
-    .filter(Boolean)
-    .join('\n')
-    .trim();
-}
-
-/** <p t=".." d=".."><s>content</s></p> 형식 파싱 (srv3) */
-function parseSrv3Format(xml: string): string {
-  const pMatches = xml.match(/<p[^>]*>([\s\S]*?)<\/p>/g) ?? [];
-  return pMatches
-    .map((p) => {
-      const sMatches = p.match(/<s[^>]*>([^<]*)<\/s>/g) ?? [];
-      if (sMatches.length > 0) {
-        return sMatches.map((s) => s.replace(/<s[^>]*>/, '').replace(/<\/s>/, '')).join('');
-      }
-      return p.replace(/<p[^>]*>/, '').replace(/<\/p>/, '').replace(/<[^>]+>/g, '');
-    })
-    .map(decodeEntities)
-    .filter((t) => t.trim().length > 0)
-    .join('\n')
-    .trim();
-}
-
-function parseCaption(xml: string): string {
-  if (xml.includes('<html')) return ''; // 429/차단 페이지 감지
-  const srv3 = parseSrv3Format(xml);
-  if (srv3.length > 0) return srv3;
-  return parseTextFormat(xml);
-}
-
-function decodeEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/g, "'");
-}
 
 async function getTracksFromPlayer(
   videoId: string,
@@ -105,7 +64,7 @@ async function fetchCaptionContent(url: string, userAgent: string): Promise<stri
       });
       if (!res.ok) continue;
       const xml = await res.text();
-      const text = parseCaption(xml);
+      const text = parseYouTubeCaptionXml(xml);
       if (text.trim().length > 0) return text;
     } catch {
       continue;
@@ -129,7 +88,7 @@ async function fetchSimpleCaption(
       });
       if (!res.ok) continue;
       const xml = await res.text();
-      const text = parseCaption(xml);
+      const text = parseYouTubeCaptionXml(xml);
       if (text.trim().length > 0) return text;
     } catch {
       continue;

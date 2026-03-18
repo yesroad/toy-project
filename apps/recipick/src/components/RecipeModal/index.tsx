@@ -102,7 +102,9 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
                 {recipe.title}
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-[13px] text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">📺 {recipe.channelName}</p>
+                <p className="text-[13px] text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
+                  📺 {recipe.channelName}
+                </p>
                 {recipe.cached && (
                   <span className="text-[11px] font-semibold bg-[#c4724a]/80 text-white px-2 py-0.5 rounded-full">
                     ⚡ 즉시 로드
@@ -189,7 +191,9 @@ function VideoDetailSkeleton({
             {detail.title}
           </h2>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-[13px] text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">📺 {detail.channelName}</p>
+            <p className="text-[13px] text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
+              📺 {detail.channelName}
+            </p>
           </div>
         </div>
         <button

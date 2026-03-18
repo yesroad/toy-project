@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { filterVideo, parseDurationSeconds, normalizeThumbnailUrl } from '../youtube';
+import { filterVideo, parseDurationSeconds, normalizeThumbnailUrl, mergeVideos } from '../youtube';
+import type { VideoItem } from '@/types/api/routeApi/response';
+
+const makeVideo = (videoId: string): VideoItem => ({
+  videoId,
+  title: `영상 ${videoId}`,
+  channelName: '테스트 채널',
+  thumbnail: `https://example.com/${videoId}.jpg`,
+  publishedAt: '2024-01-01T00:00:00Z',
+});
 
 // filterVideo 기본 파라미터 (요리 영상 기본값)
 const baseVideoParams = {
@@ -175,6 +184,50 @@ describe('parseDurationSeconds', () => {
 
     it('Shorts 경계값 초과 61초 (PT1M1S)', () => {
       expect(parseDurationSeconds('PT1M1S')).toBe(61);
+    });
+  });
+});
+
+describe('mergeVideos', () => {
+  describe('정상 케이스', () => {
+    it('DB 결과가 앞에 배치되고 API 결과가 뒤에 추가됨', () => {
+      const db = [makeVideo('db1'), makeVideo('db2')];
+      const api = [makeVideo('api1'), makeVideo('api2')];
+      const result = mergeVideos(db, api);
+      expect(result[0].videoId).toBe('db1');
+      expect(result[1].videoId).toBe('db2');
+      expect(result[2].videoId).toBe('api1');
+      expect(result[3].videoId).toBe('api2');
+    });
+
+    it('API 결과 중 DB와 중복된 videoId는 제거됨', () => {
+      const db = [makeVideo('shared1'), makeVideo('db-only')];
+      const api = [makeVideo('shared1'), makeVideo('api-only')];
+      const result = mergeVideos(db, api);
+      const ids = result.map((v) => v.videoId);
+      expect(ids.filter((id) => id === 'shared1')).toHaveLength(1);
+      expect(ids).toContain('db-only');
+      expect(ids).toContain('api-only');
+    });
+  });
+
+  describe('경계값', () => {
+    it('DB 빈 배열이면 API 결과만 반환', () => {
+      const api = [makeVideo('api1')];
+      const result = mergeVideos([], api);
+      expect(result).toHaveLength(1);
+      expect(result[0].videoId).toBe('api1');
+    });
+
+    it('API 빈 배열이면 DB 결과만 반환', () => {
+      const db = [makeVideo('db1')];
+      const result = mergeVideos(db, []);
+      expect(result).toHaveLength(1);
+      expect(result[0].videoId).toBe('db1');
+    });
+
+    it('둘 다 빈 배열이면 빈 배열 반환', () => {
+      expect(mergeVideos([], [])).toEqual([]);
     });
   });
 });

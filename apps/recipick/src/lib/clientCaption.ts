@@ -6,46 +6,10 @@
  * 서버(클라우드 IP)에서는 차단되는 자막을 브라우저에서 우회 취득.
  */
 
-function parseTimedText(xml: string): string {
-  if (!xml || xml.includes('<html')) return '';
+import { parseYouTubeCaptionXml } from './caption';
+import { TIMEOUT } from './constants';
 
-  // srv3 포맷: <p t=".." d=".."><s>text</s></p>
-  const pMatches = xml.match(/<p[^>]*>([\s\S]*?)<\/p>/g) ?? [];
-  if (pMatches.length > 0) {
-    return pMatches
-      .map((p) => {
-        const sMatches = p.match(/<s[^>]*>([^<]*)<\/s>/g) ?? [];
-        return sMatches.length > 0
-          ? sMatches.map((s) => s.replace(/<s[^>]*>/, '').replace(/<\/s>/, '')).join('')
-          : p.replace(/<p[^>]*>/, '').replace(/<\/p>/, '').replace(/<[^>]+>/g, '');
-      })
-      .map(decodeEntities)
-      .filter((t) => t.trim())
-      .join('\n')
-      .trim();
-  }
-
-  // 기본 포맷: <text start=".." dur="..">text</text>
-  const textMatches = xml.match(/<text[^>]*>([\s\S]*?)<\/text>/g) ?? [];
-  return textMatches
-    .map((m) => m.replace(/<text[^>]*>/, '').replace(/<\/text>/, '').trim())
-    .map(decodeEntities)
-    .filter(Boolean)
-    .join('\n')
-    .trim();
-}
-
-function decodeEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/g, "'");
-}
-
-const BROWSER_CAPTION_TIMEOUT_MS = 3000;
+const BROWSER_CAPTION_TIMEOUT_MS = TIMEOUT.CAPTION_CLIENT;
 
 async function fetchSingleCaption(
   videoId: string,
@@ -64,7 +28,7 @@ async function fetchSingleCaption(
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const xml = await res.text();
-  const text = parseTimedText(xml);
+  const text = parseYouTubeCaptionXml(xml);
   if (!text.trim()) throw new Error('empty caption');
   return { text, lang: lang as 'ko' | 'en' };
 }

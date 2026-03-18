@@ -76,3 +76,37 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&#x27;/g, "'");
 }
+
+/**
+ * srv3 포맷 XML 파싱: <p t=".." d=".."><s>text</s></p>
+ */
+export function parseSrv3Format(xml: string): string {
+  const pMatches = xml.match(/<p[^>]*>([\s\S]*?)<\/p>/g) ?? [];
+  return pMatches
+    .map((p) => {
+      const sMatches = p.match(/<s[^>]*>([^<]*)<\/s>/g) ?? [];
+      if (sMatches.length > 0) {
+        return sMatches.map((s) => s.replace(/<s[^>]*>/, '').replace(/<\/s>/, '')).join('');
+      }
+      return p
+        .replace(/<p[^>]*>/, '')
+        .replace(/<\/p>/, '')
+        .replace(/<[^>]+>/g, '');
+    })
+    .map(decodeHtmlEntities)
+    .filter((t) => t.trim().length > 0)
+    .join('\n')
+    .trim();
+}
+
+/**
+ * YouTube XML 자막을 포맷에 따라 파싱.
+ * - HTML 페이지(429/차단)이면 빈 문자열 반환
+ * - srv3 포맷 우선, 없으면 timedtext 포맷으로 fallback
+ */
+export function parseYouTubeCaptionXml(xml: string): string {
+  if (!xml || xml.includes('<html')) return '';
+  const srv3 = parseSrv3Format(xml);
+  if (srv3.length > 0) return srv3;
+  return parseTimedTextXml(xml);
+}

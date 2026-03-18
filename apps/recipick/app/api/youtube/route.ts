@@ -9,21 +9,12 @@ import {
 import { getCachedSearch, setCachedSearch } from '@/lib/youtubeCache';
 import { serverEnv } from '@/env/server';
 import { getCaption, getVideoDetail } from '@/services/captionService';
+import { ApiRouteError } from '../_shared/errors';
 import type { SearchResult, VideoItem } from '@/types/api/routeApi/response';
 import type {
   YouTubeSearchResponse,
   YouTubeVideoDetailsResponse,
 } from '@/types/api/youtube/response';
-
-class ApiRouteError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-    readonly details?: unknown,
-  ) {
-    super(message);
-  }
-}
 
 async function parseErrorPayload(res: Response): Promise<unknown> {
   const contentType = res.headers.get('content-type') ?? '';

@@ -1,6 +1,8 @@
 import 'server-only';
 import { Innertube } from 'youtubei.js';
 import { parseTimedTextXml } from '@/lib/caption';
+import { TIMEOUT } from '@/lib/constants';
+import { getBaseUrl } from '@/../app/api/_shared/getBaseUrl';
 import { serverEnv } from '@/env/server';
 import { getRawCaption } from '@/services/supabaseService';
 import type { YouTubeVideoSnippetResponse } from '@/types/api/youtube/response';
@@ -22,15 +24,11 @@ async function getCaptionViaEdgeRoute(
   videoId: string,
   signal?: AbortSignal,
 ): Promise<CaptionResult> {
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
-
-  const res = await fetch(`${baseUrl}/api/caption`, {
+  const res = await fetch(`${getBaseUrl()}/api/caption`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ videoId }),
-    signal: signal ?? AbortSignal.timeout(6_000),
+    signal: signal ?? AbortSignal.timeout(TIMEOUT.CAPTION_SERVER),
   });
 
   if (!res.ok) throw new Error(`edge caption route failed: ${res.status}`);

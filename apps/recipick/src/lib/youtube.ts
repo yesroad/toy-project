@@ -1,4 +1,6 @@
-// YouTube 영상 필터링 관련 순수 함수
+// YouTube 영상 필터링 및 병합 관련 순수 함수
+
+import type { VideoItem } from '@/types/api/routeApi/response';
 
 /** Hard exclude — 하나라도 포함 시 즉시 탈락 */
 export const HARD_EXCLUDE_KEYWORDS = [
@@ -161,4 +163,13 @@ export function filterVideo({
  */
 export function normalizeThumbnailUrl(thumbnails: Record<string, { url: string }>): string {
   return thumbnails?.high?.url ?? thumbnails?.medium?.url ?? thumbnails?.default?.url ?? '';
+}
+
+/**
+ * DB 결과와 YouTube API 결과를 병합.
+ * DB 결과를 앞에 배치하고, API 결과에서 중복 videoId를 제거한 후 뒤에 추가.
+ */
+export function mergeVideos(dbVideos: VideoItem[], apiVideos: VideoItem[]): VideoItem[] {
+  const dbVideoIds = new Set(dbVideos.map((v) => v.videoId));
+  return [...dbVideos, ...apiVideos.filter((v) => !dbVideoIds.has(v.videoId))];
 }
