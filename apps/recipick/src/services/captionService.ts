@@ -2,14 +2,26 @@ import 'server-only';
 import { Innertube } from 'youtubei.js';
 import { parseTimedTextXml } from '@/lib/caption';
 import { serverEnv } from '@/env/server';
+import { getRawCaption } from '@/services/supabaseService';
 import type { YouTubeVideoSnippetResponse } from '@/types/api/youtube/response';
+
+/** Edge Route가 명확히 "자막 없음"을 응답한 경우. YouTube IP 차단과 달리 재시도해도 결과가 같음. */
+export class DefinitiveCaptionError extends Error {
+  constructor() {
+    super('NO_CAPTION_ON_VIDEO');
+    this.name = 'DefinitiveCaptionError';
+  }
+}
 
 /**
  * Vercel Edge Runtime(/api/caption)을 통해 자막을 조회.
  * Edge Runtime은 Cloudflare 네트워크에서 실행 → AWS Lambda IP 차단 우회.
  * VERCEL_URL 또는 NEXT_PUBLIC_APP_URL 환경변수로 자기 자신에게 요청.
  */
-async function getCaptionViaEdgeRoute(videoId: string): Promise<CaptionResult> {
+async function getCaptionViaEdgeRoute(
+  videoId: string,
+  signal?: AbortSignal,
+): Promise<CaptionResult> {
   const baseUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
@@ -18,12 +30,13 @@ async function getCaptionViaEdgeRoute(videoId: string): Promise<CaptionResult> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ videoId }),
-    signal: AbortSignal.timeout(15_000),
+    signal: signal ?? AbortSignal.timeout(6_000),
   });
 
   if (!res.ok) throw new Error(`edge caption route failed: ${res.status}`);
 
   const data = await res.json();
+  if (data.error === 'no_caption_content') throw new DefinitiveCaptionError();
   if (data.error || !data.text) throw new Error(data.error ?? 'no caption');
 
   return { text: data.text, lang: data.lang ?? 'ko' };
@@ -112,15 +125,21 @@ async function getCaptionTracksFromPage(videoId: string): Promise<CaptionTrackIn
   }
 }
 
-export async function getCaption(videoId: string): Promise<CaptionResult> {
+export async function getCaption(videoId: string, signal?: AbortSignal): Promise<CaptionResult> {
+  // 0차: DB 캐시 조회 — 이미 저장된 자막이 있으면 외부 API 호출 생략
+  const cached = await getRawCaption(videoId).catch(() => null);
+  if (cached) return cached;
+
   // 1차: Edge Runtime 경유 (Cloudflare IP → AWS 차단 우회)
   try {
-    return await getCaptionViaEdgeRoute(videoId);
-  } catch {
-    // Edge Route 실패 시 기존 방식으로 fallback
+    return await getCaptionViaEdgeRoute(videoId, signal);
+  } catch (e) {
+    // signal이 있는 경우(타임아웃 모드) → fallback 없이 즉시 실패
+    // signal 없이 호출된 경우(직접 호출)만 youtubei.js로 fallback
+    if (signal) throw e;
   }
 
-  // 2차: youtubei.js 라이브러리
+  // 2차: youtubei.js 라이브러리 (signal 없는 직접 호출 전용)
   let tracks = await getCaptionTracksViaYoutubeiJs(videoId).catch(() => [] as CaptionTrackInfo[]);
   if (tracks.length === 0) {
     tracks = await getCaptionTracksFromPage(videoId);

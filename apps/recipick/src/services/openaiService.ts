@@ -49,13 +49,10 @@ const TRANSLATE_SYSTEM_PROMPT = `당신은 전문 번역가입니다.
 주어진 영어 텍스트를 자연스러운 한국어로 번역하세요.
 요리 관련 용어는 한국에서 통용되는 표현을 사용하세요.`;
 
-function createOpenAIClient() {
-  return new OpenAI({ apiKey: serverEnv.openAiApiKey });
-}
+const openaiClient = new OpenAI({ apiKey: serverEnv.openAiApiKey });
 
 export async function analyzeCaption(caption: string): Promise<RecipeAnalysis> {
-  const client = createOpenAIClient();
-  const completion = await client.beta.chat.completions.parse({
+  const completion = await openaiClient.beta.chat.completions.parse({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: CAPTION_SYSTEM_PROMPT },
@@ -65,7 +62,7 @@ export async function analyzeCaption(caption: string): Promise<RecipeAnalysis> {
       },
     ],
     response_format: zodResponseFormat(RecipeAnalysisSchema, 'recipe_analysis'),
-    max_tokens: 1000,
+    max_tokens: 4096,
     temperature: 0.1,
   });
   const result = completion.choices[0]?.message.parsed;
@@ -74,8 +71,7 @@ export async function analyzeCaption(caption: string): Promise<RecipeAnalysis> {
 }
 
 export async function analyzeDescription(content: string): Promise<RecipeAnalysis> {
-  const client = createOpenAIClient();
-  const completion = await client.beta.chat.completions.parse({
+  const completion = await openaiClient.beta.chat.completions.parse({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: DESCRIPTION_SYSTEM_PROMPT },
@@ -94,8 +90,7 @@ export async function analyzeDescription(content: string): Promise<RecipeAnalysi
 }
 
 export async function translateText(content: string): Promise<string> {
-  const client = createOpenAIClient();
-  const completion = await client.beta.chat.completions.parse({
+  const completion = await openaiClient.beta.chat.completions.parse({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: TRANSLATE_SYSTEM_PROMPT },
@@ -111,8 +106,7 @@ export async function translateText(content: string): Promise<string> {
 }
 
 export async function checkIsCooking(content: string): Promise<boolean> {
-  const client = createOpenAIClient();
-  const completion = await client.beta.chat.completions.parse({
+  const completion = await openaiClient.beta.chat.completions.parse({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: IS_COOKING_SYSTEM_PROMPT },

@@ -16,6 +16,8 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
   });
 
   const initial = video.channelName.charAt(0);
+  const isShorts =
+    video.title.toLowerCase().includes('#shorts') || video.title.includes('#쇼츠');
 
   return (
     <article
@@ -32,6 +34,11 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
           className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
           sizes="(max-width: 640px) 50vw, (max-width: 960px) 33vw, 280px"
         />
+        {isShorts && (
+          <span className="absolute top-2 left-2 flex items-center gap-0.5 bg-black/60 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+            📱 Shorts
+          </span>
+        )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-200 flex items-center justify-center">
           <div className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
             <span className="text-[#3d2b1f] text-base pl-0.5">▶</span>
@@ -46,7 +53,7 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
           </div>
           <span className="text-xs text-[#7d6550] font-medium truncate">{video.channelName}</span>
         </div>
-        <h3 className="text-[13px] font-semibold text-[#3d2b1f] leading-snug line-clamp-2 break-keep mb-2.5">
+        <h3 className="text-[13px] font-semibold text-[#3d2b1f] leading-snug line-clamp-2 break-keep mb-2.5 min-h-[2.4em]">
           {video.title}
         </h3>
         <div className="flex items-center justify-between">

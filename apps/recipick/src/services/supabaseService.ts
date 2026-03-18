@@ -2,7 +2,7 @@ import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 import { serverEnv } from '@/env/server';
 import type { Recipe } from '@/types/api/routeApi/response';
-import type { RecipeCacheRow } from '@/types/api/supabase/response';
+import type { RecipeCacheRow, RecipeUnavailableRow, RecipeUnavailableReason } from '@/types/api/supabase/response';
 
 const TABLE = 'recipe_cache';
 
@@ -23,6 +23,19 @@ export function rowToRecipe(row: RecipeCacheRow, cached: boolean): Recipe {
     cached,
     createdAt: row.created_at,
   };
+}
+
+export async function getRawCaption(
+  videoId: string,
+): Promise<{ text: string; lang: 'ko' } | null> {
+  const { data } = await supabase
+    .from(TABLE)
+    .select('raw_caption')
+    .eq('video_id', videoId.trim())
+    .single<Pick<RecipeCacheRow, 'raw_caption'>>();
+
+  if (!data?.raw_caption) return null;
+  return { text: data.raw_caption, lang: 'ko' };
 }
 
 export async function getRecipeCache(videoId: string): Promise<Recipe | null> {
@@ -50,4 +63,24 @@ export async function saveRecipeCache(recipe: Omit<Recipe, 'cached'>): Promise<v
     raw_caption: recipe.rawCaption ?? null,
   };
   await supabase.from(TABLE).upsert(row, { onConflict: 'video_id' });
+}
+
+const SKIP_TABLE = 'recipe_unavailable';
+
+export async function getRecipeUnavailable(videoId: string): Promise<RecipeUnavailableRow | null> {
+  const { data } = await supabase
+    .from(SKIP_TABLE)
+    .select('video_id, reason, created_at')
+    .eq('video_id', videoId.trim())
+    .single<RecipeUnavailableRow>();
+  return data ?? null;
+}
+
+export async function saveRecipeUnavailable(
+  videoId: string,
+  reason: RecipeUnavailableReason,
+): Promise<void> {
+  await supabase
+    .from(SKIP_TABLE)
+    .upsert({ video_id: videoId, reason }, { onConflict: 'video_id' });
 }

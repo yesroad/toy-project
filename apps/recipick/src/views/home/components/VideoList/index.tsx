@@ -46,7 +46,9 @@ export default function VideoList({ query, onVideoClick }: VideoListProps) {
 
   return (
     <div>
-      <p className="text-[13px] text-[#7d6550] mb-4">&ldquo;{query}&rdquo; 검색 결과</p>
+      <div className="mb-5">
+        <p className="text-[13px] text-[#7d6550]">&ldquo;{query}&rdquo; 검색 결과</p>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
         {videos.map((video) => (
           <VideoCard key={video.videoId} video={video} onClick={onVideoClick} />

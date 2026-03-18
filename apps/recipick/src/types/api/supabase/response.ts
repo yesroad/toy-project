@@ -21,3 +21,11 @@ export interface RecipeCacheRow {
   created_at: string;
   updated_at: string;
 }
+
+export type RecipeUnavailableReason = 'NO_CAPTION' | 'INSUFFICIENT_INGREDIENTS';
+
+export interface RecipeUnavailableRow {
+  video_id: string;
+  reason: RecipeUnavailableReason;
+  created_at: string;
+}

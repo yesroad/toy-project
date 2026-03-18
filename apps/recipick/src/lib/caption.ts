@@ -1,8 +1,19 @@
 // 자막 텍스트 처리 관련 순수 함수
 
+const MAX_CAPTION_CHARS = 18000; // 단일 호출 최대 자막 길이 (~6000토큰)
+
 const MAX_TOKENS_PER_CHUNK = 2000; // GPT 입력 토큰 상한
 const AVG_CHARS_PER_TOKEN = 3; // 한국어 기준 평균 (약 1~2자/토큰)
 const MAX_CHARS_PER_CHUNK = MAX_TOKENS_PER_CHUNK * AVG_CHARS_PER_TOKEN;
+
+/**
+ * 자막 텍스트를 단일 OpenAI 호출에 적합한 길이로 잘라냄.
+ * 요리 레시피 정보는 영상 초반~중반에 집중되므로 앞쪽만 유지.
+ */
+export function truncateCaption(caption: string): string {
+  if (caption.length <= MAX_CAPTION_CHARS) return caption;
+  return caption.slice(0, MAX_CAPTION_CHARS);
+}
 
 /**
  * 긴 자막 텍스트를 GPT 토큰 상한에 맞게 분할

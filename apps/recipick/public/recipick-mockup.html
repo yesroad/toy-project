@@ -581,9 +581,37 @@
 
     .modal-hero {
       position: relative;
-      aspect-ratio: 16/7;
+      aspect-ratio: 16/9;
       overflow: hidden;
-      background: var(--muted);
+      background: #000;
+    }
+
+    .modal-play-btn {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .modal-play-icon {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: rgba(0,0,0,.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: white;
+      transition: background .15s;
+      padding-left: 4px;
+    }
+    .modal-play-btn:hover .modal-play-icon {
+      background: rgba(196,114,74,.9);
     }
 
     .modal-thumbnail {
@@ -653,7 +681,7 @@
     .modal-close-btn:hover { background: rgba(30,18,10,.75); }
 
     .modal-body {
-      padding: 24px;
+      padding: 16px 24px 24px;
     }
 
     .modal-section {
@@ -1270,18 +1298,32 @@
       <!-- 모달 목업 (인라인으로 표시) -->
       <div style="border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-lg); max-width: 600px; margin: 0 auto;">
 
-        <!-- 히어로 썸네일 -->
-        <div class="modal-hero">
-          <img class="modal-thumbnail"
-            src="https://picsum.photos/seed/food3/640/280"
-            alt="레시피 썸네일"
-          />
-          <div class="modal-hero-overlay"></div>
-          <div class="modal-hero-info">
-            <h2 class="modal-title">10분 만에 완성하는 된장찌개! 집에서 쉽게 따라하는 정통 레시피</h2>
-            <p class="modal-channel">📺 백종원의 요리비책</p>
+        <!-- 히어로 썸네일 / 재생 -->
+        <div class="modal-hero" id="modalHero">
+          <!-- 썸네일 상태 -->
+          <div id="thumbnailState" style="position:absolute;inset:0;">
+            <img class="modal-thumbnail"
+              src="https://picsum.photos/seed/food3/640/360"
+              alt="레시피 썸네일"
+            />
+            <div class="modal-hero-overlay"></div>
+            <button class="modal-play-btn" onclick="playVideo()" aria-label="영상 재생">
+              <div class="modal-play-icon">▶</div>
+            </button>
+            <div class="modal-hero-info">
+              <h2 class="modal-title">10분 만에 완성하는 된장찌개! 집에서 쉽게 따라하는 정통 레시피</h2>
+              <p class="modal-channel">📺 백종원의 요리비책</p>
+            </div>
           </div>
-          <button class="modal-close-btn">✕</button>
+          <!-- iframe 재생 상태 (클릭 후) -->
+          <iframe id="videoIframe"
+            src=""
+            title="레시피 영상"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            style="position:absolute;inset:0;width:100%;height:100%;display:none;border:none;"
+          ></iframe>
+          <button class="modal-close-btn" style="z-index:10;">✕</button>
         </div>
 
         <!-- 모달 바디 -->
@@ -1390,7 +1432,7 @@
     <div class="mockup-section">
       <span class="mockup-section-title">RecipeModal — 로딩 스켈레톤</span>
       <div style="border-radius: var(--radius-xl); overflow: hidden; border: 1.5px solid var(--border); max-width: 600px; margin: 0 auto; background: var(--white);">
-        <div class="skeleton" style="aspect-ratio: 16/7; width: 100%; border-radius: 0;"></div>
+        <div class="skeleton" style="aspect-ratio: 16/9; width: 100%; border-radius: 0;"></div>
         <div style="padding: 24px; display: flex; flex-direction: column; gap: 12px;">
           <div class="skeleton skeleton-line w-60" style="height: 20px; border-radius: var(--radius-sm);"></div>
           <div class="skeleton skeleton-line w-90" style="height: 14px;"></div>
@@ -1518,6 +1560,14 @@
 </div>
 
 <script>
+  // 모달 영상 재생 시뮬레이션
+  function playVideo() {
+    document.getElementById('thumbnailState').style.display = 'none';
+    const iframe = document.getElementById('videoIframe');
+    iframe.src = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
+    iframe.style.display = 'block';
+  }
+
   // 탭 인터랙션 시뮬레이션
   document.querySelectorAll('.tab-close').forEach(btn => {
     btn.addEventListener('click', (e) => {

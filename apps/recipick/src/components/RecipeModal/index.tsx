@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Play } from 'lucide-react';
 import { useRecipeModal } from './useRecipeModal';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Dialog, DialogContent, DialogTitle } from '@workspace/ui/components/dialog';
@@ -40,7 +41,7 @@ export default function RecipeModal({ videoId, onClose }: RecipeModalProps) {
         )}
 
         {state.phase === 'recipe_ready' && (
-          <RecipeModalContent recipe={state.recipe} onClose={onClose} />
+          <RecipeModalContent recipe={state.recipe} videoId={videoId} onClose={onClose} />
         )}
       </DialogContent>
     </Dialog>
@@ -57,57 +58,72 @@ interface RecipeModalContentProps {
     steps: string[];
     coupangLinks?: Record<string, string>;
   };
+  videoId: string | null;
   onClose: () => void;
 }
 
-function RecipeModalContent({ recipe, onClose }: RecipeModalContentProps) {
-  const isShorts = recipe.title.toLowerCase().includes('#shorts') || recipe.title.includes('#쇼츠');
+function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <>
-      {/* 히어로 썸네일 */}
-      <div className="relative aspect-[16/7] overflow-hidden bg-[#f5ede0]">
-        <Image
-          src={recipe.thumbnail}
-          alt={recipe.title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 640px) 100vw, 672px"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0" />
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <h2 className="text-[18px] font-bold text-white leading-snug break-keep">
-            {recipe.title}
-          </h2>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="text-[13px] text-white/75">📺 {recipe.channelName}</p>
-            {recipe.cached && (
-              <span className="text-[11px] font-semibold bg-[#c4724a]/80 text-white px-2 py-0.5 rounded-full">
-                ⚡ 즉시 로드
-              </span>
-            )}
-          </div>
-        </div>
+      {/* 히어로 영역 */}
+      <div className="relative aspect-video overflow-hidden bg-black">
+        {isPlaying && videoId ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+            title={recipe.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+          />
+        ) : (
+          <>
+            <Image
+              src={recipe.thumbnail}
+              alt={recipe.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, 672px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/0" />
+            {/* 재생 버튼 */}
+            <button
+              onClick={() => setIsPlaying(true)}
+              aria-label="영상 재생"
+              className="absolute inset-0 flex items-center justify-center group cursor-pointer"
+            >
+              <div className="w-14 h-14 rounded-full bg-black/60 group-hover:bg-[#c4724a]/90 flex items-center justify-center transition-colors">
+                <Play size={24} className="text-white fill-white ml-1" />
+              </div>
+            </button>
+            <div className="absolute bottom-0 left-0 right-0 p-5">
+              <h2 className="text-[18px] font-bold text-white leading-snug break-keep [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
+                {recipe.title}
+              </h2>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-[13px] text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">📺 {recipe.channelName}</p>
+                {recipe.cached && (
+                  <span className="text-[11px] font-semibold bg-[#c4724a]/80 text-white px-2 py-0.5 rounded-full">
+                    ⚡ 즉시 로드
+                  </span>
+                )}
+              </div>
+            </div>
+          </>
+        )}
         <button
           onClick={onClose}
           aria-label="닫기"
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 hover:bg-black/75
-                     text-white flex items-center justify-center transition-colors cursor-pointer text-base"
+                     text-white flex items-center justify-center transition-colors cursor-pointer text-base z-10"
         >
           ✕
         </button>
       </div>
 
       {/* 바디 */}
-      <div className="p-6 max-h-[55vh] overflow-y-auto">
-        {/* 숏츠 안내 */}
-        {isShorts && (
-          <div className="flex items-start gap-2 bg-[#f5ede0] rounded-lg px-3 py-2.5 mb-5 text-[12px] text-[#7d6550] break-keep leading-relaxed">
-            <span className="shrink-0">📱</span>
-            <span>숏츠 영상은 특성상 레시피와 재료 정보가 정확히 정리되지 않을 수 있습니다.</span>
-          </div>
-        )}
-
+      <div className="px-6 pt-4 pb-6 max-h-[55vh] overflow-y-auto">
         {/* 재료 */}
         <div className="mb-7">
           <div className="flex items-center gap-2 mb-4">
@@ -167,17 +183,13 @@ function VideoDetailSkeleton({
           className="object-cover"
           sizes="(max-width: 640px) 100vw, 672px"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/0" />
         <div className="absolute bottom-0 left-0 right-0 p-5">
-          <h2 className="text-[18px] font-bold text-white leading-snug break-keep">
+          <h2 className="text-[18px] font-bold text-white leading-snug break-keep [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
             {detail.title}
           </h2>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-[13px] text-white/75">📺 {detail.channelName}</p>
-            <span className="text-[11px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full flex items-center gap-1">
-              <Loader2 size={10} className="animate-spin" />
-              레시피 분석 중
-            </span>
+            <p className="text-[13px] text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">📺 {detail.channelName}</p>
           </div>
         </div>
         <button
@@ -190,6 +202,10 @@ function VideoDetailSkeleton({
         </button>
       </div>
       <div className="p-6 space-y-3">
+        <div className="flex items-center gap-2 mb-4 text-[#c4724a]">
+          <Loader2 size={16} className="animate-spin" />
+          <span className="text-[13px] font-semibold text-[#7d6550]">레시피 분석 중...</span>
+        </div>
         <Skeleton className="h-5 w-3/5" />
         <Skeleton className="h-4 w-4/5" />
         <Skeleton className="h-4 w-2/3" />

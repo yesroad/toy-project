@@ -51,12 +51,16 @@ async function fetchSingleCaption(
   videoId: string,
   lang: string,
   kind: string,
+  externalSignal?: AbortSignal,
 ): Promise<{ text: string; lang: 'ko' | 'en' }> {
   const kindParam = kind ? `&kind=${kind}` : '';
   const url = `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}${kindParam}`;
+  const signal = externalSignal
+    ? AbortSignal.any([AbortSignal.timeout(2500), externalSignal])
+    : AbortSignal.timeout(2500);
   const res = await fetch(url, {
     credentials: 'include', // YouTube 세션 쿠키 포함
-    signal: AbortSignal.timeout(2500),
+    signal,
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const xml = await res.text();
@@ -68,7 +72,7 @@ async function fetchSingleCaption(
 export async function fetchCaptionFromBrowser(
   videoId: string,
 ): Promise<{ text: string; lang: 'ko' | 'en' } | null> {
-  // 4개 후보를 동시에 fetch → 첫 성공 반환, 전체 3초 cap
+  // 4개 후보를 병렬로 시작 → 첫 성공 시 나머지 요청 즉시 취소, 전체 3초 cap
   const candidates = [
     { lang: 'ko', kind: 'asr' },
     { lang: 'ko', kind: '' },
@@ -76,16 +80,20 @@ export async function fetchCaptionFromBrowser(
     { lang: 'en', kind: '' },
   ];
 
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error('timeout')), BROWSER_CAPTION_TIMEOUT_MS),
-  );
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), BROWSER_CAPTION_TIMEOUT_MS);
 
   try {
-    return await Promise.race([
-      Promise.any(candidates.map(({ lang, kind }) => fetchSingleCaption(videoId, lang, kind))),
-      timeout,
-    ]);
+    return await Promise.any(
+      candidates.map(async ({ lang, kind }) => {
+        const result = await fetchSingleCaption(videoId, lang, kind, controller.signal);
+        controller.abort(); // 성공 시 나머지 취소
+        return result;
+      }),
+    );
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
