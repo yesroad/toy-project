@@ -39,6 +39,7 @@
     "@types/qs": "^6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/to-ico": "^1",
     "@typescript-eslint/parser": "^8.57.0",
     "@vitest/coverage-v8": "^3.1.1",
     "@workspace/eslint-config": "*",
@@ -49,6 +50,7 @@
     "jsdom": "^26.0.0",
     "prettier": "^3.5.3",
     "tailwindcss": "^4",
+    "to-ico": "^1.1.5",
     "typescript": "^5.9.3",
     "vitest": "^3.1.1"
   }

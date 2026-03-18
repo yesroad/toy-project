@@ -26,7 +26,7 @@ export default function VideoList({ query, onVideoClick }: VideoListProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
         {Array.from({ length: 6 }).map((_, i) => (
           <VideoCardSkeleton key={i} />
         ))}
@@ -49,7 +49,7 @@ export default function VideoList({ query, onVideoClick }: VideoListProps) {
       <div className="mb-5">
         <p className="text-[13px] text-[#7d6550]">&ldquo;{query}&rdquo; 검색 결과</p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
         {videos.map((video) => (
           <VideoCard key={video.videoId} video={video} onClick={onVideoClick} />
         ))}
