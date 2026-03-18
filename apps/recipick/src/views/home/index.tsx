@@ -2,7 +2,6 @@
 
 import SearchBar from '@/components/SearchBar';
 import SearchHistoryTabs from '@/components/SearchHistoryTabs';
-import RecipeModal from '@/components/RecipeModal';
 import VideoList from './components/VideoList';
 import EmptyState from './components/EmptyState';
 import { useHomeView } from './useHomeView';
@@ -10,8 +9,6 @@ import { useHomeView } from './useHomeView';
 export default function HomeView() {
   const {
     query,
-    selectedVideoId,
-    setSelectedVideoId,
     tabs,
     isLoading,
     handleSearch,
@@ -58,14 +55,11 @@ export default function HomeView() {
       {/* 메인 콘텐츠 */}
       <main className="max-w-[960px] mx-auto px-4 py-6 pb-16">
         {query ? (
-          <VideoList query={query} onVideoClick={setSelectedVideoId} />
+          <VideoList query={query} />
         ) : (
           <EmptyState onHintClick={handleSearch} />
         )}
       </main>
-
-      {/* 레시피 모달 */}
-      <RecipeModal videoId={selectedVideoId} onClose={() => setSelectedVideoId(null)} />
     </div>
   );
 }

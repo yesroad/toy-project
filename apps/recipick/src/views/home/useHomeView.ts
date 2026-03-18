@@ -6,7 +6,6 @@ import { useInfiniteSearchQuery } from '@/queries/search';
 
 export function useHomeView() {
   const [query, setQuery] = useState('');
-  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const { tabs, add, remove } = useSearchHistory();
 
   const { data, isLoading } = useInfiniteSearchQuery(query);
@@ -42,8 +41,6 @@ export function useHomeView() {
 
   return {
     query,
-    selectedVideoId,
-    setSelectedVideoId,
     tabs,
     isLoading,
     handleSearch,

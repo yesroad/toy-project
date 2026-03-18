@@ -7,10 +7,9 @@ import { useVideoList } from './useVideoList';
 
 interface VideoListProps {
   query: string;
-  onVideoClick: (videoId: string) => void;
 }
 
-export default function VideoList({ query, onVideoClick }: VideoListProps) {
+export default function VideoList({ query }: VideoListProps) {
   const { videos, isLoading, isFetchingNextPage, canLoadMore, handleLoadMore } =
     useVideoList(query);
 
@@ -41,7 +40,7 @@ export default function VideoList({ query, onVideoClick }: VideoListProps) {
       </div>
       <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
         {videos.map((video) => (
-          <VideoCard key={video.videoId} video={video} onClick={onVideoClick} />
+          <VideoCard key={video.videoId} video={video} />
         ))}
       </div>
 

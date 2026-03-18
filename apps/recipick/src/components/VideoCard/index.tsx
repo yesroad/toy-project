@@ -1,14 +1,14 @@
 'use client';
 
+import Link from 'next/link';
 import Image from 'next/image';
 import type { VideoItem } from '@/types/api/routeApi/response';
 
 interface VideoCardProps {
   video: VideoItem;
-  onClick: (videoId: string) => void;
 }
 
-export default function VideoCard({ video, onClick }: VideoCardProps) {
+export default function VideoCard({ video }: VideoCardProps) {
   const formattedDate = new Date(video.publishedAt).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: '2-digit',
@@ -19,11 +19,11 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
   const isShorts = video.title.toLowerCase().includes('#shorts') || video.title.includes('#쇼츠');
 
   return (
-    <article
-      onClick={() => onClick(video.videoId)}
-      className="bg-white rounded-2xl overflow-hidden cursor-pointer border-[1.5px] border-[#ddd0bc]
+    <Link
+      href={`/recipe/${video.videoId}`}
+      className="bg-white rounded-2xl overflow-hidden border-[1.5px] border-[#ddd0bc]
                  shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-[#c4a882]
-                 transition-all duration-200 group"
+                 transition-all duration-200 group block"
     >
       <div className="relative aspect-video overflow-hidden bg-[#f5ede0]">
         <Image
@@ -62,6 +62,6 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
           </span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
