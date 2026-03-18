@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useInfiniteSearchQuery, useDbCachedSearchQuery } from '@/queries/search';
+import recipeServices from '@/services/api/recipe';
 import type { VideoItem } from '@/types/api/routeApi/response';
 
 const INITIAL_COUNT = 6;
@@ -52,6 +53,14 @@ export function useVideoList(query: string) {
 
   // DB 또는 API 중 하나라도 데이터 있으면 스피너 숨김
   const isLoading = allVideos.length === 0 && (isDbLoading || isApiLoading);
+
+  // 검색 결과 첫 로드 시 상위 3개 pre-warm (fire-and-forget)
+  const videosLength = videos.length;
+  useEffect(() => {
+    if (videosLength === 0) return;
+    const ids = videos.slice(0, 3).map((v) => v.videoId);
+    recipeServices.prewarmRecipes(ids).catch(() => {});
+  }, [videosLength]); // videos 참조 안정성 불필요 — 길이 변경 시에만 실행
 
   return { videos, isLoading, isFetchingNextPage, canLoadMore, handleLoadMore };
 }

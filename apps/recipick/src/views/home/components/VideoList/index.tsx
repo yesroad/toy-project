@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import VideoCard from '@/components/VideoCard';
-import recipeServices from '@/services/api/recipe';
 import { useVideoList } from './useVideoList';
 
 interface VideoListProps {
@@ -15,14 +13,6 @@ interface VideoListProps {
 export default function VideoList({ query, onVideoClick }: VideoListProps) {
   const { videos, isLoading, isFetchingNextPage, canLoadMore, handleLoadMore } =
     useVideoList(query);
-
-  // 검색 결과 첫 로드 시 상위 3개 pre-warm (fire-and-forget)
-  const videosLength = videos.length;
-  useEffect(() => {
-    if (videosLength === 0) return;
-    const ids = videos.slice(0, 3).map((v) => v.videoId);
-    recipeServices.prewarmRecipes(ids).catch(() => {});
-  }, [videosLength]); // videos 참조 안정성 불필요 — 길이 변경 시에만 실행
 
   if (isLoading) {
     return (
