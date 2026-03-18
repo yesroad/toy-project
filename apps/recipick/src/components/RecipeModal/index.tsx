@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Loader2, Play } from 'lucide-react';
+import { Loader2, Play, ChefHat } from 'lucide-react';
 import { useRecipeModal } from './useRecipeModal';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Dialog, DialogContent, DialogTitle } from '@workspace/ui/components/dialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/components/tabs';
 import IngredientList from './IngredientList';
 import RecipeSteps from './RecipeSteps';
 
@@ -66,9 +67,9 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <>
+    <div className="flex flex-col max-h-[90vh]">
       {/* 히어로 영역 */}
-      <div className="relative aspect-video overflow-hidden bg-black">
+      <div className="relative aspect-video overflow-hidden bg-black shrink-0">
         {isPlaying && videoId ? (
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
@@ -124,19 +125,30 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
         </button>
       </div>
 
-      {/* 바디 */}
-      <div className="px-6 pt-4 pb-6 max-h-[55vh] overflow-y-auto">
-        {/* 재료 */}
-        <div className="mb-7">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[#f5ede0] flex items-center justify-center text-base">
-              🥕
-            </div>
-            <span className="text-[15px] font-bold text-[#3d2b1f]">재료</span>
-            <span className="ml-auto text-xs text-[#7d6550] bg-[#f5ede0] px-2 py-0.5 rounded-full">
-              {recipe.ingredients.length}가지
-            </span>
-          </div>
+      {/* 탭 바디 */}
+      <Tabs defaultValue="ingredients" className="flex flex-col flex-1 min-h-0">
+        <div className="px-6 pt-4 shrink-0">
+          <TabsList className="w-full bg-[#f5ede0] rounded-xl h-10 p-1">
+            <TabsTrigger
+              value="ingredients"
+              className="flex-1 text-[13px] font-semibold text-[#7d6550]
+                         data-[state=active]:bg-white data-[state=active]:text-[#c4724a]
+                         data-[state=active]:shadow-sm rounded-lg transition-all"
+            >
+              🥕 재료 ({recipe.ingredients.length}가지)
+            </TabsTrigger>
+            <TabsTrigger
+              value="steps"
+              className="flex-1 text-[13px] font-semibold text-[#7d6550]
+                         data-[state=active]:bg-white data-[state=active]:text-[#c4724a]
+                         data-[state=active]:shadow-sm rounded-lg transition-all"
+            >
+              📋 조리방법 ({recipe.steps.length}단계)
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="ingredients" className="flex-1 overflow-y-auto px-6 py-4">
           {recipe.coupangLinks && Object.keys(recipe.coupangLinks).length > 0 && (
             <p className="text-[11px] text-[#9d8570] mb-3 break-keep leading-relaxed">
               * 재료 구매 링크는 쿠팡 파트너스 활동의 일환으로 이에 따른 일정액의 수수료를
@@ -144,25 +156,27 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
             </p>
           )}
           <IngredientList ingredients={recipe.ingredients} coupangLinks={recipe.coupangLinks} />
-        </div>
+        </TabsContent>
 
-        <div className="h-px bg-[#ddd0bc] mb-7" />
-
-        {/* 조리 단계 */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[#f5ede0] flex items-center justify-center text-base">
-              📋
-            </div>
-            <span className="text-[15px] font-bold text-[#3d2b1f]">조리 방법</span>
-            <span className="ml-auto text-xs text-[#7d6550] bg-[#f5ede0] px-2 py-0.5 rounded-full">
-              {recipe.steps.length}단계
-            </span>
-          </div>
+        <TabsContent value="steps" className="flex-1 overflow-y-auto px-6 py-4">
           <RecipeSteps steps={recipe.steps} />
-        </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Floating CTA */}
+      <div className="shrink-0 px-5 py-4 border-t border-[#ede3d8] bg-white">
+        <button
+          onClick={() => setIsPlaying(true)}
+          disabled={isPlaying}
+          className="w-full flex items-center justify-center gap-2.5 bg-[#3d2b1f] hover:bg-[#2d1f16]
+                     disabled:bg-[#c4a88a] text-white font-bold text-[15px] py-3.5 rounded-xl
+                     transition-colors cursor-pointer disabled:cursor-default"
+        >
+          <ChefHat size={18} />
+          요리 시작하기
+        </button>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -206,18 +220,19 @@ function VideoDetailSkeleton({
         </button>
       </div>
       <div className="p-6 space-y-3">
-        <div className="flex items-center gap-2 mb-4 text-[#c4724a]">
+        {/* 탭 스켈레톤 */}
+        <Skeleton className="h-10 w-full rounded-xl" />
+        <div className="flex items-center gap-2 mt-2 text-[#c4724a]">
           <Loader2 size={16} className="animate-spin" />
           <span className="text-[13px] font-semibold text-[#7d6550]">레시피 분석 중...</span>
         </div>
-        <Skeleton className="h-5 w-3/5" />
-        <Skeleton className="h-4 w-4/5" />
-        <Skeleton className="h-4 w-2/3" />
         <div className="flex flex-wrap gap-2 pt-2">
           {[90, 75, 105, 80, 95].map((w, i) => (
             <Skeleton key={i} className="h-9 rounded-full" style={{ width: `${w}px` }} />
           ))}
         </div>
+        <Skeleton className="h-4 w-4/5" />
+        <Skeleton className="h-4 w-2/3" />
       </div>
     </>
   );
@@ -289,9 +304,9 @@ function ModalSkeleton() {
         <Loader2 size={32} className="animate-spin text-[#c4724a]/60" />
       </div>
       <div className="p-6 space-y-3">
+        <Skeleton className="h-10 w-full rounded-xl" />
         <Skeleton className="h-5 w-3/5" />
         <Skeleton className="h-4 w-4/5" />
-        <Skeleton className="h-4 w-2/3" />
         <div className="flex flex-wrap gap-2 pt-2">
           {[90, 75, 105, 80, 95].map((w, i) => (
             <Skeleton key={i} className="h-9 rounded-full" style={{ width: `${w}px` }} />
