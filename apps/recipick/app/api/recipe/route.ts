@@ -209,6 +209,13 @@ export async function POST(request: Request) {
           steps: mergedAnalysis.steps,
           coupangLinks,
           rawCaption,
+          servings: mergedAnalysis.servings,
+          cookingTime: mergedAnalysis.cookingTime,
+          difficulty: mergedAnalysis.difficulty,
+          calories: mergedAnalysis.calories,
+          tips: mergedAnalysis.tips,
+          notes: mergedAnalysis.notes,
+          stepDetails: mergedAnalysis.stepDetails,
         };
 
         // 8. Supabase 캐시 저장 (비차단)

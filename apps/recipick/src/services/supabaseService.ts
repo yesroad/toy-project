@@ -26,6 +26,13 @@ export function rowToRecipe(row: RecipeCacheRow, cached: boolean): Recipe {
     rawCaption: row.raw_caption ?? undefined,
     cached,
     createdAt: row.created_at,
+    servings: row.servings ?? undefined,
+    cookingTime: row.cooking_time_minutes ?? undefined,
+    difficulty: (row.difficulty as Recipe['difficulty']) ?? undefined,
+    calories: row.calories ?? undefined,
+    tips: row.tips ?? undefined,
+    notes: row.notes ?? undefined,
+    stepDetails: row.step_details ?? undefined,
   };
 }
 
@@ -44,7 +51,7 @@ export async function getRecipeCache(videoId: string): Promise<Recipe | null> {
   const { data, error } = await supabase
     .from(TABLE)
     .select(
-      'id, video_id, title, thumbnail, channel_name, ingredients, steps, coupang_links, created_at, updated_at',
+      'id, video_id, title, thumbnail, channel_name, ingredients, steps, coupang_links, raw_caption, created_at, updated_at, servings, cooking_time_minutes, difficulty, calories, tips, notes, step_details',
     )
     .eq('video_id', videoId.trim())
     .single<RecipeCacheRow>();
@@ -63,6 +70,13 @@ export async function saveRecipeCache(recipe: Omit<Recipe, 'cached'>): Promise<v
     steps: recipe.steps,
     coupang_links: recipe.coupangLinks ?? null,
     raw_caption: recipe.rawCaption ?? null,
+    servings: recipe.servings ?? null,
+    cooking_time_minutes: recipe.cookingTime ?? null,
+    difficulty: recipe.difficulty ?? null,
+    calories: recipe.calories ?? null,
+    tips: recipe.tips ?? null,
+    notes: recipe.notes ?? null,
+    step_details: recipe.stepDetails ?? null,
   };
   await supabase.from(TABLE).upsert(row, { onConflict: 'video_id' });
 }

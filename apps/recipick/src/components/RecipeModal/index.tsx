@@ -58,6 +58,12 @@ interface RecipeModalContentProps {
     ingredients: { name: string; amount: string }[];
     steps: string[];
     coupangLinks?: Record<string, string>;
+    servings?: string;
+    cookingTime?: number;
+    calories?: number;
+    tips?: string[];
+    notes?: string[];
+    stepDetails?: { description: string; ingredients?: string[]; duration?: number }[];
   };
   videoId: string | null;
   onClose: () => void;
@@ -149,6 +155,26 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
         </div>
 
         <TabsContent value="ingredients" className="flex-1 overflow-y-auto px-6 py-4">
+          {/* 메타 정보 바 */}
+          {(recipe.cookingTime || recipe.servings || recipe.calories) && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {recipe.cookingTime && (
+                <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
+                  ⏱ {recipe.cookingTime}분
+                </span>
+              )}
+              {recipe.servings && (
+                <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
+                  👤 {recipe.servings}
+                </span>
+              )}
+              {recipe.calories && (
+                <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
+                  🔥 {recipe.calories}kcal
+                </span>
+              )}
+            </div>
+          )}
           {recipe.coupangLinks && Object.keys(recipe.coupangLinks).length > 0 && (
             <p className="text-[11px] text-[#9d8570] mb-3 break-keep leading-relaxed">
               * 재료 구매 링크는 쿠팡 파트너스 활동의 일환으로 이에 따른 일정액의 수수료를
@@ -156,10 +182,49 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
             </p>
           )}
           <IngredientList ingredients={recipe.ingredients} coupangLinks={recipe.coupangLinks} />
+
+          {/* 핵심 팁 */}
+          {recipe.tips && recipe.tips.length > 0 && (
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-lg bg-[#fdf0e6] flex items-center justify-center text-sm">
+                  💡
+                </div>
+                <span className="text-[14px] font-bold text-[#3d2b1f]">핵심 팁</span>
+              </div>
+              <ul className="flex flex-col gap-2">
+                {recipe.tips.map((tip, i) => (
+                  <li key={i} className="flex gap-2 items-start">
+                    <span className="text-[#c4724a] font-bold text-[13px] shrink-0 mt-0.5">
+                      {i + 1}.
+                    </span>
+                    <p className="text-[13px] text-[#5a3e2e] leading-relaxed break-keep">{tip}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 유의사항 */}
+          {recipe.notes && recipe.notes.length > 0 && (
+            <div className="mt-5 bg-[#fdf8f4] border border-[#ede3d8] rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm">⚠️</span>
+                <span className="text-[13px] font-bold text-[#7d6550]">유의사항</span>
+              </div>
+              <ul className="flex flex-col gap-1.5">
+                {recipe.notes.map((note, i) => (
+                  <li key={i} className="text-[12px] text-[#9d8570] leading-relaxed break-keep">
+                    • {note}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="steps" className="flex-1 overflow-y-auto px-6 py-4">
-          <RecipeSteps steps={recipe.steps} />
+          <RecipeSteps steps={recipe.steps} stepDetails={recipe.stepDetails} />
         </TabsContent>
       </Tabs>
 

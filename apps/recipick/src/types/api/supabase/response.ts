@@ -1,5 +1,5 @@
 // Supabase 테이블 행 타입
-import type { Ingredient, CoupangLinks } from '@/types/api/routeApi/response';
+import type { Ingredient, CoupangLinks, RecipeStep } from '@/types/api/routeApi/response';
 
 export interface IngredientLinkRow {
   name: string;
@@ -20,6 +20,14 @@ export interface RecipeCacheRow {
   raw_caption: string | null;
   created_at: string;
   updated_at: string;
+  // Phase 2 확장 컬럼 (NULLABLE — 기존 행 호환)
+  servings: string | null;
+  cooking_time_minutes: number | null;
+  difficulty: string | null;
+  calories: number | null;
+  tips: string[] | null;
+  notes: string[] | null;
+  step_details: RecipeStep[] | null;
 }
 
 export type RecipeUnavailableReason = 'NO_CAPTION' | 'INSUFFICIENT_INGREDIENTS';
