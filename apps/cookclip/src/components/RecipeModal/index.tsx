@@ -215,15 +215,8 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
 
         <TabsContent value="ingredients" className="flex-1 overflow-y-auto px-6 py-4">
           {/* 메타 정보 바 */}
-          {(!!recipe.cookingTime ||
-            (!!recipe.servings && recipe.servings !== 'omit') ||
-            !!recipe.calories) && (
+          {((!!recipe.servings && recipe.servings !== 'omit') || !!recipe.calories) && (
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {!!recipe.cookingTime && (
-                <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
-                  ⏱ {recipe.cookingTime}분
-                </span>
-              )}
               {!!recipe.servings && recipe.servings !== 'omit' && (
                 <div className="flex items-center gap-1.5 bg-[#f5ede0] px-3 py-1.5 rounded-full">
                   <span className="text-[12px]">👤</span>
