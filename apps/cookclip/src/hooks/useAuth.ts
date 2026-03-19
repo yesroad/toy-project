@@ -33,12 +33,16 @@ export function useAuth() {
     });
   };
 
-  const signInWithKakao = async () => {
+  const signInWithEmail = async (email: string, password: string): Promise<string | null> => {
     const supabase = createSupabaseBrowserClient();
-    await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return error ? error.message : null;
+  };
+
+  const signUpWithEmail = async (email: string, password: string): Promise<string | null> => {
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.signUp({ email, password });
+    return error ? error.message : null;
   };
 
   const signOut = async () => {
@@ -46,5 +50,5 @@ export function useAuth() {
     await supabase.auth.signOut();
   };
 
-  return { user, isLoading, signInWithGoogle, signInWithKakao, signOut };
+  return { user, isLoading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut };
 }
