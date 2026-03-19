@@ -27,11 +27,13 @@ export function generateMetadata(): Metadata {
       siteName: SITE_NAME,
       locale: 'ko_KR',
       type: 'website',
+      images: [{ url: `${siteUrl}/og-image.png`, width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${SITE_NAME} — 유튜브 요리 영상 레시피 자동 추출`,
       description: SITE_DESCRIPTION,
+      images: [`${siteUrl}/og-image.png`],
     },
     icons: {
       icon: [

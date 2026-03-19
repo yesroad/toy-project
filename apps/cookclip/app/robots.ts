@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { serverEnv } from '@/env/server';
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/_next/'],
     },
-    sitemap: 'https://cookclip.vercel.app/sitemap.xml',
+    sitemap: `${serverEnv.siteUrl}/sitemap.xml`,
   };
 }

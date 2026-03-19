@@ -109,6 +109,14 @@ export async function getAllRecipeSitemapEntries(): Promise<
   return (data ?? []).map((row) => ({ videoId: row.video_id, createdAt: row.created_at }));
 }
 
+export async function getSaveCount(videoId: string): Promise<number> {
+  const { count } = await supabase
+    .from('user_saved_recipes')
+    .select('*', { count: 'exact', head: true })
+    .eq('video_id', videoId.trim());
+  return count ?? 0;
+}
+
 export async function getRecentRecipes(limit: number): Promise<VideoItem[]> {
   const { data } = await supabase
     .from(TABLE)

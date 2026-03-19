@@ -1,6 +1,11 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getRecipeCache } from '@/services/supabaseService';
 import CookingModeView from '@/views/cooking-mode/CookingModeView';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 interface Props {
   params: Promise<{ videoId: string }>;

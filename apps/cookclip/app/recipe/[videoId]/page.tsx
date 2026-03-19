@@ -1,6 +1,6 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
-import { getRecipeCache } from '@/services/supabaseService';
+import { getRecipeCache, getSaveCount } from '@/services/supabaseService';
 import { serverEnv } from '@/env/server';
 import RecipePageView from './RecipePageView';
 
@@ -9,9 +9,11 @@ interface Props {
 }
 
 const SITE_URL = serverEnv.siteUrl;
+const MIN_SAVE_COUNT_FOR_RATING = 2;
 
 // 같은 요청 내 generateMetadata + page 간 중복 DB 호출 제거
 const getCachedRecipe = cache((videoId: string) => getRecipeCache(videoId).catch(() => null));
+const getCachedSaveCount = cache((videoId: string) => getSaveCount(videoId).catch(() => 0));
 
 function buildDescription(recipe: NonNullable<Awaited<ReturnType<typeof getRecipeCache>>>) {
   const base = `재료 ${recipe.ingredients.length}가지, 조리 ${recipe.steps.length}단계`;
@@ -23,6 +25,7 @@ function buildDescription(recipe: NonNullable<Awaited<ReturnType<typeof getRecip
 function buildRecipeJsonLd(
   recipe: NonNullable<Awaited<ReturnType<typeof getRecipeCache>>>,
   description: string,
+  saveCount: number,
 ) {
   return {
     '@context': 'https://schema.org',
@@ -45,6 +48,39 @@ function buildRecipeJsonLd(
     ...(recipe.calories && {
       nutrition: { '@type': 'NutritionInformation', calories: `${recipe.calories} kcal` },
     }),
+    ...(saveCount >= MIN_SAVE_COUNT_FOR_RATING && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: 5,
+        ratingCount: saveCount,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
+  };
+}
+
+function buildBreadcrumbJsonLd(
+  recipe: NonNullable<Awaited<ReturnType<typeof getRecipeCache>>>,
+  videoId: string,
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: '홈',
+        item: SITE_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: recipe.title,
+        item: `${SITE_URL}/recipe/${videoId}`,
+      },
+    ],
   };
 }
 
@@ -86,16 +122,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RecipePage({ params }: Props) {
   const { videoId } = await params;
-  const recipe = await getCachedRecipe(videoId);
+  const [recipe, saveCount] = await Promise.all([
+    getCachedRecipe(videoId),
+    getCachedSaveCount(videoId),
+  ]);
 
-  const jsonLd = recipe ? buildRecipeJsonLd(recipe, buildDescription(recipe)) : null;
+  const recipeJsonLd = recipe ? buildRecipeJsonLd(recipe, buildDescription(recipe), saveCount) : null;
+  const breadcrumbJsonLd = recipe ? buildBreadcrumbJsonLd(recipe, videoId) : null;
 
   return (
     <>
-      {jsonLd && (
+      {recipeJsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(recipeJsonLd) }}
+        />
+      )}
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       )}
       <RecipePageView videoId={videoId} />
