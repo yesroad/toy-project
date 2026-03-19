@@ -27,6 +27,9 @@ function requireEnv(options: { key: string; aliases?: readonly string[] }): stri
 }
 
 export const serverEnv = {
+  get siteUrl(): string {
+    return requireEnv({ key: 'SITE_URL' });
+  },
   get openAiApiKey(): string {
     return requireEnv({ key: 'OPENAI_API_KEY' });
   },

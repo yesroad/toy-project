@@ -98,3 +98,13 @@ export async function saveRecipeUnavailable(
 ): Promise<void> {
   await supabase.from(SKIP_TABLE).upsert({ video_id: videoId, reason }, { onConflict: 'video_id' });
 }
+
+export async function getAllRecipeSitemapEntries(): Promise<
+  Array<{ videoId: string; createdAt: string }>
+> {
+  const { data } = await supabase
+    .from(TABLE)
+    .select('video_id, created_at')
+    .order('created_at', { ascending: false });
+  return (data ?? []).map((row) => ({ videoId: row.video_id, createdAt: row.created_at }));
+}
