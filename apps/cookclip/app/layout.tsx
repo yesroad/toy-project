@@ -2,60 +2,62 @@ import type { Metadata } from 'next';
 import '@workspace/ui/styles/globals.css';
 import './globals.css';
 import QueryProvider from '@/provider/QueryProvider';
-import AuthButton from '@/components/AuthButton';
+import GlobalNav from '@/components/GlobalNav';
 import { serverEnv } from '@/env/server';
 
-const SITE_URL = serverEnv.siteUrl;
 const SITE_NAME = 'CookClip';
 const SITE_DESCRIPTION = '유튜브 요리 영상 URL만 넣으면 재료와 조리 순서를 자동으로 정리해 드려요';
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: SITE_NAME,
-  url: SITE_URL,
-  description: SITE_DESCRIPTION,
-  inLanguage: 'ko',
-};
-
-export const metadata: Metadata = {
-  title: {
-    default: `${SITE_NAME} — 유튜브 요리 영상 레시피 자동 추출`,
-    template: `%s | ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  metadataBase: new URL(SITE_URL),
-  alternates: {
-    canonical: '/',
-  },
-  openGraph: {
-    title: `${SITE_NAME} — 유튜브 요리 영상 레시피 자동 추출`,
+export function generateMetadata(): Metadata {
+  const siteUrl = serverEnv.siteUrl;
+  return {
+    title: {
+      default: `${SITE_NAME} — 유튜브 요리 영상 레시피 자동 추출`,
+      template: `%s | ${SITE_NAME}`,
+    },
     description: SITE_DESCRIPTION,
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    locale: 'ko_KR',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${SITE_NAME} — 유튜브 요리 영상 레시피 자동 추출`,
-    description: SITE_DESCRIPTION,
-  },
-  icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', type: 'image/x-icon' },
-    ],
-    apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
-  },
-  manifest: '/site.webmanifest',
-};
+    metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: '/',
+    },
+    openGraph: {
+      title: `${SITE_NAME} — 유튜브 요리 영상 레시피 자동 추출`,
+      description: SITE_DESCRIPTION,
+      url: siteUrl,
+      siteName: SITE_NAME,
+      locale: 'ko_KR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${SITE_NAME} — 유튜브 요리 영상 레시피 자동 추출`,
+      description: SITE_DESCRIPTION,
+    },
+    icons: {
+      icon: [
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+        { url: '/favicon.ico', type: 'image/x-icon' },
+      ],
+      apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
+    },
+    manifest: '/site.webmanifest',
+  };
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: serverEnv.siteUrl,
+    description: SITE_DESCRIPTION,
+    inLanguage: 'ko',
+  };
+
   return (
     <html lang="ko">
       <head>
@@ -66,9 +68,7 @@ export default function RootLayout({
       </head>
       <body>
         <QueryProvider>
-          <nav className="fixed top-0 right-0 z-50 px-4 py-3">
-            <AuthButton />
-          </nav>
+          <GlobalNav />
           {children}
         </QueryProvider>
       </body>
