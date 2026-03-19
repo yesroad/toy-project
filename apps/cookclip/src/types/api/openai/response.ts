@@ -12,4 +12,5 @@ export interface RecipeAnalysis {
   tips?: string[];
   notes?: string[];
   stepDetails?: RecipeStep[];
+  dishName?: string; // 요리 이름 (예: "계란말이", "평양냉면")
 }

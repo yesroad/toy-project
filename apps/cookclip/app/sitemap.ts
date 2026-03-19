@@ -1,10 +1,13 @@
 import { MetadataRoute } from 'next';
-import { getAllRecipeSitemapEntries } from '@/services/supabaseService';
+import { getAllRecipeSitemapEntries, getAllDishSitemapEntries } from '@/services/supabaseService';
 import { serverEnv } from '@/env/server';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = serverEnv.siteUrl;
-  const recipes = await getAllRecipeSitemapEntries().catch(() => []);
+  const [recipes, dishes] = await Promise.all([
+    getAllRecipeSitemapEntries().catch(() => []),
+    getAllDishSitemapEntries().catch(() => []),
+  ]);
 
   const recipeUrls: MetadataRoute.Sitemap = recipes.map((r) => ({
     url: `${siteUrl}/recipe/${r.videoId}`,
@@ -13,13 +16,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const dishUrls: MetadataRoute.Sitemap = dishes.map((d) => ({
+    url: `${siteUrl}/dish/${encodeURIComponent(d.dishName)}`,
+    lastModified: new Date(d.updatedAt),
+    changeFrequency: 'weekly',
+    priority: 0.9,
+  }));
+
   return [
-    {
-      url: siteUrl,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
-    },
+    { url: siteUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
+    ...dishUrls,
     ...recipeUrls,
   ];
 }

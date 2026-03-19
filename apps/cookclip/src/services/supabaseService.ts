@@ -33,6 +33,7 @@ export function rowToRecipe(row: RecipeCacheRow, cached: boolean): Recipe {
     tips: row.tips ?? undefined,
     notes: row.notes ?? undefined,
     stepDetails: row.step_details ?? undefined,
+    dishName: row.dish_name ?? undefined,
   };
 }
 
@@ -51,7 +52,7 @@ export async function getRecipeCache(videoId: string): Promise<Recipe | null> {
   const { data, error } = await supabase
     .from(TABLE)
     .select(
-      'id, video_id, title, thumbnail, channel_name, ingredients, steps, coupang_links, raw_caption, created_at, updated_at, servings, cooking_time_minutes, difficulty, calories, tips, notes, step_details',
+      'id, video_id, title, thumbnail, channel_name, ingredients, steps, coupang_links, raw_caption, created_at, updated_at, servings, cooking_time_minutes, difficulty, calories, tips, notes, step_details, dish_name',
     )
     .eq('video_id', videoId.trim())
     .single<RecipeCacheRow>();
@@ -77,6 +78,7 @@ export async function saveRecipeCache(recipe: Omit<Recipe, 'cached'>): Promise<v
     tips: recipe.tips ?? null,
     notes: recipe.notes ?? null,
     step_details: recipe.stepDetails ?? null,
+    dish_name: recipe.dishName ?? null,
   };
   await supabase.from(TABLE).upsert(row, { onConflict: 'video_id' });
 }
@@ -130,5 +132,44 @@ export async function getRecentRecipes(limit: number): Promise<VideoItem[]> {
     thumbnail: row.thumbnail,
     channelName: row.channel_name,
     publishedAt: row.created_at,
+  }));
+}
+
+export async function getRecipesByDishName(dishName: string): Promise<VideoItem[]> {
+  const { data } = await supabase
+    .from(TABLE)
+    .select('video_id, title, thumbnail, channel_name, created_at')
+    .eq('dish_name', dishName)
+    .order('created_at', { ascending: false });
+
+  return (data ?? []).map((row) => ({
+    videoId: row.video_id,
+    title: row.title,
+    thumbnail: row.thumbnail,
+    channelName: row.channel_name,
+    publishedAt: row.created_at,
+  }));
+}
+
+export async function getAllDishSitemapEntries(): Promise<
+  Array<{ dishName: string; updatedAt: string }>
+> {
+  const { data } = await supabase
+    .from(TABLE)
+    .select('dish_name, updated_at')
+    .not('dish_name', 'is', null)
+    .order('updated_at', { ascending: false });
+
+  // dish_name 중복 제거, 각 dish의 가장 최신 updated_at 사용
+  const dishMap = new Map<string, string>();
+  for (const row of data ?? []) {
+    if (row.dish_name && !dishMap.has(row.dish_name)) {
+      dishMap.set(row.dish_name, row.updated_at);
+    }
+  }
+
+  return Array.from(dishMap.entries()).map(([dishName, updatedAt]) => ({
+    dishName,
+    updatedAt,
   }));
 }

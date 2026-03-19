@@ -33,6 +33,7 @@ export interface Recipe {
   tips?: string[];
   notes?: string[];
   stepDetails?: RecipeStep[]; // steps와 병행 저장 (breaking change 없음)
+  dishName?: string; // 요리 이름 (예: "계란말이") — dish 집계 페이지용
 }
 
 export interface RecipeResponse {

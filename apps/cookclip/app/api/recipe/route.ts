@@ -216,6 +216,7 @@ export async function POST(request: Request) {
           tips: mergedAnalysis.tips,
           notes: mergedAnalysis.notes,
           stepDetails: mergedAnalysis.stepDetails,
+          dishName: mergedAnalysis.dishName,
         };
 
         // 8. Supabase 캐시 저장 (비차단)

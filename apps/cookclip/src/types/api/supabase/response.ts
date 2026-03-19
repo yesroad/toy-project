@@ -28,6 +28,7 @@ export interface RecipeCacheRow {
   tips: string[] | null;
   notes: string[] | null;
   step_details: RecipeStep[] | null;
+  dish_name: string | null; // Phase 3 — 요리명 (SEO 집계 페이지용)
 }
 
 export type RecipeUnavailableReason = 'NO_CAPTION' | 'INSUFFICIENT_INGREDIENTS';

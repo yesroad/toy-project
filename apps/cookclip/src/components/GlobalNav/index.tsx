@@ -10,7 +10,8 @@ export default function GlobalNav() {
   if (
     pathname.startsWith('/recipe/') ||
     pathname.startsWith('/saved') ||
-    pathname.startsWith('/shopping')
+    pathname.startsWith('/shopping') ||
+    pathname.startsWith('/login')
   )
     return null;
 
