@@ -54,4 +54,7 @@ export const serverEnv = {
   get supabaseServiceRoleKey(): string {
     return requireEnv({ key: 'SUPABASE_SERVICE_ROLE_KEY' });
   },
+  get gaId(): string | undefined {
+    return readEnv(['NEXT_PUBLIC_GA_ID']);
+  },
 };

@@ -31,7 +31,10 @@ export default function SaveRecipeButton({ videoId, variant = 'default' }: SaveR
     if (variant === 'hero') {
       return (
         <button
-          onClick={(e) => { e.stopPropagation(); handleToggle(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggle();
+          }}
           disabled={isLoading}
           aria-label={isSaved ? '저장 취소' : '나의 레시피에 저장'}
           className={`absolute top-3 right-3 z-10 w-10 h-10 rounded-full flex items-center justify-center

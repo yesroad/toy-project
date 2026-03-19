@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import '@workspace/ui/styles/globals.css';
 import './globals.css';
 import QueryProvider from '@/provider/QueryProvider';
@@ -73,6 +75,11 @@ export default function RootLayout({
           <GlobalNav />
           {children}
         </QueryProvider>
+        {serverEnv.gaId && (
+          <Suspense>
+            <GoogleAnalytics gaId={serverEnv.gaId} />
+          </Suspense>
+        )}
       </body>
     </html>
   );

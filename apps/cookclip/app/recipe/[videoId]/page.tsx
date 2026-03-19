@@ -126,7 +126,9 @@ export default async function RecipePage({ params }: Props) {
     getCachedSaveCount(videoId),
   ]);
 
-  const recipeJsonLd = recipe ? buildRecipeJsonLd(recipe, buildDescription(recipe), saveCount) : null;
+  const recipeJsonLd = recipe
+    ? buildRecipeJsonLd(recipe, buildDescription(recipe), saveCount)
+    : null;
   const breadcrumbJsonLd = recipe ? buildBreadcrumbJsonLd(recipe, videoId) : null;
 
   return (

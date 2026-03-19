@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Loader2, Play, ChefHat } from 'lucide-react';
+import { Loader2, Play, ChefHat, Copy, Check } from 'lucide-react';
 import { useRecipeModal } from './useRecipeModal';
+import ServingScaler from '@/components/ServingScaler';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Dialog, DialogContent, DialogTitle } from '@workspace/ui/components/dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/components/tabs';
@@ -69,8 +70,66 @@ interface RecipeModalContentProps {
   onClose: () => void;
 }
 
+// "2인분" → 2, "3~4인분" → 3, 파싱 불가 → 2
+function parseServings(servings: string | undefined): number {
+  if (!servings) return 2;
+  const match = servings.match(/\d+/);
+  return match ? parseInt(match[0], 10) : 2;
+}
+
+// "200g" → { num: 200, unit: "g" }, "적당량" → null
+function parseAmount(amount: string): { num: number; unit: string } | null {
+  const match = amount.match(/^([\d.]+(?:\/\d+)?)\s*(.*)$/);
+  if (!match) return null;
+  // 분수 처리: "1/2" → 0.5
+  const rawNum = match[1];
+  let num: number;
+  if (rawNum.includes('/')) {
+    const [numerator, denominator] = rawNum.split('/');
+    num = parseFloat(numerator) / parseFloat(denominator);
+  } else {
+    num = parseFloat(rawNum);
+  }
+  if (isNaN(num)) return null;
+  return { num, unit: match[2] };
+}
+
+function scaleAmount(amount: string, ratio: number): string {
+  if (ratio === 1) return amount;
+  const parsed = parseAmount(amount);
+  if (!parsed) return amount;
+  const scaled = parsed.num * ratio;
+  // 소수점 정리: 정수면 정수로, 아니면 소수점 1자리
+  const formatted = scaled % 1 === 0 ? scaled.toString() : scaled.toFixed(1);
+  return parsed.unit ? `${formatted}${parsed.unit}` : formatted;
+}
+
+const MIN_SERVINGS = 1;
+const MAX_SERVINGS = 20;
+const COPY_RESET_DELAY_MS = 2000;
+
 function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const baseServings = parseServings(recipe.servings);
+  const [currentServings, setCurrentServings] = useState(baseServings);
+  const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const servingRatio = currentServings / baseServings;
+
+  const scaledIngredients = recipe.ingredients.map((ing) => ({
+    ...ing,
+    amount: scaleAmount(ing.amount, servingRatio),
+  }));
+
+  function handleCopyIngredients() {
+    const text = scaledIngredients.map((ing) => `${ing.name} ${ing.amount}`.trim()).join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), COPY_RESET_DELAY_MS);
+    });
+  }
 
   return (
     <div className="flex flex-col max-h-[90vh]">
@@ -156,17 +215,26 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
 
         <TabsContent value="ingredients" className="flex-1 overflow-y-auto px-6 py-4">
           {/* 메타 정보 바 */}
-          {(!!recipe.cookingTime || (!!recipe.servings && recipe.servings !== 'omit') || !!recipe.calories) && (
-            <div className="flex flex-wrap gap-2 mb-4">
+          {(!!recipe.cookingTime ||
+            (!!recipe.servings && recipe.servings !== 'omit') ||
+            !!recipe.calories) && (
+            <div className="flex flex-wrap items-center gap-2 mb-4">
               {!!recipe.cookingTime && (
                 <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
                   ⏱ {recipe.cookingTime}분
                 </span>
               )}
               {!!recipe.servings && recipe.servings !== 'omit' && (
-                <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
-                  👤 {recipe.servings}
-                </span>
+                <div className="flex items-center gap-1.5 bg-[#f5ede0] px-3 py-1.5 rounded-full">
+                  <span className="text-[12px]">👤</span>
+                  <ServingScaler
+                    currentServings={currentServings}
+                    canDecrease={currentServings > MIN_SERVINGS}
+                    canIncrease={currentServings < MAX_SERVINGS}
+                    onDecrease={() => setCurrentServings((s) => s - 1)}
+                    onIncrease={() => setCurrentServings((s) => s + 1)}
+                  />
+                </div>
               )}
               {!!recipe.calories && (
                 <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
@@ -181,7 +249,25 @@ function RecipeModalContent({ recipe, videoId, onClose }: RecipeModalContentProp
               제공받습니다.
             </p>
           )}
-          <IngredientList ingredients={recipe.ingredients} coupangLinks={recipe.coupangLinks} />
+          {/* 재료 복사 버튼 */}
+          <button
+            onClick={handleCopyIngredients}
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-[#7d6550]
+                       hover:text-[#c4724a] transition-colors mb-3 cursor-pointer"
+          >
+            {copied ? (
+              <>
+                <Check size={13} className="text-[#c4724a]" />
+                복사 완료!
+              </>
+            ) : (
+              <>
+                <Copy size={13} />
+                재료 전체 복사
+              </>
+            )}
+          </button>
+          <IngredientList ingredients={scaledIngredients} coupangLinks={recipe.coupangLinks} />
 
           {/* 핵심 팁 */}
           {recipe.tips && recipe.tips.length > 0 && (
