@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Trash2, ShoppingCart } from 'lucide-react';
 import { useShoppingList } from '@/hooks/useShoppingList';
+import AuthButton from '@/components/AuthButton';
 
 export default function ShoppingListView() {
   const { items, toggle, remove, clearDone } = useShoppingList();
@@ -28,14 +29,17 @@ export default function ShoppingListView() {
         </Link>
         <span className="text-[#ddd0bc]">|</span>
         <span className="text-[14px] font-bold text-[#3d2b1f]">🛒 장보기 목록</span>
-        {checkedCount > 0 && (
-          <button
-            onClick={clearDone}
-            className="ml-auto text-[12px] text-[#9d8570] hover:text-[#c4724a] transition-colors"
-          >
-            완료 항목 삭제 ({checkedCount})
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-3">
+          {checkedCount > 0 && (
+            <button
+              onClick={clearDone}
+              className="text-[12px] text-[#9d8570] hover:text-[#c4724a] transition-colors"
+            >
+              완료 항목 삭제 ({checkedCount})
+            </button>
+          )}
+          <AuthButton />
+        </div>
       </nav>
 
       <main className="max-w-[600px] mx-auto px-4 py-8">
