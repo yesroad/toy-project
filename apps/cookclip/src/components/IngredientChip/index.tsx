@@ -22,9 +22,11 @@ export default function IngredientChip({ name, amount, link }: IngredientChipPro
                  transition-all duration-150 no-underline"
     >
       <span className="font-semibold">{name}</span>
-      <span className="text-[12px] text-[#7d6550] group-hover:text-white/80 transition-colors">
-        {amount}
-      </span>
+      {amount && amount !== '0' && (
+        <span className="text-[12px] text-[#7d6550] group-hover:text-white/80 transition-colors">
+          {amount}
+        </span>
+      )}
       <span className="text-[13px] ml-0.5 opacity-45 group-hover:opacity-90 transition-opacity">
         🛒
       </span>

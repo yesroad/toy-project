@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import userServices from '@/services/api/user';
 import { userKeys } from './queryKeys';
+import { userRecipesKeys } from '@/queries/user-recipes/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
 
 export function useSavedRecipesQuery() {
@@ -37,6 +38,7 @@ export function useSaveRecipeMutation(videoId: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.savedRecipes() });
+      queryClient.invalidateQueries({ queryKey: userRecipesKeys.saved() });
     },
   });
 
@@ -59,6 +61,7 @@ export function useSaveRecipeMutation(videoId: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.savedRecipes() });
+      queryClient.invalidateQueries({ queryKey: userRecipesKeys.saved() });
     },
   });
 

@@ -3,7 +3,7 @@
 import SearchBar from '@/components/SearchBar';
 import SearchHistoryTabs from '@/components/SearchHistoryTabs';
 import VideoList from './components/VideoList';
-import FeaturedRecipes from './components/FeaturedRecipes';
+import SavedRecipeList from './components/SavedRecipeList';
 import { useHomeView } from './useHomeView';
 
 export default function HomeView() {
@@ -47,7 +47,7 @@ export default function HomeView() {
 
       {/* 메인 콘텐츠 */}
       <main className="max-w-[960px] mx-auto px-4 py-6 pb-16">
-        {query ? <VideoList query={query} /> : <FeaturedRecipes onSearch={handleSearch} />}
+        {query ? <VideoList query={query} /> : <SavedRecipeList onSearch={handleSearch} />}
       </main>
     </div>
   );

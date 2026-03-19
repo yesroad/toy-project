@@ -40,7 +40,7 @@ export default function RecipeSteps({ steps, stepDetails }: RecipeStepsProps) {
                 </div>
               )}
               {/* 소요 시간 */}
-              {detail?.duration && (
+              {!!detail?.duration && (
                 <p className="text-[11px] text-[#a89880] mt-2">⏱ {detail.duration}초</p>
               )}
             </div>

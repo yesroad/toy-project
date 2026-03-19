@@ -7,6 +7,7 @@ import { Play, ChefHat, ArrowLeft, Loader2 } from 'lucide-react';
 import { useRecipeModal } from '@/components/RecipeModal/useRecipeModal';
 import ShareButton from '@/components/ShareButton';
 import SaveRecipeButton from '@/components/SaveRecipeButton';
+import AuthButton from '@/components/AuthButton';
 import AddToShoppingButton from '@/components/AddToShoppingButton';
 import ServingScaler from '@/components/ServingScaler';
 import { useServingScaler } from '@/components/ServingScaler/useServingScaler';
@@ -84,7 +85,6 @@ export default function RecipePageView({ videoId }: Props) {
         <span className="text-[#ddd0bc]">|</span>
         <span className="text-[14px] font-bold text-[#3d2b1f]">🍳 CookClip</span>
         <div className="ml-auto flex items-center gap-3">
-          {state.phase === 'recipe_ready' && <SaveRecipeButton videoId={videoId} />}
           {state.phase === 'recipe_ready' && (
             <AddToShoppingButton
               ingredients={state.recipe.ingredients}
@@ -93,6 +93,7 @@ export default function RecipePageView({ videoId }: Props) {
             />
           )}
           {state.phase === 'recipe_ready' && <ShareButton title={state.recipe.title} />}
+          <AuthButton />
         </div>
       </nav>
 
@@ -113,6 +114,7 @@ export default function RecipePageView({ videoId }: Props) {
           <>
             {/* 히어로 영역 */}
             <div className="relative aspect-video overflow-hidden bg-black">
+              <SaveRecipeButton videoId={videoId} variant="hero" />
               {isPlaying ? (
                 <iframe
                   src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
@@ -200,27 +202,27 @@ export default function RecipePageView({ videoId }: Props) {
                 className="px-4 pt-6 pb-8 md:p-0 md:sticky md:top-[113px] md:self-start"
               >
                 {/* 메타 배지 */}
-                {(state.recipe.cookingTime ||
-                  state.recipe.servings ||
-                  state.recipe.calories ||
-                  state.recipe.difficulty) && (
+                {(!!state.recipe.cookingTime ||
+                  !!state.recipe.servings ||
+                  !!state.recipe.calories ||
+                  !!state.recipe.difficulty) && (
                   <div className="flex flex-wrap gap-2 mb-5">
-                    {state.recipe.cookingTime && (
+                    {!!state.recipe.cookingTime && (
                       <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
                         ⏱ {state.recipe.cookingTime}분
                       </span>
                     )}
-                    {state.recipe.servings && (
+                    {!!state.recipe.servings && state.recipe.servings !== 'omit' && (
                       <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
                         👤 {state.recipe.servings}
                       </span>
                     )}
-                    {state.recipe.calories && (
+                    {!!state.recipe.calories && (
                       <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
                         🔥 {state.recipe.calories}kcal
                       </span>
                     )}
-                    {state.recipe.difficulty && (
+                    {!!state.recipe.difficulty && (
                       <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
                         {state.recipe.difficulty === 'easy'
                           ? '🟢 초급'
@@ -327,27 +329,25 @@ export default function RecipePageView({ videoId }: Props) {
 
             {/* Floating CTA */}
             <div className="fixed bottom-0 left-0 right-0 px-4 py-4 bg-white/95 backdrop-blur border-t border-[#ede3d8]">
-              <div className="max-w-4xl mx-auto">
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setIsPlaying(true)}
-                    disabled={isPlaying}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#3d2b1f] hover:bg-[#2d1f16]
-                               disabled:bg-[#c4a88a] text-white font-bold text-[15px] py-3.5 rounded-xl
-                               transition-colors cursor-pointer disabled:cursor-default"
-                  >
-                    <Play size={18} className="fill-white" />
-                    영상 보기
-                  </button>
-                  <a
-                    href={`/recipe/${videoId}/cooking-mode`}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#c4724a] hover:bg-[#b5623d]
-                               text-white font-bold text-[15px] py-3.5 rounded-xl transition-colors"
-                  >
-                    <ChefHat size={18} />
-                    요리 모드
-                  </a>
-                </div>
+              <div className="max-w-4xl mx-auto flex gap-3">
+                <button
+                  onClick={() => setIsPlaying(true)}
+                  disabled={isPlaying}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#3d2b1f] hover:bg-[#2d1f16]
+                             disabled:bg-[#c4a88a] text-white font-bold text-[15px] py-3.5 rounded-xl
+                             transition-colors cursor-pointer disabled:cursor-default"
+                >
+                  <Play size={18} className="fill-white" />
+                  영상 보기
+                </button>
+                <a
+                  href={`/recipe/${videoId}/cooking-mode`}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#c4724a] hover:bg-[#b5623d]
+                             text-white font-bold text-[15px] py-3.5 rounded-xl transition-colors"
+                >
+                  <ChefHat size={18} />
+                  요리 모드
+                </a>
               </div>
             </div>
           </>
