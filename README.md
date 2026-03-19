@@ -6,7 +6,7 @@
 
 ## 📦 프로젝트
 
-- `recipick`: [`apps/recipick`](apps/recipick/) — 유튜브 요리 영상 검색 · 레시피/재료 추출 앱
+- `cookclip`: [`apps/cookclip`](apps/cookclip/) — 유튜브 요리 영상 검색 · 레시피/재료 추출 앱
 - `fit-track`: [`apps/fit-track`](apps/fit-track/) — 운동/식단 기록 앱
 
 ## 🏗️ 모노레포 구조
@@ -15,7 +15,7 @@
 toy-project/
 ├── apps/
 │   ├── fit-track/          # 운동/식단 기록 앱
-│   └── recipick/           # 요리 영상 레시피 앱 (YouTube + OpenAI + Supabase)
+│   └── cookclip/           # 요리 영상 레시피 앱 (YouTube + OpenAI + Supabase)
 │
 ├── packages/
 │   ├── ui/                 # shadcn/ui 공통 컴포넌트
@@ -42,5 +42,5 @@ yarn dev
 
 # 앱별 실행
 yarn workspace fit-track dev
-yarn workspace recipick dev
+yarn workspace cookclip dev
 ```

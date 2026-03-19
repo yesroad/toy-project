@@ -15,9 +15,9 @@ format: yarn format    # prettier --write
 
 # 특정 앱만 실행할 때 (workspace 이름은 @apps/xxx 가 아닌 패키지명 그대로)
 yarn workspace fit-track dev
-yarn workspace recipick dev
+yarn workspace cookclip dev
 yarn workspace fit-track lint
-yarn workspace recipick check-types   # recipick 타입 체크 명령어는 check-types
+yarn workspace cookclip check-types   # cookclip 타입 체크 명령어는 check-types
 ```
 
 ## 비직관적 도구 규칙
@@ -40,8 +40,8 @@ yarn workspace recipick check-types   # recipick 타입 체크 명령어는 chec
 
 ## 에이전트 주의사항
 
-- 새 의존성 추가 시 **워크스페이스 루트**가 아닌 **해당 앱**에 추가: `yarn workspace recipick add [패키지]`
-- workspace 이름은 `@apps/xxx` 형식이 아닌 `package.json`의 `"name"` 필드값 그대로 사용 (`fit-track`, `recipick`)
+- 새 의존성 추가 시 **워크스페이스 루트**가 아닌 **해당 앱**에 추가: `yarn workspace cookclip add [패키지]`
+- workspace 이름은 `@apps/xxx` 형식이 아닌 `package.json`의 `"name"` 필드값 그대로 사용 (`fit-track`, `cookclip`)
 - `packages/ui`의 shadcn/ui 컴포넌트 추가: `packages/ui` 디렉토리에서 `npx shadcn@latest add` 실행
 - 공유 컴포넌트는 `packages/ui/src/components/`에, 앱 전용 컴포넌트는 `apps/[project]/src/components/`에 작성
 - `packages/services` — HTTP 클라이언트 베이스(`BaseServices`). 앱 서비스는 이를 상속해서 작성
@@ -49,7 +49,7 @@ yarn workspace recipick check-types   # recipick 타입 체크 명령어는 chec
 ## 컨텍스트 라우팅
 
 - **[apps/fit-track](./apps/fit-track/CLAUDE.md)** — Next.js App Router 앱 고유 규칙 (Server Components, 폴더 구조)
-- **[apps/recipick](./apps/recipick/CLAUDE.md)** — 요리 영상 레시피 앱 규칙 (훅 분리 패턴, SSR-safe localStorage, Supabase/OpenAI 연동)
+- **[apps/cookclip](./apps/cookclip/CLAUDE.md)** — 요리 영상 레시피 앱 규칙 (훅 분리 패턴, SSR-safe localStorage, Supabase/OpenAI 연동)
 - **[코딩 표준](.claude/rules/core/coding-standards.md)** — TypeScript/React 코딩 규칙
 - **[상태 관리](.claude/rules/core/state-and-server-state.md)** — 현재 스택 기준 상태 관리 경계
 - **[App Router 규칙](.claude/rules/core/nextjs-app-router.md)** — Suspense, Server Actions, RSC 패턴

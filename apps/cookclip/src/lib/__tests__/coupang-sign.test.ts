@@ -144,9 +144,9 @@ describe('buildCoupangApiUrl', () => {
       expect(url).toContain('keyword=chicken');
     });
 
-    it('subId=recipick 포함', () => {
+    it('subId=cookclip 포함', () => {
       const url = buildCoupangApiUrl('떡볶이');
-      expect(url).toContain('subId=recipick');
+      expect(url).toContain('subId=cookclip');
     });
 
     it('limit=1 포함', () => {

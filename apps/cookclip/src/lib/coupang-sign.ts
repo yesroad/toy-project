@@ -44,5 +44,5 @@ export function generateCoupangAuthHeader({
  */
 export function buildCoupangApiUrl(keyword: string): string {
   const encoded = encodeURIComponent(keyword);
-  return `${COUPANG_BASE_URL}/v2/providers/affiliate_open_api/apis/openapi/products/search?keyword=${encoded}&limit=1&subId=recipick`;
+  return `${COUPANG_BASE_URL}/v2/providers/affiliate_open_api/apis/openapi/products/search?keyword=${encoded}&limit=1&subId=cookclip`;
 }

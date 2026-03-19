@@ -1,18 +1,18 @@
-# recipick 앱 규칙
+# cookclip 앱 규칙
 
 ## 개요
 
-유튜브 요리 영상 검색 → AI 레시피/재료 추출 앱. 패키지명 `recipick`.
+유튜브 요리 영상 검색 → AI 레시피/재료 추출 앱. 패키지명 `cookclip`.
 
 ## 명령어
 
 ```bash
-dev:          yarn workspace recipick dev
-build:        yarn workspace recipick build
-lint:         yarn workspace recipick lint
-check-types:  yarn workspace recipick check-types   # tsc --noEmit (type-check 아님)
-test:         yarn workspace recipick test           # vitest (watch mode)
-test CI:      yarn workspace recipick test -- --run  # 단발 실행 시 --run 필수
+dev:          yarn workspace cookclip dev
+build:        yarn workspace cookclip build
+lint:         yarn workspace cookclip lint
+check-types:  yarn workspace cookclip check-types   # tsc --noEmit (type-check 아님)
+test:         yarn workspace cookclip test           # vitest (watch mode)
+test CI:      yarn workspace cookclip test -- --run  # 단발 실행 시 --run 필수
 ```
 
 ## 비직관적 도구 규칙
@@ -77,7 +77,7 @@ import { Loader2 } from 'lucide-react';
 ## 에이전트 주의사항
 
 - shadcn/ui 컴포넌트 추가는 `packages/ui` 기준: `cd packages/ui && npx shadcn@latest add [컴포넌트]`
-- 새 의존성: `yarn workspace recipick add [패키지]` (루트에서 추가하지 않음)
+- 새 의존성: `yarn workspace cookclip add [패키지]` (루트에서 추가하지 않음)
 - `'use client'` — 브라우저 API, Hook, 이벤트 핸들러 사용 시에만 추가
 - Route Handler(`app/api/**`) 내에서도 `serverEnv` 사용, `process.env` 직접 접근 금지
 

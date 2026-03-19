@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { addTab, clearTabs, parseTabs, removeTab } from '@/lib/search-history';
 import type { SearchTab } from '@/lib/search-history';
 
-const STORAGE_KEY = 'recipick:search-tabs';
+const STORAGE_KEY = 'cookclip:search-tabs';
 
 /**
  * 검색 기록 탭 관리 훅

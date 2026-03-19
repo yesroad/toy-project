@@ -1,6 +1,9 @@
 ---
 name: component-creator
-description: React/Next.js 컴포넌트 신규 생성. "컴포넌트 만들어", "새 컴포넌트", "페이지 추가", "훅 만들어" 가 언급될 때 이 스킬을 활성화. 프로젝트 기존 패턴을 분석하여 일관된 보일러플레이트 생성.
+description: >
+  React/Next.js 단일 컴포넌트 또는 훅을 신규 생성. 기존 프로젝트 패턴(스타일링 방식, export 형태, props 타입 위치)을 분석하여 일관된 보일러플레이트 생성.
+  "컴포넌트 만들어", "새 컴포넌트", "훅 만들어", "페이지 추가" 가 언급될 때 사용.
+  단, service+query+view를 함께 만드는 도메인 전체 스캐폴딩이나 "어디에 파일 만들어야 해?" 같은 폴더 구조 질문은 next-project-structure를 사용.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Write, Edit, Bash
 metadata:
@@ -15,12 +18,24 @@ metadata:
 
 ---
 
+## 스킬 경계
+
+| 요청 유형 | 사용할 스킬 |
+|---|---|
+| 단일 컴포넌트/훅 생성 | **component-creator** (이 스킬) |
+| service + query + view 전체 도메인 | **next-project-structure** |
+| "어디에 파일 만들어야 해?" 폴더 구조 질문 | **next-project-structure** |
+| 기존 컴포넌트 구조 개선 | **refactor** |
+
+---
+
 ## 트리거 조건
 
 | 트리거                           | 반응        |
 | -------------------------------- | ----------- |
 | "컴포넌트 만들어", "새 컴포넌트" | 스킬 활성화 |
-| "페이지 추가", "훅 만들어"       | 스킬 활성화 |
+| "훅 만들어", "커스텀 훅 추가"    | 스킬 활성화 |
+| "페이지 컴포넌트 추가"           | 스킬 활성화 |
 | "보일러플레이트 생성"            | 스킬 활성화 |
 
 ---
