@@ -137,7 +137,7 @@ export function use{Page}View({ initialData }: Options = {}) {
 
 ---
 
-## _app.tsx — QueryProvider 설정
+## \_app.tsx — QueryProvider 설정
 
 ```typescript
 // pages/_app.tsx
@@ -171,10 +171,7 @@ pages/api/
 // pages/api/{domain}/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -196,9 +193,7 @@ Pages Router에서도 SSR 시 `localStorage`는 없다. App Router와 동일한 
 
 ```typescript
 // ❌ 금지
-const [items, setItems] = useState<Item[]>(() =>
-  JSON.parse(localStorage.getItem('items') ?? '[]')
-);
+const [items, setItems] = useState<Item[]>(() => JSON.parse(localStorage.getItem('items') ?? '[]'));
 
 // ✅ 필수
 const [items, setItems] = useState<Item[]>([]);
@@ -212,12 +207,12 @@ useEffect(() => {
 
 ## App Router vs Pages Router 비교
 
-| 항목 | App Router | Pages Router |
-|---|---|---|
-| 라우트 파일 위치 | `src/app/{route}/page.tsx` | `pages/{route}/index.tsx` |
-| 전역 레이아웃 | `src/app/layout.tsx` | `pages/_app.tsx` |
-| Provider 주입 | `layout.tsx`에서 | `_app.tsx`에서 |
-| 서버 데이터 | async Server Component | `getServerSideProps` / `getStaticProps` |
-| API Routes | `src/app/api/{domain}/route.ts` | `pages/api/{domain}/index.ts` |
-| 뷰 구조 | `src/views/` (동일) | `src/views/` (동일) |
-| 서비스/쿼리 구조 | `src/services/`, `src/queries/` (동일) | (동일) |
+| 항목             | App Router                             | Pages Router                            |
+| ---------------- | -------------------------------------- | --------------------------------------- |
+| 라우트 파일 위치 | `src/app/{route}/page.tsx`             | `pages/{route}/index.tsx`               |
+| 전역 레이아웃    | `src/app/layout.tsx`                   | `pages/_app.tsx`                        |
+| Provider 주입    | `layout.tsx`에서                       | `_app.tsx`에서                          |
+| 서버 데이터      | async Server Component                 | `getServerSideProps` / `getStaticProps` |
+| API Routes       | `src/app/api/{domain}/route.ts`        | `pages/api/{domain}/index.ts`           |
+| 뷰 구조          | `src/views/` (동일)                    | `src/views/` (동일)                     |
+| 서비스/쿼리 구조 | `src/services/`, `src/queries/` (동일) | (동일)                                  |

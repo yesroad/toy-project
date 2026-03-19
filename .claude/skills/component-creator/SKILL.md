@@ -20,12 +20,12 @@ metadata:
 
 ## 스킬 경계
 
-| 요청 유형 | 사용할 스킬 |
-|---|---|
-| 단일 컴포넌트/훅 생성 | **component-creator** (이 스킬) |
-| service + query + view 전체 도메인 | **next-project-structure** |
-| "어디에 파일 만들어야 해?" 폴더 구조 질문 | **next-project-structure** |
-| 기존 컴포넌트 구조 개선 | **refactor** |
+| 요청 유형                                 | 사용할 스킬                     |
+| ----------------------------------------- | ------------------------------- |
+| 단일 컴포넌트/훅 생성                     | **component-creator** (이 스킬) |
+| service + query + view 전체 도메인        | **next-project-structure**      |
+| "어디에 파일 만들어야 해?" 폴더 구조 질문 | **next-project-structure**      |
+| 기존 컴포넌트 구조 개선                   | **refactor**                    |
 
 ---
 

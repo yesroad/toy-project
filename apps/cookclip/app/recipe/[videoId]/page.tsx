@@ -8,7 +8,6 @@ interface Props {
   params: Promise<{ videoId: string }>;
 }
 
-const SITE_URL = serverEnv.siteUrl;
 const MIN_SAVE_COUNT_FOR_RATING = 2;
 
 // 같은 요청 내 generateMetadata + page 간 중복 DB 호출 제거
@@ -72,13 +71,13 @@ function buildBreadcrumbJsonLd(
         '@type': 'ListItem',
         position: 1,
         name: '홈',
-        item: SITE_URL,
+        item: serverEnv.siteUrl,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: recipe.title,
-        item: `${SITE_URL}/recipe/${videoId}`,
+        item: `${serverEnv.siteUrl}/recipe/${videoId}`,
       },
     ],
   };
@@ -92,7 +91,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: '레시피 분석 중',
       description: 'CookClip이 유튜브 요리 영상에서 레시피를 자동으로 추출합니다.',
-      alternates: { canonical: `${SITE_URL}/recipe/${videoId}` },
+      alternates: { canonical: `${serverEnv.siteUrl}/recipe/${videoId}` },
     };
   }
 
@@ -102,7 +101,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `${SITE_URL}/recipe/${videoId}` },
+    alternates: { canonical: `${serverEnv.siteUrl}/recipe/${videoId}` },
     openGraph: {
       title,
       description,

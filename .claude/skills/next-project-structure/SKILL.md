@@ -37,6 +37,7 @@ ls src/queries/ 2>/dev/null
 ```
 
 **판단 결과에 따라 분기:**
+
 - 모노레포 + `packages/services` 존재 → `import Services from '@workspace/services'` 사용
 - 단일 앱 → `src/services/core/base.ts`에 BaseServices 직접 정의
 - App Router → `references/app-router.md` 참조
@@ -57,13 +58,13 @@ ls src/views/
 
 ### Step 3: 요청 종류에 따라 생성 대상 결정
 
-| 요청 키워드 | 생성 대상 | 비고 |
-|---|---|---|
-| 서비스, API, service | `services/api/{domain}.ts` | |
-| 쿼리, useQuery, TanStack, queryKeys | `queries/{domain}/` | |
-| view, 뷰, view+hook 분리 | `views/{page}/` | |
-| 전체 도메인, 도메인 추가 | services + queries + view + types 모두 | |
-| 컴포넌트, 훅 단독 생성 | — | `component-creator` 스킬 사용 |
+| 요청 키워드                         | 생성 대상                              | 비고                          |
+| ----------------------------------- | -------------------------------------- | ----------------------------- |
+| 서비스, API, service                | `services/api/{domain}.ts`             |                               |
+| 쿼리, useQuery, TanStack, queryKeys | `queries/{domain}/`                    |                               |
+| view, 뷰, view+hook 분리            | `views/{page}/`                        |                               |
+| 전체 도메인, 도메인 추가            | services + queries + view + types 모두 |                               |
+| 컴포넌트, 훅 단독 생성              | —                                      | `component-creator` 스킬 사용 |
 
 ### Step 4: 파일 생성 + 배럴 index.ts 즉시 업데이트
 
@@ -98,6 +99,7 @@ src/
 ```
 
 **모노레포 추가 구조:**
+
 ```
 packages/
 ├── services/            # BaseServices (axios wrapper) — 앱에서 상속
@@ -113,6 +115,7 @@ apps/
 ### Services (BaseServices 상속)
 
 **모노레포 — `@workspace/services` 있을 때:**
+
 ```typescript
 // src/services/api/{domain}.ts
 import Services from '@workspace/services';
@@ -132,6 +135,7 @@ export default new {Domain}Services(); // 싱글턴
 ```
 
 **단일 앱 — BaseServices 없을 때:**
+
 ```typescript
 // src/services/api/{domain}.ts
 import axios from 'axios';
@@ -262,14 +266,14 @@ export default function {Name}(props: {Name}Props) {
 
 ## 주요 금지 패턴
 
-| 금지 | 이유 | 대안 |
-|---|---|---|
-| `useState(() => localStorage.getItem(...))` | SSR에서 ReferenceError | `useEffect`에서 로드 |
-| `any` 타입 | 런타임 에러 미감지 | 명시적 `interface`/`type` |
-| 배럴 index.ts 미업데이트 | import 경로 불일치 | 파일 생성 즉시 추가 |
-| 뷰에 비즈니스 로직 직접 작성 | UI/로직 책임 혼재 | `use{Page}View` 훅으로 분리 |
-| 훅 파일 상단에 `'use client'` 누락 | TanStack Query 서버 실행 오류 | 모든 훅 파일 최상단에 추가 |
-| queryKeys를 훅 파일에 인라인 작성 | invalidate/prefetch 재사용 불가 | 별도 `queryKeys.ts` 파일 |
+| 금지                                        | 이유                            | 대안                        |
+| ------------------------------------------- | ------------------------------- | --------------------------- |
+| `useState(() => localStorage.getItem(...))` | SSR에서 ReferenceError          | `useEffect`에서 로드        |
+| `any` 타입                                  | 런타임 에러 미감지              | 명시적 `interface`/`type`   |
+| 배럴 index.ts 미업데이트                    | import 경로 불일치              | 파일 생성 즉시 추가         |
+| 뷰에 비즈니스 로직 직접 작성                | UI/로직 책임 혼재               | `use{Page}View` 훅으로 분리 |
+| 훅 파일 상단에 `'use client'` 누락          | TanStack Query 서버 실행 오류   | 모든 훅 파일 최상단에 추가  |
+| queryKeys를 훅 파일에 인라인 작성           | invalidate/prefetch 재사용 불가 | 별도 `queryKeys.ts` 파일    |
 
 ---
 
@@ -289,8 +293,8 @@ export default function {Name}(props: {Name}Props) {
 
 ## 상세 참조
 
-| 파일 | 내용 |
-|---|---|
-| `references/app-router.md` | App Router 전용 패턴 (Server Component, Suspense 등) |
-| `references/pages-router.md` | Pages Router 전용 패턴 |
-| `references/boilerplate-templates.md` | 복사 즉시 사용 가능한 전체 보일러플레이트 |
+| 파일                                  | 내용                                                 |
+| ------------------------------------- | ---------------------------------------------------- |
+| `references/app-router.md`            | App Router 전용 패턴 (Server Component, Suspense 등) |
+| `references/pages-router.md`          | Pages Router 전용 패턴                               |
+| `references/boilerplate-templates.md` | 복사 즉시 사용 가능한 전체 보일러플레이트            |
