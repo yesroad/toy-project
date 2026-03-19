@@ -25,11 +25,11 @@ export default function HomeView() {
             🍳
           </div>
           <h1 className="text-[28px] font-extrabold text-[#3d2b1f] tracking-tight">
-            Reci<span className="text-[#c4724a]">pick</span>
+            Cook<span className="text-[#c4724a]">Clip</span>
           </h1>
         </div>
         <p className="text-[14px] text-[#7d6550] mb-5 break-keep">
-          유튜브 요리 영상을 <span className="text-[#c4724a] font-semibold">pick</span>하고
+          유튜브 요리 영상을 <span className="text-[#c4724a] font-semibold">clip</span>하고
           <br />
           레시피와 재료를 한 번에 확인하세요
         </p>

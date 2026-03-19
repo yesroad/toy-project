@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/_next/'],
     },
-    sitemap: 'https://recipick.vercel.app/sitemap.xml',
+    sitemap: 'https://cookclip.vercel.app/sitemap.xml',
   };
 }

@@ -3,8 +3,8 @@ import '@workspace/ui/globals.css';
 import './globals.css';
 import QueryProvider from '@/provider/QueryProvider';
 
-const SITE_URL = 'https://recipick.vercel.app';
-const SITE_NAME = 'Recipick';
+const SITE_URL = 'https://cookclip.vercel.app';
+const SITE_NAME = 'CookClip';
 const SITE_DESCRIPTION = '유튜브 요리 영상 URL만 넣으면 재료와 조리 순서를 자동으로 정리해 드려요';
 
 const jsonLd = {
@@ -31,7 +31,6 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     siteName: SITE_NAME,
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Recipick' }],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -39,7 +38,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: `${SITE_NAME} — 유튜브 요리 영상 레시피 자동 추출`,
     description: SITE_DESCRIPTION,
-    images: ['/og-image.png'],
   },
   icons: {
     icon: [

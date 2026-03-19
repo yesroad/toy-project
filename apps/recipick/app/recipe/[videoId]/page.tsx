@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!recipe) {
     return {
       title: '레시피 분석 중',
-      description: 'Recipick이 유튜브 요리 영상에서 레시피를 자동으로 추출합니다.',
+      description: 'CookClip이 유튜브 요리 영상에서 레시피를 자동으로 추출합니다.',
     };
   }
 

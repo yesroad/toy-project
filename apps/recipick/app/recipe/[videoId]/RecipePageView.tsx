@@ -74,7 +74,7 @@ export default function RecipePageView({ videoId }: Props) {
           돌아가기
         </Link>
         <span className="text-[#ddd0bc]">|</span>
-        <span className="text-[14px] font-bold text-[#3d2b1f]">🍳 Recipick</span>
+        <span className="text-[14px] font-bold text-[#3d2b1f]">🍳 CookClip</span>
       </nav>
 
       <main className="max-w-4xl mx-auto pb-24">

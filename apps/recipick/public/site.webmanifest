@@ -1,7 +1,7 @@
 {
-  "name": "Recipick",
-  "short_name": "Recipick",
-  "description": "유튜브 요리 영상에서 레시피를 자동 추출하는 서비스",
+  "name": "CookClip",
+  "short_name": "CookClip",
+  "description": "유튜브 요리 영상을 clip하고 레시피와 재료를 한 번에 확인하세요",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
