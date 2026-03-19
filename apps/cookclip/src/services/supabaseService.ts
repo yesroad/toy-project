@@ -1,7 +1,7 @@
 import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 import { serverEnv } from '@/env/server';
-import type { Recipe } from '@/types/api/routeApi/response';
+import type { Recipe, VideoItem } from '@/types/api/routeApi/response';
 import type {
   RecipeCacheRow,
   RecipeUnavailableRow,
@@ -107,4 +107,20 @@ export async function getAllRecipeSitemapEntries(): Promise<
     .select('video_id, created_at')
     .order('created_at', { ascending: false });
   return (data ?? []).map((row) => ({ videoId: row.video_id, createdAt: row.created_at }));
+}
+
+export async function getRecentRecipes(limit: number): Promise<VideoItem[]> {
+  const { data } = await supabase
+    .from(TABLE)
+    .select('video_id, title, thumbnail, channel_name, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  return (data ?? []).map((row) => ({
+    videoId: row.video_id,
+    title: row.title,
+    thumbnail: row.thumbnail,
+    channelName: row.channel_name,
+    publishedAt: row.created_at,
+  }));
 }

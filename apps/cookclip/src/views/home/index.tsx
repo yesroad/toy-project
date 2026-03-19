@@ -3,18 +3,11 @@
 import SearchBar from '@/components/SearchBar';
 import SearchHistoryTabs from '@/components/SearchHistoryTabs';
 import VideoList from './components/VideoList';
-import EmptyState from './components/EmptyState';
+import FeaturedRecipes from './components/FeaturedRecipes';
 import { useHomeView } from './useHomeView';
 
 export default function HomeView() {
-  const {
-    query,
-    tabs,
-    isLoading,
-    handleSearch,
-    handleTabRemove,
-    setQuery,
-  } = useHomeView();
+  const { query, tabs, isLoading, handleSearch, handleTabRemove, setQuery } = useHomeView();
 
   return (
     <div className="min-h-screen bg-[#faf7f2]">
@@ -54,11 +47,7 @@ export default function HomeView() {
 
       {/* 메인 콘텐츠 */}
       <main className="max-w-[960px] mx-auto px-4 py-6 pb-16">
-        {query ? (
-          <VideoList query={query} />
-        ) : (
-          <EmptyState onHintClick={handleSearch} />
-        )}
+        {query ? <VideoList query={query} /> : <FeaturedRecipes onSearch={handleSearch} />}
       </main>
     </div>
   );

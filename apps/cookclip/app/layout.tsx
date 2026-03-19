@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import '@workspace/ui/styles/globals.css';
 import './globals.css';
 import QueryProvider from '@/provider/QueryProvider';
+import AuthButton from '@/components/AuthButton';
 import { serverEnv } from '@/env/server';
 
 const SITE_URL = serverEnv.siteUrl;
@@ -64,7 +65,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <nav className="fixed top-0 right-0 z-50 px-4 py-3">
+            <AuthButton />
+          </nav>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

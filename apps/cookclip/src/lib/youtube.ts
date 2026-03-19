@@ -173,3 +173,28 @@ export function mergeVideos(dbVideos: VideoItem[], apiVideos: VideoItem[]): Vide
   const dbVideoIds = new Set(dbVideos.map((v) => v.videoId));
   return [...dbVideos, ...apiVideos.filter((v) => !dbVideoIds.has(v.videoId))];
 }
+
+/**
+ * YouTube URL에서 videoId 추출
+ * 지원 형식: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+ */
+export function extractVideoIdFromUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === 'youtu.be') {
+      const id = parsed.pathname.slice(1).split('/')[0];
+      return id || null;
+    }
+    if (parsed.hostname.includes('youtube.com')) {
+      if (parsed.pathname === '/watch') {
+        return parsed.searchParams.get('v');
+      }
+      if (parsed.pathname.startsWith('/embed/')) {
+        return parsed.pathname.split('/embed/')[1]?.split('/')[0] ?? null;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}

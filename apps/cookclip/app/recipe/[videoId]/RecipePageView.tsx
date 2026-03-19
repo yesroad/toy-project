@@ -5,6 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Play, ChefHat, ArrowLeft, Loader2 } from 'lucide-react';
 import { useRecipeModal } from '@/components/RecipeModal/useRecipeModal';
+import ShareButton from '@/components/ShareButton';
+import SaveRecipeButton from '@/components/SaveRecipeButton';
+import AddToShoppingButton from '@/components/AddToShoppingButton';
+import ServingScaler from '@/components/ServingScaler';
+import { useServingScaler } from '@/components/ServingScaler/useServingScaler';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import IngredientList from '@/components/RecipeModal/IngredientList';
 import RecipeSteps from '@/components/RecipeModal/RecipeSteps';
@@ -16,6 +21,9 @@ interface Props {
 
 export default function RecipePageView({ videoId }: Props) {
   const { state } = useRecipeModal(videoId);
+  const recipe = state.phase === 'recipe_ready' ? state.recipe : null;
+  const { currentServings, scaledIngredients, decrease, increase, canDecrease, canIncrease } =
+    useServingScaler(recipe?.ingredients ?? [], recipe?.servings);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeSection, setActiveSection] = useState<'ingredients' | 'steps'>('ingredients');
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -75,6 +83,17 @@ export default function RecipePageView({ videoId }: Props) {
         </Link>
         <span className="text-[#ddd0bc]">|</span>
         <span className="text-[14px] font-bold text-[#3d2b1f]">🍳 CookClip</span>
+        <div className="ml-auto flex items-center gap-3">
+          {state.phase === 'recipe_ready' && <SaveRecipeButton videoId={videoId} />}
+          {state.phase === 'recipe_ready' && (
+            <AddToShoppingButton
+              ingredients={state.recipe.ingredients}
+              videoId={videoId}
+              videoTitle={state.recipe.title}
+            />
+          )}
+          {state.phase === 'recipe_ready' && <ShareButton title={state.recipe.title} />}
+        </div>
       </nav>
 
       <main className="max-w-4xl mx-auto pb-24">
@@ -175,11 +194,16 @@ export default function RecipePageView({ videoId }: Props) {
 
             {/* 아티클 바디 — 모바일: 단일 컬럼 / 데스크톱: 2컬럼 */}
             <div className="md:grid md:grid-cols-2 md:gap-12 md:items-start md:px-6 md:py-8">
-
               {/* 재료 섹션 */}
-              <section id="ingredients" className="px-4 pt-6 pb-8 md:p-0 md:sticky md:top-[113px] md:self-start">
+              <section
+                id="ingredients"
+                className="px-4 pt-6 pb-8 md:p-0 md:sticky md:top-[113px] md:self-start"
+              >
                 {/* 메타 배지 */}
-                {(state.recipe.cookingTime || state.recipe.servings || state.recipe.calories) && (
+                {(state.recipe.cookingTime ||
+                  state.recipe.servings ||
+                  state.recipe.calories ||
+                  state.recipe.difficulty) && (
                   <div className="flex flex-wrap gap-2 mb-5">
                     {state.recipe.cookingTime && (
                       <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
@@ -196,6 +220,15 @@ export default function RecipePageView({ videoId }: Props) {
                         🔥 {state.recipe.calories}kcal
                       </span>
                     )}
+                    {state.recipe.difficulty && (
+                      <span className="text-[12px] text-[#7d6550] bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">
+                        {state.recipe.difficulty === 'easy'
+                          ? '🟢 초급'
+                          : state.recipe.difficulty === 'medium'
+                            ? '🟡 중급'
+                            : '🔴 고급'}
+                      </span>
+                    )}
                   </div>
                 )}
 
@@ -206,17 +239,27 @@ export default function RecipePageView({ videoId }: Props) {
                   <span className="text-[12px] font-semibold text-[#a89880] bg-[#ede3d8] px-2 py-0.5 rounded-full ml-1">
                     {state.recipe.ingredients.length}가지
                   </span>
+                  <div className="ml-auto">
+                    <ServingScaler
+                      currentServings={currentServings}
+                      canDecrease={canDecrease}
+                      canIncrease={canIncrease}
+                      onDecrease={decrease}
+                      onIncrease={increase}
+                    />
+                  </div>
                 </div>
 
                 {/* 쿠팡 고지 — 재료 칩 목록 위 */}
                 {state.recipe.coupangLinks && Object.keys(state.recipe.coupangLinks).length > 0 && (
                   <p className="text-[11px] text-[#9d8570] mb-3 break-keep leading-relaxed bg-[#f5ede0] rounded-lg px-3 py-2">
-                    🛒 재료 구매 링크는 쿠팡 파트너스 활동의 일환으로 이에 따른 일정액의 수수료를 제공받습니다.
+                    🛒 재료 구매 링크는 쿠팡 파트너스 활동의 일환으로 이에 따른 일정액의 수수료를
+                    제공받습니다.
                   </p>
                 )}
 
                 <IngredientList
-                  ingredients={state.recipe.ingredients}
+                  ingredients={scaledIngredients}
                   coupangLinks={state.recipe.coupangLinks}
                 />
 
@@ -233,7 +276,9 @@ export default function RecipePageView({ videoId }: Props) {
                           <span className="text-[#c4724a] font-bold text-[13px] shrink-0 mt-0.5">
                             {i + 1}.
                           </span>
-                          <p className="text-[13px] text-[#5a3e2e] leading-relaxed break-keep">{tip}</p>
+                          <p className="text-[13px] text-[#5a3e2e] leading-relaxed break-keep">
+                            {tip}
+                          </p>
                         </li>
                       ))}
                     </ul>
@@ -249,7 +294,10 @@ export default function RecipePageView({ videoId }: Props) {
                     </div>
                     <ul className="flex flex-col gap-1.5">
                       {state.recipe.notes.map((note, i) => (
-                        <li key={i} className="text-[12px] text-[#9d8570] leading-relaxed break-keep">
+                        <li
+                          key={i}
+                          className="text-[12px] text-[#9d8570] leading-relaxed break-keep"
+                        >
                           • {note}
                         </li>
                       ))}
@@ -265,7 +313,9 @@ export default function RecipePageView({ videoId }: Props) {
               >
                 <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-[#ede3d8]">
                   <span className="text-[18px]">📋</span>
-                  <h2 className="text-[17px] font-extrabold text-[#3d2b1f] tracking-tight">조리방법</h2>
+                  <h2 className="text-[17px] font-extrabold text-[#3d2b1f] tracking-tight">
+                    조리방법
+                  </h2>
                   <span className="text-[12px] font-semibold text-[#a89880] bg-[#ede3d8] px-2 py-0.5 rounded-full ml-1">
                     {state.recipe.steps.length}단계
                   </span>
@@ -278,16 +328,26 @@ export default function RecipePageView({ videoId }: Props) {
             {/* Floating CTA */}
             <div className="fixed bottom-0 left-0 right-0 px-4 py-4 bg-white/95 backdrop-blur border-t border-[#ede3d8]">
               <div className="max-w-4xl mx-auto">
-                <button
-                  onClick={() => setIsPlaying(true)}
-                  disabled={isPlaying}
-                  className="w-full flex items-center justify-center gap-2.5 bg-[#3d2b1f] hover:bg-[#2d1f16]
-                             disabled:bg-[#c4a88a] text-white font-bold text-[15px] py-3.5 rounded-xl
-                             transition-colors cursor-pointer disabled:cursor-default"
-                >
-                  <ChefHat size={18} />
-                  요리 시작하기
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setIsPlaying(true)}
+                    disabled={isPlaying}
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#3d2b1f] hover:bg-[#2d1f16]
+                               disabled:bg-[#c4a88a] text-white font-bold text-[15px] py-3.5 rounded-xl
+                               transition-colors cursor-pointer disabled:cursor-default"
+                  >
+                    <Play size={18} className="fill-white" />
+                    영상 보기
+                  </button>
+                  <a
+                    href={`/recipe/${videoId}/cooking-mode`}
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#c4724a] hover:bg-[#b5623d]
+                               text-white font-bold text-[15px] py-3.5 rounded-xl transition-colors"
+                  >
+                    <ChefHat size={18} />
+                    요리 모드
+                  </a>
+                </div>
               </div>
             </div>
           </>
