@@ -1,6 +1,6 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
-import { getRecipeCache, getSaveCount } from '@/services/supabaseService';
+import { getRecipeCache } from '@/services/supabaseService';
 import { serverEnv } from '@/env/server';
 import RecipePageView from './RecipePageView';
 
@@ -8,11 +8,8 @@ interface Props {
   params: Promise<{ videoId: string }>;
 }
 
-const MIN_SAVE_COUNT_FOR_RATING = 2;
-
 // 같은 요청 내 generateMetadata + page 간 중복 DB 호출 제거
 const getCachedRecipe = cache((videoId: string) => getRecipeCache(videoId).catch(() => null));
-const getCachedSaveCount = cache((videoId: string) => getSaveCount(videoId).catch(() => 0));
 
 function buildDescription(recipe: NonNullable<Awaited<ReturnType<typeof getRecipeCache>>>) {
   const base = `재료 ${recipe.ingredients.length}가지, 조리 ${recipe.steps.length}단계`;
@@ -24,7 +21,6 @@ function buildDescription(recipe: NonNullable<Awaited<ReturnType<typeof getRecip
 function buildRecipeJsonLd(
   recipe: NonNullable<Awaited<ReturnType<typeof getRecipeCache>>>,
   description: string,
-  saveCount: number,
 ) {
   return {
     '@context': 'https://schema.org',
@@ -46,15 +42,6 @@ function buildRecipeJsonLd(
     ...(recipe.servings && { recipeYield: recipe.servings }),
     ...(recipe.calories && {
       nutrition: { '@type': 'NutritionInformation', calories: `${recipe.calories} kcal` },
-    }),
-    ...(saveCount >= MIN_SAVE_COUNT_FOR_RATING && {
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: 5,
-        ratingCount: saveCount,
-        bestRating: 5,
-        worstRating: 1,
-      },
     }),
   };
 }
@@ -121,14 +108,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RecipePage({ params }: Props) {
   const { videoId } = await params;
-  const [recipe, saveCount] = await Promise.all([
-    getCachedRecipe(videoId),
-    getCachedSaveCount(videoId),
-  ]);
+  const recipe = await getCachedRecipe(videoId);
 
-  const recipeJsonLd = recipe
-    ? buildRecipeJsonLd(recipe, buildDescription(recipe), saveCount)
-    : null;
+  const recipeJsonLd = recipe ? buildRecipeJsonLd(recipe, buildDescription(recipe)) : null;
   const breadcrumbJsonLd = recipe ? buildBreadcrumbJsonLd(recipe, videoId) : null;
 
   return (

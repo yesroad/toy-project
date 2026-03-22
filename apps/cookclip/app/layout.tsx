@@ -60,6 +60,14 @@ export default function RootLayout({
     url: serverEnv.siteUrl,
     description: SITE_DESCRIPTION,
     inLanguage: 'ko',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${serverEnv.siteUrl}/dish/{search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
   };
 
   return (
